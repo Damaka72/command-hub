@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import SiteCard from "./components/SiteCard";
+import type { SiteDetail, AgentSummary } from "./api/status/route";
 
 const sites = [
   {
@@ -51,11 +52,74 @@ const sites = [
   },
 ];
 
-type StatusMap = Record<string, {
-  up: boolean;
-  deploy: { state: string; ago: string; commitMessage: string } | null;
-  agent: { status: string; ago: string | null } | null;
-}>;
+type StatusMap = Record<string, SiteDetail>;
+
+function countActiveAgents(summaries: AgentSummary[]): number {
+  return summaries.filter(a => a.status !== 'never_run').length;
+}
+
+function PortfolioBar({ statusMap }: { statusMap: StatusMap }) {
+  const statuses = Object.values(statusMap);
+
+  const allRevenueNull = statuses.every(s => s.monthlyRevenue === null);
+  const totalRevenue   = allRevenueNull
+    ? null
+    : statuses.reduce((sum, s) => sum + (s.monthlyRevenue ?? 0), 0);
+
+  const activeAgents = statuses.reduce(
+    (sum, s) => sum + countActiveAgents(s.agentSummaries), 0
+  );
+
+  const outstanding = statuses.reduce(
+    (sum, s) => sum + s.outstanding.overdueFollowUps + s.outstanding.awaitingApproval, 0
+  );
+
+  const scheduled = statuses.reduce((sum, s) => sum + s.scheduledCount, 0);
+
+  return (
+    <div className="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900/50">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-4 px-6 py-3">
+        <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+          Portfolio
+        </span>
+
+        <span className="flex items-center gap-1.5 text-xs">
+          <span className="text-zinc-400 dark:text-zinc-500">Revenue</span>
+          <span className={`font-semibold ${totalRevenue !== null ? 'text-emerald-600 dark:text-emerald-400' : 'text-zinc-400'}`}>
+            {totalRevenue !== null ? `£${totalRevenue.toLocaleString()}/mo` : '—'}
+          </span>
+        </span>
+
+        <span className="text-zinc-200 dark:text-zinc-700">|</span>
+
+        <span className="flex items-center gap-1.5 text-xs">
+          <span className="text-zinc-400 dark:text-zinc-500">Active agents</span>
+          <span className={`font-semibold ${activeAgents > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-zinc-400'}`}>
+            {activeAgents}
+          </span>
+        </span>
+
+        <span className="text-zinc-200 dark:text-zinc-700">|</span>
+
+        <span className="flex items-center gap-1.5 text-xs">
+          <span className="text-zinc-400 dark:text-zinc-500">Outstanding</span>
+          <span className={`font-semibold ${outstanding > 0 ? 'text-red-600 dark:text-red-400' : 'text-zinc-400'}`}>
+            {outstanding}{outstanding > 0 && ' ⚠'}
+          </span>
+        </span>
+
+        <span className="text-zinc-200 dark:text-zinc-700">|</span>
+
+        <span className="flex items-center gap-1.5 text-xs">
+          <span className="text-zinc-400 dark:text-zinc-500">Scheduled</span>
+          <span className={`font-semibold ${scheduled > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-zinc-400'}`}>
+            {scheduled} posts
+          </span>
+        </span>
+      </div>
+    </div>
+  );
+}
 
 export default function Home() {
   const [statusMap, setStatusMap] = useState<StatusMap | null>(null);
@@ -82,7 +146,7 @@ export default function Home() {
             </div>
             <div className="flex items-center gap-2 rounded-full bg-zinc-100 px-4 py-2 dark:bg-zinc-800">
               {statusMap === null ? (
-                <span className="h-2 w-2 rounded-full bg-zinc-300 dark:bg-zinc-600 animate-pulse" />
+                <span className="h-2 w-2 animate-pulse rounded-full bg-zinc-300 dark:bg-zinc-600" />
               ) : (
                 <span className={`h-2 w-2 rounded-full ${Object.values(statusMap).every(s => s.up) ? 'bg-emerald-500' : 'bg-amber-400'}`} />
               )}
@@ -93,6 +157,10 @@ export default function Home() {
           </div>
         </div>
       </header>
+
+      {statusMap && Object.keys(statusMap).length > 0 && (
+        <PortfolioBar statusMap={statusMap} />
+      )}
 
       <main className="mx-auto max-w-6xl px-6 py-10">
         <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">

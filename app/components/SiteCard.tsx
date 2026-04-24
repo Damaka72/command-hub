@@ -1,6 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import TaskList from "./TaskList";
+import RevenueFlow from "./RevenueFlow";
+import type { SiteDetail } from "../api/status/route";
 
 interface Site {
   id: string;
@@ -12,109 +15,335 @@ interface Site {
   socialAgent?: string;
 }
 
-interface SiteStatus {
-  up: boolean;
-  deploy: { state: string; ago: string; commitMessage: string } | null;
-  agent: { status: string; ago: string | null } | null;
-}
-
 const DEPLOY_STYLES: Record<string, { dot: string; label: string }> = {
   READY:    { dot: 'bg-emerald-400', label: 'READY' },
   BUILDING: { dot: 'bg-amber-400 animate-pulse', label: 'BUILDING' },
   ERROR:    { dot: 'bg-red-400', label: 'ERROR' },
 };
 
-export default function SiteCard({ site, status }: { site: Site; status?: SiteStatus }) {
-  const deploy = status?.deploy ?? null;
-  const deployStyle = deploy ? (DEPLOY_STYLES[deploy.state] ?? { dot: 'bg-zinc-400', label: deploy.state }) : null;
+const TABS = ['Revenue', 'Agents', 'Outstanding', 'Marketing'] as const;
 
-  const agentLabel = status?.agent
-    ? status.agent.status === 'never_run'
-      ? 'Never run'
-      : status.agent.ago ?? 'Run'
-    : null;
+function fmt(n: number | null | undefined, prefix = ''): string {
+  return n != null ? `${prefix}${n.toLocaleString()}` : '—';
+}
+
+function StatusBadge({ status }: { status: string }) {
+  if (status === 'never_run') return <span className="text-xs text-zinc-400">Never run</span>;
+  if (status === 'error')     return <span className="text-xs font-medium text-red-500">Error</span>;
+  return <span className="text-xs font-medium text-emerald-500">Active</span>;
+}
+
+export default function SiteCard({ site, status }: { site: Site; status?: SiteDetail }) {
+  const [expanded,      setExpanded]      = useState(false);
+  const [activeTab,     setActiveTab]     = useState(0);
+  const [showReadiness, setShowReadiness] = useState(false);
+
+  const deploy         = status?.deploy ?? null;
+  const deployStyle    = deploy ? (DEPLOY_STYLES[deploy.state] ?? { dot: 'bg-zinc-400', label: deploy.state }) : null;
+  const revenue        = status?.revenue ?? null;
+  const agentSummaries = status?.agentSummaries ?? [];
+  const readiness      = status?.readiness ?? [];
+  const coordinator    = status?.coordinator ?? null;
+
+  const activeAgents  = agentSummaries.filter(a => a.status !== 'never_run').length;
+  const totalAgents   = agentSummaries.length;
+  const agentLabel    = totalAgents > 0 ? `${activeAgents}/${totalAgents}` : null;
+  const readinessOk   = readiness.filter(r => r.ok).length;
+  const readinessTot  = readiness.length;
+
+  const readinessColor = readinessTot === 0
+    ? 'text-zinc-400'
+    : readinessOk === readinessTot
+      ? 'text-emerald-600 dark:text-emerald-400'
+      : readinessOk >= 3
+        ? 'text-amber-600 dark:text-amber-400'
+        : 'text-red-500 dark:text-red-400';
 
   return (
-    <div className="flex flex-col gap-4 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md dark:border-zinc-700 dark:bg-zinc-900">
+    <div className="flex flex-col rounded-2xl border border-zinc-200 bg-white shadow-sm transition-shadow hover:shadow-md dark:border-zinc-700 dark:bg-zinc-900">
+      <div className="flex flex-col gap-4 p-6">
 
-      {/* Status strip */}
-      <div className="flex items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400">
-        {/* Uptime */}
-        <span className="flex items-center gap-1.5">
-          <span className={`h-2 w-2 rounded-full flex-shrink-0 ${status ? (status.up ? 'bg-emerald-400' : 'bg-red-400') : 'bg-zinc-300 dark:bg-zinc-600'}`} />
-          {status ? (status.up ? 'Up' : 'Down') : '—'}
-        </span>
-
-        <span className="text-zinc-300 dark:text-zinc-700">·</span>
-
-        {/* Vercel deploy */}
-        {deployStyle ? (
+        {/* ── Status strip ── */}
+        <div className="flex items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400">
           <span className="flex items-center gap-1.5">
-            <span className={`h-2 w-2 rounded-full flex-shrink-0 ${deployStyle.dot}`} />
-            {deployStyle.label}
-            {deploy?.ago && <span className="text-zinc-400 dark:text-zinc-600">{deploy.ago}</span>}
+            <span className={`h-2 w-2 rounded-full flex-shrink-0 ${status ? (status.up ? 'bg-emerald-400' : 'bg-red-400') : 'bg-zinc-300 dark:bg-zinc-600'}`} />
+            {status ? (status.up ? 'Up' : 'Down') : '—'}
           </span>
-        ) : (
-          <span className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full flex-shrink-0 bg-zinc-300 dark:bg-zinc-600" />
-            {status && !deploy ? 'No deploy' : '—'}
+          <span className="text-zinc-300 dark:text-zinc-700">·</span>
+          {deployStyle ? (
+            <span className="flex items-center gap-1.5">
+              <span className={`h-2 w-2 rounded-full flex-shrink-0 ${deployStyle.dot}`} />
+              {deployStyle.label}
+              {deploy?.ago && <span className="text-zinc-400 dark:text-zinc-600">{deploy.ago}</span>}
+            </span>
+          ) : (
+            <span className="flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full flex-shrink-0 bg-zinc-300 dark:bg-zinc-600" />
+              {status && !deploy ? 'No deploy' : '—'}
+            </span>
+          )}
+          <span className="text-zinc-300 dark:text-zinc-700">·</span>
+          <span>
+            Agents: <span className={activeAgents > 0 ? 'text-zinc-600 dark:text-zinc-300' : 'text-zinc-400'}>{agentLabel ?? '—'}</span>
           </span>
+        </div>
+
+        {/* ── Info row ── */}
+        {status && (
+          <div className="grid grid-cols-4 divide-x divide-zinc-100 rounded-lg bg-zinc-50 dark:divide-zinc-800 dark:bg-zinc-800">
+            <div className="flex flex-col gap-0.5 px-3 py-2">
+              <span className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Revenue</span>
+              <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                {fmt(status.monthlyRevenue, '£')}
+              </span>
+            </div>
+            <div className="flex flex-col gap-0.5 px-3 py-2">
+              <span className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Agents</span>
+              <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">{agentLabel ?? '—'}</span>
+            </div>
+            <div className="flex flex-col gap-0.5 px-3 py-2">
+              <span className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Activity</span>
+              <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">{status.lastActivity ?? '—'}</span>
+            </div>
+            <div className="flex flex-col gap-0.5 px-3 py-2">
+              <span className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Ready</span>
+              <button
+                onClick={() => setShowReadiness(s => !s)}
+                className={`text-left text-xs font-semibold ${readinessColor}`}
+              >
+                {readinessTot > 0 ? `${readinessOk}/${readinessTot}` : '—'}
+                {readinessTot > 0 && <span className="ml-1 text-[10px]">{showReadiness ? '▲' : '▼'}</span>}
+              </button>
+            </div>
+          </div>
         )}
 
-        <span className="text-zinc-300 dark:text-zinc-700">·</span>
-
-        {/* Agents */}
-        <span className="flex items-center gap-1">
-          <span>Agents:</span>
-          <span className={agentLabel === 'Never run' ? 'text-zinc-400' : 'text-zinc-600 dark:text-zinc-300'}>
-            {agentLabel ?? '—'}
-          </span>
-        </span>
-      </div>
-
-      {/* Site name + description */}
-      <div className="flex flex-col gap-1">
-        <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">{site.name}</h2>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">{site.description}</p>
-        {deploy?.commitMessage && (
-          <p className="text-xs text-zinc-400 dark:text-zinc-600 truncate" title={deploy.commitMessage}>
-            {deploy.commitMessage}
-          </p>
+        {/* ── Readiness checklist ── */}
+        {showReadiness && readiness.length > 0 && (
+          <div className="divide-y divide-zinc-100 rounded-lg border border-zinc-100 dark:divide-zinc-800 dark:border-zinc-800">
+            {readiness.map((item, i) => (
+              <div key={i} className="flex items-start gap-2 px-3 py-2">
+                <span className={`mt-0.5 flex-shrink-0 text-xs ${item.ok ? 'text-emerald-500' : 'text-zinc-300 dark:text-zinc-600'}`}>
+                  {item.ok ? '✓' : '○'}
+                </span>
+                <div>
+                  <p className="text-xs font-medium text-zinc-700 dark:text-zinc-300">{item.label}</p>
+                  <p className="text-xs text-zinc-400 dark:text-zinc-500">{item.reason}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
-      </div>
 
-      {/* Action buttons */}
-      <div className="flex flex-wrap gap-2">
-        <a href={site.github} target="_blank" rel="noopener noreferrer"
-          className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 transition-colors hover:border-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-600 dark:text-zinc-300 dark:hover:border-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100">
-          GitHub
-        </a>
-        {site.admin && (
-          <a href={site.admin} target="_blank" rel="noopener noreferrer"
+        {/* ── Site name + description ── */}
+        <div className="flex flex-col gap-1">
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">{site.name}</h2>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">{site.description}</p>
+          {deploy?.commitMessage && (
+            <p className="truncate text-xs text-zinc-400 dark:text-zinc-600" title={deploy.commitMessage}>
+              {deploy.commitMessage}
+            </p>
+          )}
+        </div>
+
+        {/* ── Action buttons ── */}
+        <div className="flex flex-wrap gap-2">
+          <a href={site.github} target="_blank" rel="noopener noreferrer"
             className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 transition-colors hover:border-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-600 dark:text-zinc-300 dark:hover:border-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100">
-            Admin
+            GitHub
           </a>
-        )}
-        {site.socialAgent && (
-          <a href={site.socialAgent} target="_blank" rel="noopener noreferrer"
-            className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 transition-colors hover:border-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-600 dark:text-zinc-300 dark:hover:border-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100">
-            Social
+          {site.admin && (
+            <a href={site.admin} target="_blank" rel="noopener noreferrer"
+              className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 transition-colors hover:border-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-600 dark:text-zinc-300 dark:hover:border-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100">
+              Admin
+            </a>
+          )}
+          {site.socialAgent && (
+            <a href={site.socialAgent} target="_blank" rel="noopener noreferrer"
+              className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 transition-colors hover:border-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-600 dark:text-zinc-300 dark:hover:border-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100">
+              Social
+            </a>
+          )}
+          {status && (
+            <button
+              onClick={() => setExpanded(e => !e)}
+              className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 transition-colors hover:border-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-600 dark:text-zinc-300 dark:hover:border-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100">
+              {expanded ? 'Less ↑' : 'More ↓'}
+            </button>
+          )}
+          <a href={`https://${site.url}`} target="_blank" rel="noopener noreferrer"
+            className="rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300">
+            Visit →
           </a>
-        )}
-        <a href={`https://${site.url}`} target="_blank" rel="noopener noreferrer"
-          className="rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300">
-          Visit →
-        </a>
+        </div>
+
+        {/* ── URL pill ── */}
+        <div className="flex items-center gap-2 rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800">
+          <span className="text-xs font-medium text-zinc-400 dark:text-zinc-500">URL</span>
+          <span className="font-mono text-sm text-zinc-600 dark:text-zinc-300">{site.url}</span>
+        </div>
+
+        {/* ── Task list ── */}
+        <TaskList siteId={site.id} />
       </div>
 
-      {/* URL pill */}
-      <div className="flex items-center gap-2 rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800">
-        <span className="text-xs font-medium text-zinc-400 dark:text-zinc-500">URL</span>
-        <span className="text-sm font-mono text-zinc-600 dark:text-zinc-300">{site.url}</span>
-      </div>
+      {/* ── Expanded panel ── */}
+      {expanded && status && (
+        <div className="border-t border-zinc-100 dark:border-zinc-800">
 
-      {/* Task list */}
-      <TaskList siteId={site.id} />
+          {/* Tab bar */}
+          <div className="flex border-b border-zinc-100 dark:border-zinc-800">
+            {TABS.map((tab, i) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(i)}
+                className={`px-4 py-2.5 text-xs font-medium transition-colors ${
+                  activeTab === i
+                    ? 'border-b-2 border-zinc-900 text-zinc-900 dark:border-zinc-100 dark:text-zinc-100'
+                    : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300'
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+
+          <div className="p-6">
+
+            {/* Tab 0 — Revenue */}
+            {activeTab === 0 && (
+              <div className="flex flex-col gap-4">
+                <RevenueFlow siteId={site.id} />
+                {status.revenueConfig && (
+                  <div className="flex flex-col gap-0.5 rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800">
+                    <span className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Revenue Source</span>
+                    <span className="text-xs font-medium text-zinc-600 dark:text-zinc-300">
+                      {status.revenueConfig.label}
+                      <span className="ml-1 font-normal text-zinc-400 dark:text-zinc-500">· {status.revenueConfig.source.replace(/_/g, ' ')}</span>
+                      {status.revenueConfig.workshopPrice !== undefined && (
+                        <span className="ml-1 text-emerald-600 dark:text-emerald-400">· £{status.revenueConfig.workshopPrice}/booking</span>
+                      )}
+                    </span>
+                    {status.revenueConfig.notes && (
+                      <span className="text-xs text-zinc-400 dark:text-zinc-500">{status.revenueConfig.notes}</span>
+                    )}
+                  </div>
+                )}
+                {revenue ? (
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800">
+                    {revenue.model === 'consulting' ? (
+                      <>
+                        <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                          {revenue.pipelineValue !== undefined ? `£${revenue.pipelineValue.toLocaleString()} pipeline` : 'Pipeline: —'}
+                        </span>
+                        <span className={`text-xs ${(revenue.activeEnquiries ?? 0) > 0 ? 'text-amber-600 dark:text-amber-400 font-medium' : 'text-zinc-500 dark:text-zinc-400'}`}>
+                          {fmt(revenue.activeEnquiries)} enquiries
+                        </span>
+                        <span className={`text-xs ${(revenue.overdueFollowUps ?? 0) > 0 ? 'text-red-600 dark:text-red-400 font-medium' : 'text-zinc-500 dark:text-zinc-400'}`}>
+                          {fmt(revenue.overdueFollowUps)} overdue
+                        </span>
+                        <span className={`text-xs ${(revenue.meetingsBooked ?? 0) > 0 ? 'text-emerald-600 dark:text-emerald-400 font-medium' : 'text-zinc-500 dark:text-zinc-400'}`}>
+                          {fmt(revenue.meetingsBooked)} meetings
+                        </span>
+                      </>
+                    ) : (
+                      <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                        Revenue source not yet connected — agents not run
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-xs text-zinc-400 dark:text-zinc-500">No revenue data</p>
+                )}
+              </div>
+            )}
+
+            {/* Tab 1 — Agent Activity */}
+            {activeTab === 1 && (
+              <div className="flex flex-col gap-2">
+                {agentSummaries.length === 0 ? (
+                  <p className="text-xs text-zinc-400">No agent data available</p>
+                ) : agentSummaries.map(agent => (
+                  <div key={agent.name} className="flex items-center justify-between rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800">
+                    <div>
+                      <p className="text-xs font-medium text-zinc-700 dark:text-zinc-300">{agent.displayName}</p>
+                      {agent.lastAction && (
+                        <p className="text-xs text-zinc-400 dark:text-zinc-500">{agent.lastAction}</p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {agent.ago && <span className="text-xs text-zinc-400">{agent.ago}</span>}
+                      <StatusBadge status={agent.status} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Tab 2 — Outstanding */}
+            {activeTab === 2 && (
+              <div className="flex flex-col gap-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-lg bg-zinc-50 px-3 py-3 dark:bg-zinc-800">
+                    <p className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Overdue Follow-ups</p>
+                    <p className={`mt-1 text-2xl font-bold ${(status.outstanding.overdueFollowUps ?? 0) > 0 ? 'text-red-500' : 'text-zinc-400'}`}>
+                      {status.outstanding.overdueFollowUps}
+                    </p>
+                  </div>
+                  <div className="rounded-lg bg-zinc-50 px-3 py-3 dark:bg-zinc-800">
+                    <p className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Awaiting Approval</p>
+                    <p className={`mt-1 text-2xl font-bold ${(status.outstanding.awaitingApproval ?? 0) > 0 ? 'text-amber-500' : 'text-zinc-400'}`}>
+                      {status.outstanding.awaitingApproval}
+                    </p>
+                  </div>
+                </div>
+                {status.outstanding.overdueFollowUps === 0 && status.outstanding.awaitingApproval === 0 && (
+                  <p className="text-center text-xs text-zinc-400 dark:text-zinc-500">
+                    Nothing outstanding — run agents to populate
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Tab 3 — Marketing Assets */}
+            {activeTab === 3 && (
+              <div className="flex flex-col gap-3">
+                {coordinator ? (
+                  <>
+                    {coordinator.weekCommencing && (
+                      <div className="flex flex-col gap-0.5 rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800">
+                        <span className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Week Commencing</span>
+                        <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300">{coordinator.weekCommencing}</span>
+                      </div>
+                    )}
+                    <div className="flex flex-col gap-0.5 rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800">
+                      <span className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Weekly Theme</span>
+                      <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{coordinator.weeklyTheme}</span>
+                    </div>
+                    {coordinator.campaignObjective && (
+                      <div className="flex flex-col gap-0.5 rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800">
+                        <span className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Campaign Objective</span>
+                        <span className="text-xs text-zinc-600 dark:text-zinc-300">{coordinator.campaignObjective}</span>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-xs text-zinc-400 dark:text-zinc-500">
+                    No coordinator data — run the Social Agent to set the weekly theme
+                  </p>
+                )}
+                <div className="flex items-center justify-between rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800">
+                  <span className="text-xs text-zinc-500 dark:text-zinc-400">Content scheduled this week</span>
+                  <span className={`text-sm font-bold ${status.scheduledCount > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-zinc-400'}`}>
+                    {status.scheduledCount}
+                  </span>
+                </div>
+              </div>
+            )}
+
+          </div>
+        </div>
+      )}
     </div>
   );
 }
