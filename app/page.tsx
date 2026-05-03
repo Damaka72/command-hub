@@ -13,6 +13,22 @@ const sites = [
     github: "https://github.com/Damaka72/oldoaktown",
     admin: "https://oldoaktown.co.uk/admin",
     socialAgent: "https://oldoaktown.co.uk/social-agent",
+    marketingPlan: {
+      buffer: {
+        status: 'active' as const,
+        statusLabel: 'Active',
+        platform: 'Instagram',
+        schedule: '1 post/day',
+        contentPillars: ['Local news', 'Business spotlights', 'Regeneration updates', 'Community events', 'Planning & development'],
+        nextAction: 'Schedule first week of Instagram posts in Buffer',
+      },
+      beehiiv: {
+        status: 'in_progress' as const,
+        statusLabel: 'Set up — content needed',
+        cadence: 'Weekly newsletter (TBC)',
+        nextAction: 'Set Beehiiv newsletter template and cadence',
+      },
+    },
   },
   {
     id: "theconcurrentcontractor",
@@ -31,6 +47,22 @@ const sites = [
     github: "https://github.com/Damaka72/Masteryourcareerpath",
     admin: "https://masteryourcareerpath.com/admin",
     socialAgent: "https://masteryourcareerpath.com/social-agent",
+    marketingPlan: {
+      buffer: {
+        status: 'active' as const,
+        statusLabel: 'Active',
+        platform: 'Instagram',
+        schedule: '1 post/day',
+        contentPillars: ['Career strategy', 'IR35 & contracting', 'PRIME framework', 'Community wins', 'LinkedIn growth'],
+        nextAction: 'Schedule first week of Instagram posts in Buffer',
+      },
+      beehiiv: {
+        status: 'in_progress' as const,
+        statusLabel: 'Set up — content needed',
+        cadence: 'Weekly newsletter (TBC)',
+        nextAction: 'Draft welcome email sequence in Beehiiv',
+      },
+    },
   },
   {
     id: "aiviralvideoprompts",
@@ -40,6 +72,22 @@ const sites = [
     github: "https://github.com/Damaka72/ai-viral-video-prompts",
     admin: "https://aiviralvideoprompts.com/admin",
     socialAgent: "https://aiviralvideoprompts.com/social-agent",
+    marketingPlan: {
+      buffer: {
+        status: 'active' as const,
+        statusLabel: 'Active',
+        platform: 'Instagram',
+        schedule: '1 post/day',
+        contentPillars: ['Prompt demos', 'Before/after results', 'Quick tutorials', 'Gumroad product spotlights', 'Creator tips'],
+        nextAction: 'Schedule first week of Instagram posts in Buffer',
+      },
+      beehiiv: {
+        status: 'in_progress' as const,
+        statusLabel: 'Set up — content needed',
+        cadence: 'Weekly newsletter (TBC)',
+        nextAction: 'Set up Beehiiv promotional email for 50% off campaign',
+      },
+    },
   },
   {
     id: "didianolue",

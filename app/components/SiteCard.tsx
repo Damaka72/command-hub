@@ -5,6 +5,22 @@ import TaskList from "./TaskList";
 import RevenueFlow from "./RevenueFlow";
 import type { SiteDetail } from "../api/status/route";
 
+interface MarketingChannel {
+  status: 'active' | 'in_progress' | 'not_started';
+  statusLabel: string;
+  platform?: string;
+  schedule?: string;
+  cadence?: string;
+  contentPillars?: string[];
+  subscribers?: string;
+  nextAction: string;
+}
+
+interface MarketingPlan {
+  buffer: MarketingChannel;
+  beehiiv: MarketingChannel;
+}
+
 interface Site {
   id: string;
   name: string;
@@ -13,6 +29,7 @@ interface Site {
   github: string;
   admin?: string;
   socialAgent?: string;
+  marketingPlan?: MarketingPlan;
 }
 
 const DEPLOY_STYLES: Record<string, { dot: string; label: string }> = {
@@ -25,6 +42,22 @@ const TABS = ['Revenue', 'Agents', 'Outstanding', 'Marketing'] as const;
 
 function fmt(n: number | null | undefined, prefix = ''): string {
   return n != null ? `${prefix}${n.toLocaleString()}` : '—';
+}
+
+const MARKETING_STATUS_STYLES = {
+  active:      { dot: 'bg-emerald-400', text: 'text-emerald-700 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
+  in_progress: { dot: 'bg-amber-400',   text: 'text-amber-700 dark:text-amber-400',     bg: 'bg-amber-50 dark:bg-amber-900/20' },
+  not_started: { dot: 'bg-red-400',     text: 'text-red-700 dark:text-red-400',         bg: 'bg-red-50 dark:bg-red-900/20' },
+} as const;
+
+function MarketingStatusPill({ status, label }: { status: keyof typeof MARKETING_STATUS_STYLES; label: string }) {
+  const s = MARKETING_STATUS_STYLES[status];
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${s.bg} ${s.text}`}>
+      <span className={`h-1.5 w-1.5 flex-shrink-0 rounded-full ${s.dot}`} />
+      {label}
+    </span>
+  );
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -338,6 +371,77 @@ export default function SiteCard({ site, status }: { site: Site; status?: SiteDe
                     {status.scheduledCount}
                   </span>
                 </div>
+
+                {/* ── Marketing Plan (static, read-only) ── */}
+                {site.marketingPlan && (
+                  <div className="flex flex-col gap-3 border-t border-zinc-100 pt-4 dark:border-zinc-800">
+                    <span className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+                      Marketing Plan
+                    </span>
+
+                    {/* Buffer */}
+                    <div className="flex flex-col gap-2 rounded-lg border border-zinc-100 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-800/60">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-200">Buffer (Social Media)</span>
+                        <MarketingStatusPill status={site.marketingPlan.buffer.status} label={site.marketingPlan.buffer.statusLabel} />
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        {site.marketingPlan.buffer.platform && (
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Platform</span>
+                            <span className="text-xs font-medium text-zinc-600 dark:text-zinc-300">{site.marketingPlan.buffer.platform}</span>
+                          </div>
+                        )}
+                        {site.marketingPlan.buffer.schedule && (
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Schedule</span>
+                            <span className="text-xs font-medium text-zinc-600 dark:text-zinc-300">{site.marketingPlan.buffer.schedule}</span>
+                          </div>
+                        )}
+                      </div>
+                      {site.marketingPlan.buffer.contentPillars && (
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Content Pillars</span>
+                          <div className="flex flex-wrap gap-1">
+                            {site.marketingPlan.buffer.contentPillars.map((pillar, i) => (
+                              <span key={i} className="rounded-md bg-zinc-200 px-2 py-0.5 text-[10px] font-medium text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">
+                                {pillar}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      <div className="flex flex-col gap-0.5 rounded-md bg-zinc-100 px-2 py-1.5 dark:bg-zinc-700/50">
+                        <span className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Next Action</span>
+                        <span className="text-xs text-zinc-600 dark:text-zinc-300">{site.marketingPlan.buffer.nextAction}</span>
+                      </div>
+                    </div>
+
+                    {/* Beehiiv */}
+                    <div className="flex flex-col gap-2 rounded-lg border border-zinc-100 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-800/60">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-200">Beehiiv (Email Marketing)</span>
+                        <MarketingStatusPill status={site.marketingPlan.beehiiv.status} label={site.marketingPlan.beehiiv.statusLabel} />
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        {site.marketingPlan.beehiiv.cadence && (
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Cadence</span>
+                            <span className="text-xs font-medium text-zinc-600 dark:text-zinc-300">{site.marketingPlan.beehiiv.cadence}</span>
+                          </div>
+                        )}
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Subscribers</span>
+                          <span className="text-xs font-medium text-zinc-600 dark:text-zinc-300">{site.marketingPlan.beehiiv.subscribers ?? '—'}</span>
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-0.5 rounded-md bg-zinc-100 px-2 py-1.5 dark:bg-zinc-700/50">
+                        <span className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Next Action</span>
+                        <span className="text-xs text-zinc-600 dark:text-zinc-300">{site.marketingPlan.beehiiv.nextAction}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
