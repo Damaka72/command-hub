@@ -5,6 +5,26 @@ import TaskList from "./TaskList";
 import RevenueFlow from "./RevenueFlow";
 import type { SiteDetail } from "../api/status/route";
 
+function getBrandTextOnColor(hex: string): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.55 ? '#1c1c1c' : '#ffffff';
+}
+
+function BrandAvatar({ name, color, initials }: { name: string; color: string; initials?: string }) {
+  const letters = initials ?? name.split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  return (
+    <div
+      style={{ backgroundColor: color, color: getBrandTextOnColor(color) }}
+      className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl text-xs font-bold tracking-wide"
+      aria-hidden="true"
+    >
+      {letters}
+    </div>
+  );
+}
+
 interface MarketingChannel {
   status: 'active' | 'in_progress' | 'not_started';
   statusLabel: string;
@@ -29,6 +49,8 @@ interface Site {
   github: string;
   admin?: string;
   socialAgent?: string;
+  brandColor?: string;
+  initials?: string;
   marketingPlan?: MarketingPlan;
 }
 
@@ -94,7 +116,13 @@ export default function SiteCard({ site, status }: { site: Site; status?: SiteDe
 
   return (
     <div className="flex flex-col rounded-2xl border border-zinc-200 bg-white shadow-sm transition-shadow hover:shadow-md dark:border-zinc-700 dark:bg-zinc-900">
-      <div className="flex flex-col gap-4 p-6">
+      {site.brandColor && (
+        <div style={{ backgroundColor: site.brandColor }} className="h-1.5 w-full flex-shrink-0 rounded-t-2xl" />
+      )}
+      <div
+        className="flex flex-col gap-4 p-6"
+        style={site.brandColor ? { background: `linear-gradient(to bottom, ${site.brandColor}18 0%, transparent 55%)` } : undefined}
+      >
 
         {/* ── Status strip ── */}
         <div className="flex items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400">
@@ -169,14 +197,19 @@ export default function SiteCard({ site, status }: { site: Site; status?: SiteDe
         )}
 
         {/* ── Site name + description ── */}
-        <div className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">{site.name}</h2>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">{site.description}</p>
-          {deploy?.commitMessage && (
-            <p className="truncate text-xs text-zinc-400 dark:text-zinc-600" title={deploy.commitMessage}>
-              {deploy.commitMessage}
-            </p>
+        <div className="flex items-start gap-3">
+          {site.brandColor && (
+            <BrandAvatar name={site.name} color={site.brandColor} initials={site.initials} />
           )}
+          <div className="flex min-w-0 flex-col gap-1">
+            <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">{site.name}</h2>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">{site.description}</p>
+            {deploy?.commitMessage && (
+              <p className="truncate text-xs text-zinc-400 dark:text-zinc-600" title={deploy.commitMessage}>
+                {deploy.commitMessage}
+              </p>
+            )}
+          </div>
         </div>
 
         {/* ── Action buttons ── */}

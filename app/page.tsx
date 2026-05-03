@@ -13,6 +13,8 @@ const sites = [
     github: "https://github.com/Damaka72/oldoaktown",
     admin: "https://oldoaktown.co.uk/admin",
     socialAgent: "https://oldoaktown.co.uk/social-agent",
+    brandColor: "#4C8A35",
+    initials: "OO",
     marketingPlan: {
       buffer: {
         status: 'active' as const,
@@ -38,6 +40,8 @@ const sites = [
     github: "https://github.com/Damaka72/Theconcurrentcontractor",
     admin: "https://www.theconcurrentcontractor.com/admin",
     socialAgent: "https://www.theconcurrentcontractor.com/social-agent",
+    brandColor: "#FFD700",
+    initials: "TC",
   },
   {
     id: "masteryourcareerpath",
@@ -47,6 +51,8 @@ const sites = [
     github: "https://github.com/Damaka72/Masteryourcareerpath",
     admin: "https://masteryourcareerpath.com/admin",
     socialAgent: "https://masteryourcareerpath.com/social-agent",
+    brandColor: "#F5A623",
+    initials: "MY",
     marketingPlan: {
       buffer: {
         status: 'active' as const,
@@ -72,6 +78,8 @@ const sites = [
     github: "https://github.com/Damaka72/ai-viral-video-prompts",
     admin: "https://aiviralvideoprompts.com/admin",
     socialAgent: "https://aiviralvideoprompts.com/social-agent",
+    brandColor: "#4ECDC4",
+    initials: "AI",
     marketingPlan: {
       buffer: {
         status: 'active' as const,
@@ -97,6 +105,8 @@ const sites = [
     github: "https://github.com/Damaka72/didi-anolue-landing-page",
     admin: "https://didianolue.co.uk/admin",
     socialAgent: "https://didianolue.co.uk/social-agent",
+    brandColor: "#4A7FC1",
+    initials: "DA",
   },
 ];
 
