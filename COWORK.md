@@ -44,19 +44,29 @@ command-hub/
 
 | Commit | What it added |
 |--------|--------------|
+| `50a908b` | Replace Buffer with Blotato — schedule count from REST API, readiness label updated, Marketing Plan tab renamed |
 | `657882d` | Brand colour accents — stripe, gradient wash, avatar on all cards |
 | `a59b34d` | Marketing Plan tab (Buffer + Beehiiv) on MasterYourCareerPath, OldOakTown, AIViralVideoPrompts |
 | `e432976` | Revenue Command Hub — PortfolioBar, agent panels, revenue flows, readiness checklists |
 | `dcb8c33` | Password protection gate |
 | `38b87c5` | Core Command Hub — live status, task lists, social agent links |
 
+### External repos (social-agent.html OOT contamination fix — May 2026)
+
+| Repo | Commit(s) | Branch |
+|------|-----------|--------|
+| Masteryourcareerpath | `ab0e327` + `c2c0954` | `main` |
+| Theconcurrentcontractor | `5d85246` | `Main` |
+| ai-viral-video-prompts | `f9b30c4` + `82af7c4` | `main` |
+| didi-anolue-landing-page | `17f56d1` | `main` |
+
 ## Known Issues (from SITE-AUDIT.md — read that file for full detail)
 
 ### CRITICAL
-1. **OOT contamination** — all four non-OOT social-agent.html files contain 21
-   hardcoded references to Old Oak Town (`oldoaktown.co.uk`, "The Old Oak Weekly",
-   "Old Oak Common") baked into the AI system prompts. Any user on MYCP, TCC, AIVVP,
-   or Didi who clicks "Newsletter" objective is directed to sign up to the wrong site.
+1. ~~**OOT contamination**~~ **RESOLVED (May 2026)** — All 21 hardcoded Old Oak Town
+   references fixed across MYCP, TCC, AIVVP, and Didi social-agent.html files.
+   OBJECTIVES sections enriched with per-brand voice, content pillars, and correct
+   platform targeting. See external repo commits above.
 
 ### High priority
 2. **TCC payment button broken** — `app/command-center/page.tsx` has a polished sales
@@ -79,6 +89,29 @@ command-hub/
    separate `oldoaktown-agents/` repo; other four sites use
    `data/agent-summaries/*.json`. Dashboard aggregation is architecturally mismatched.
 
+## Content & Scheduling Architecture
+
+Claude Cowork (this agent) talks to **Blotato via MCP** to create and schedule
+social posts. Blotato handles all content creation and scheduling. Command Hub
+**reads and monitors only** — it calls `GET /schedules` on the Blotato REST API
+and counts scheduled posts per site using site-specific account IDs.
+
+```
+Claude Cowork  ──MCP──▶  Blotato  (create posts, schedule, manage accounts)
+Command Hub    ──REST──▶  Blotato  GET /schedules  (read-only monitoring)
+```
+
+Account IDs per site (Instagram / TikTok / Pinterest / YouTube — site-specific only;
+Facebook pages and LinkedIn pages share a parent account ID so are excluded from counts):
+
+| Site | Account IDs |
+|------|-------------|
+| Old Oak Town | `46484` (IG) |
+| The Concurrent Contractor | `46494` (IG), `36388` (YT) |
+| Master Your Career Path | `46492` (IG), `36387` (YT) |
+| AI Viral Video Prompts | `46493` (IG), `41948` (TikTok), `6423` (Pinterest), `36389` (YT) |
+| Didi Anolue | `46490` (IG @damaka), `18212` (Twitter/X), `36391` (YT) |
+
 ## Environment Variables (Vercel)
 
 | Var | Used for |
@@ -86,6 +119,7 @@ command-hub/
 | `VERCEL_TOKEN` | Fetching deploy status from Vercel API |
 | `HUB_PASSWORD` | Dashboard login gate |
 | `GUMROAD_API_KEY` | Live Gumroad revenue for AIVVP (not yet set) |
+| `BLOTATO_API_KEY` | Blotato schedule count per site (set May 2026) |
 
 ## Coding Standards
 
@@ -109,8 +143,9 @@ command-hub/
 
 Work through these in order unless Didi says otherwise:
 
-1. Fix OOT contamination in the four social-agent.html files (CRITICAL — do this first)
-2. Wire Stripe (or LemonSqueezy) into TCC `app/command-center/page.tsx` CTA
-3. Add `GUMROAD_API_KEY` to Vercel env vars + confirm revenue shows on AIVVP card
-4. Add `CLAUDE.md` to Didi, TCC, and AIVVP repos (currently missing)
-5. Plan first agent run across all sites to populate dashboard data
+1. ~~Fix OOT contamination in the four social-agent.html files~~ **DONE (May 2026)**
+2. ~~Replace Buffer with Blotato~~ **DONE (May 2026)** — Marketing Plan tab, readiness checklist, schedule count all updated. `BLOTATO_API_KEY` set in Vercel.
+3. Wire Stripe (or LemonSqueezy) into TCC `app/command-center/page.tsx` CTA
+4. Add `GUMROAD_API_KEY` to Vercel env vars + confirm revenue shows on AIVVP card
+5. Add `CLAUDE.md` to Didi, TCC, and AIVVP repos (currently missing)
+6. Plan first agent run across all sites to populate dashboard data
