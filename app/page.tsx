@@ -16,13 +16,13 @@ const sites = [
     brandColor: "#4C8A35",
     initials: "OO",
     marketingPlan: {
-      buffer: {
+      blotato: {
         status: 'active' as const,
         statusLabel: 'Active',
         platform: 'Instagram',
         schedule: '1 post/day',
         contentPillars: ['Local news', 'Business spotlights', 'Regeneration updates', 'Community events', 'Planning & development'],
-        nextAction: 'Schedule first week of Instagram posts in Buffer',
+        nextAction: 'Schedule first week of posts in Blotato',
       },
       beehiiv: {
         status: 'in_progress' as const,
@@ -54,13 +54,13 @@ const sites = [
     brandColor: "#F5A623",
     initials: "MY",
     marketingPlan: {
-      buffer: {
+      blotato: {
         status: 'active' as const,
         statusLabel: 'Active',
         platform: 'Instagram',
         schedule: '1 post/day',
         contentPillars: ['Career strategy', 'IR35 & contracting', 'PRIME framework', 'Community wins', 'LinkedIn growth'],
-        nextAction: 'Schedule first week of Instagram posts in Buffer',
+        nextAction: 'Schedule first week of posts in Blotato',
       },
       beehiiv: {
         status: 'in_progress' as const,
@@ -81,13 +81,13 @@ const sites = [
     brandColor: "#4ECDC4",
     initials: "AI",
     marketingPlan: {
-      buffer: {
+      blotato: {
         status: 'active' as const,
         statusLabel: 'Active',
         platform: 'Instagram',
         schedule: '1 post/day',
         contentPillars: ['Prompt demos', 'Before/after results', 'Quick tutorials', 'Gumroad product spotlights', 'Creator tips'],
-        nextAction: 'Schedule first week of Instagram posts in Buffer',
+        nextAction: 'Schedule first week of posts in Blotato',
       },
       beehiiv: {
         status: 'in_progress' as const,

@@ -2,6 +2,17 @@ import { NextResponse } from 'next/server';
 
 const VERCEL_TOKEN   = process.env.VERCEL_TOKEN;
 const VERCEL_TEAM_ID = 'team_2fG7WKNEcvEFVhRPxREhEgs8';
+const BLOTATO_API_KEY = process.env.BLOTATO_API_KEY;
+
+// Site-specific account IDs only (Instagram/TikTok/Pinterest/YouTube are 1:1 per site;
+// Facebook/LinkedIn share a parent account ID across sites so are excluded here)
+const BLOTATO_SITE_ACCOUNTS: Record<string, string[]> = {
+  oldoaktown:              ['46484'],
+  theconcurrentcontractor: ['46494', '36388'],
+  masteryourcareerpath:    ['46492', '36387'],
+  aiviralvideoprompts:     ['46493', '41948', '6423', '36389'],
+  didianolue:              ['46490', '18212', '36391'],
+};
 
 // ─── Exported types ──────────────────────────────────────────────────────────
 
@@ -299,6 +310,27 @@ async function resolveMonthlyRevenue(config: RevenueConfig | null): Promise<numb
   return null;
 }
 
+async function fetchBlotatoScheduledCounts(): Promise<Record<string, number>> {
+  if (!BLOTATO_API_KEY) return {};
+  try {
+    const res = await fetch('https://backend.blotato.com/schedules?limit=50', {
+      headers: { Authorization: `Bearer ${BLOTATO_API_KEY}` },
+      signal: AbortSignal.timeout(6000),
+    });
+    if (!res.ok) return {};
+    const data = await res.json() as { items?: Array<{ account?: { id?: string }; accountId?: string }> };
+    const counts: Record<string, number> = {};
+    for (const item of data.items ?? []) {
+      const id = item.account?.id ?? item.accountId;
+      if (!id) continue;
+      for (const [siteId, ids] of Object.entries(BLOTATO_SITE_ACCOUNTS)) {
+        if (ids.includes(id)) { counts[siteId] = (counts[siteId] ?? 0) + 1; break; }
+      }
+    }
+    return counts;
+  } catch { return {}; }
+}
+
 function computeReadiness(
   agentSummaries: AgentSummary[],
   coordinator: CoordinatorData | null,
@@ -311,9 +343,9 @@ function computeReadiness(
 
   return [
     {
-      label:  'Social Agent → Buffer',
+      label:  'Content scheduled in Blotato',
       ok:     contentActive,
-      reason: contentActive ? 'Connected' : 'Run the Social Agent and approve posts for Buffer scheduling',
+      reason: contentActive ? 'Connected' : 'Run the Social Agent and schedule posts in Blotato',
     },
     {
       label:  `Newsletter → ${site.newsletterProvider ?? 'email provider'}`,
@@ -392,6 +424,8 @@ async function fetchRevenueMetrics(
 // ─── Main handler ─────────────────────────────────────────────────────────────
 
 export async function GET() {
+  const blotatoCounts = await fetchBlotatoScheduledCounts();
+
   const results = await Promise.all(
     SITES.map(async (site): Promise<[string, SiteDetail]> => {
       // Parallel: uptime + Vercel deploy + newsletter agent + all agent summaries + coordinator
@@ -423,10 +457,7 @@ export async function GET() {
         .filter((a): a is string => a !== null);
       const lastActivity = timestamps.length > 0 ? timestamps[0] : null;
 
-      // Scheduled count: from social agent summary if available
-      const socialSummary = agentSummaries.find(a => a.name === 'social');
-      const scheduledCount = socialSummary?.lastAction?.match(/^(\d+)/)?.[1]
-        ? parseInt(socialSummary.lastAction) : 0;
+      const scheduledCount = blotatoCounts[site.id] ?? 0;
 
       // Outstanding
       const outreachSummary = agentSummaries.find(a => a.name === 'outreach');

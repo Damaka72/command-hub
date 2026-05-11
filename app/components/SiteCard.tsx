@@ -37,7 +37,7 @@ interface MarketingChannel {
 }
 
 interface MarketingPlan {
-  buffer: MarketingChannel;
+  blotato: MarketingChannel;
   beehiiv: MarketingChannel;
 }
 
@@ -412,31 +412,31 @@ export default function SiteCard({ site, status }: { site: Site; status?: SiteDe
                       Marketing Plan
                     </span>
 
-                    {/* Buffer */}
+                    {/* Blotato */}
                     <div className="flex flex-col gap-2 rounded-lg border border-zinc-100 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-800/60">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-200">Buffer (Social Media)</span>
-                        <MarketingStatusPill status={site.marketingPlan.buffer.status} label={site.marketingPlan.buffer.statusLabel} />
+                        <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-200">Blotato (Social Media)</span>
+                        <MarketingStatusPill status={site.marketingPlan.blotato.status} label={site.marketingPlan.blotato.statusLabel} />
                       </div>
                       <div className="grid grid-cols-2 gap-2">
-                        {site.marketingPlan.buffer.platform && (
+                        {site.marketingPlan.blotato.platform && (
                           <div className="flex flex-col gap-0.5">
                             <span className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Platform</span>
-                            <span className="text-xs font-medium text-zinc-600 dark:text-zinc-300">{site.marketingPlan.buffer.platform}</span>
+                            <span className="text-xs font-medium text-zinc-600 dark:text-zinc-300">{site.marketingPlan.blotato.platform}</span>
                           </div>
                         )}
-                        {site.marketingPlan.buffer.schedule && (
+                        {site.marketingPlan.blotato.schedule && (
                           <div className="flex flex-col gap-0.5">
                             <span className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Schedule</span>
-                            <span className="text-xs font-medium text-zinc-600 dark:text-zinc-300">{site.marketingPlan.buffer.schedule}</span>
+                            <span className="text-xs font-medium text-zinc-600 dark:text-zinc-300">{site.marketingPlan.blotato.schedule}</span>
                           </div>
                         )}
                       </div>
-                      {site.marketingPlan.buffer.contentPillars && (
+                      {site.marketingPlan.blotato.contentPillars && (
                         <div className="flex flex-col gap-1">
                           <span className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Content Pillars</span>
                           <div className="flex flex-wrap gap-1">
-                            {site.marketingPlan.buffer.contentPillars.map((pillar, i) => (
+                            {site.marketingPlan.blotato.contentPillars.map((pillar, i) => (
                               <span key={i} className="rounded-md bg-zinc-200 px-2 py-0.5 text-[10px] font-medium text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">
                                 {pillar}
                               </span>
@@ -446,7 +446,7 @@ export default function SiteCard({ site, status }: { site: Site; status?: SiteDe
                       )}
                       <div className="flex flex-col gap-0.5 rounded-md bg-zinc-100 px-2 py-1.5 dark:bg-zinc-700/50">
                         <span className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Next Action</span>
-                        <span className="text-xs text-zinc-600 dark:text-zinc-300">{site.marketingPlan.buffer.nextAction}</span>
+                        <span className="text-xs text-zinc-600 dark:text-zinc-300">{site.marketingPlan.blotato.nextAction}</span>
                       </div>
                     </div>
 
