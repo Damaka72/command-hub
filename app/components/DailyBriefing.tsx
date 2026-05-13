@@ -13,8 +13,6 @@ interface WorkItem {
 
 const STATIC_ITEMS: WorkItem[] = [
   { id: 's1', priority: 'high', category: 'Revenue',  title: 'Wire Stripe payment to TCC trial button',       detail: '£97/mo blocked — app/command-center/page.tsx' },
-  { id: 's2', priority: 'med',  category: 'Revenue',  title: 'Add GUMROAD_API_KEY to Vercel env vars',        detail: 'AIVVP revenue shows — instead of live figure' },
-  { id: 's3', priority: 'med',  category: 'Setup',    title: 'Add GITHUB_TOKEN to Vercel env vars',           detail: 'Required for cross-device task persistence' },
   { id: 's4', priority: 'low',  category: 'Dev',      title: 'Add CLAUDE.md to Didi, TCC, AIVVP repos',      detail: '3 of 5 repos missing CLAUDE.md' },
   { id: 's5', priority: 'low',  category: 'Agents',   title: 'Plan first curator + health agent run',         detail: 'Non-retired agents across all sites' },
 ];
