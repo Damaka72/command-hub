@@ -191,9 +191,10 @@ Work through these in order unless Didi says otherwise:
 1. ~~Fix OOT contamination in the four social-agent.html files~~ **DONE (May 2026)**
 2. ~~Replace Buffer with Blotato~~ **DONE (May 2026)**
 3. ~~Daily briefing, agent assessment, cross-device tasks~~ **DONE (May 2026)**
-4. **Wire Stripe** into TCC `app/command-center/page.tsx` CTA — £97/mo revenue blocked
-5. **Add `GUMROAD_API_KEY`** to Vercel env vars — AIVVP revenue shows `—` instead of live figure
-6. **Add `GITHUB_TOKEN`** to Vercel env vars — enables cross-device task persistence
+4. **Move TCC workshops to MYCP Skool** — CHAOS + Concurrent Contractor workshops. See WORKSHOP-MIGRATION.md
+5. ~~Add `GUMROAD_API_KEY` to Vercel~~ **DONE (May 2026)**
+6. ~~Add `GITHUB_TOKEN` to Vercel~~ **DONE (May 2026)**
 7. **Add `CLAUDE.md`** to Didi, TCC, and AIVVP repos (3 of 5 missing)
 8. **First agent run** — curator + health across all sites (retired agents excluded)
 9. **Complete Constant Contact OAuth** for TCC — flip `DEMO_MODE=false` in CHAOS Assessment
+10. **Remove Command Center** from TCC site (page, terms, email sequence) — after workshops migrated

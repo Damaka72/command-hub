@@ -12,7 +12,7 @@ interface WorkItem {
 }
 
 const STATIC_ITEMS: WorkItem[] = [
-  { id: 's1', priority: 'high', category: 'Revenue',  title: 'Wire Stripe payment to TCC trial button',       detail: '£97/mo blocked — app/command-center/page.tsx' },
+  { id: 's6', priority: 'high', category: 'Revenue',  title: 'Move TCC workshops to MYCP Skool',              detail: 'CHAOS + Concurrent Contractor workshops — see MYCP tasks' },
   { id: 's4', priority: 'low',  category: 'Dev',      title: 'Add CLAUDE.md to Didi, TCC, AIVVP repos',      detail: '3 of 5 repos missing CLAUDE.md' },
   { id: 's5', priority: 'low',  category: 'Agents',   title: 'Plan first curator + health agent run',         detail: 'Non-retired agents across all sites' },
 ];
