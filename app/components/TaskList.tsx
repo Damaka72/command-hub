@@ -10,20 +10,41 @@ interface Task {
 
 export default function TaskList({ siteId }: { siteId: string }) {
   const storageKey = `tasks-${siteId}`;
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [input, setInput] = useState("");
+  const [tasks,   setTasks]   = useState<Task[]>([]);
+  const [input,   setInput]   = useState("");
+  const [loading, setLoading] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(storageKey);
-      if (stored) setTasks(JSON.parse(stored));
-    } catch {}
-  }, [storageKey]);
+    fetch('/data/tasks.json')
+      .then(r => r.ok ? r.json() : null)
+      .then((data: Record<string, Task[]> | null) => {
+        if (data && Array.isArray(data[siteId])) {
+          setTasks(data[siteId]);
+        } else {
+          try {
+            const stored = localStorage.getItem(storageKey);
+            if (stored) setTasks(JSON.parse(stored));
+          } catch {}
+        }
+      })
+      .catch(() => {
+        try {
+          const stored = localStorage.getItem(storageKey);
+          if (stored) setTasks(JSON.parse(stored));
+        } catch {}
+      })
+      .finally(() => setLoading(false));
+  }, [siteId, storageKey]);
 
   function save(next: Task[]) {
     setTasks(next);
     localStorage.setItem(storageKey, JSON.stringify(next));
+    fetch('/api/tasks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ siteId, tasks: next }),
+    }).catch(() => {});
   }
 
   function addTask() {
@@ -42,11 +63,13 @@ export default function TaskList({ siteId }: { siteId: string }) {
     save(tasks.filter(t => t.id !== id));
   }
 
-  const remaining = tasks.filter(t => !t.done).length;
-  const countLabel = tasks.length === 0
-    ? "No tasks yet"
+  const remaining  = tasks.filter(t => !t.done).length;
+  const countLabel = loading
+    ? 'Loading…'
+    : tasks.length === 0
+    ? 'No tasks yet'
     : remaining === 0
-    ? "All done ✓"
+    ? 'All done ✓'
     : `${remaining} of ${tasks.length} remaining`;
 
   return (
@@ -93,11 +116,12 @@ export default function TaskList({ siteId }: { siteId: string }) {
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && addTask()}
           placeholder="Add a task…"
-          className="flex-1 rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-1.5 text-sm text-zinc-700 placeholder-zinc-400 outline-none transition-colors focus:border-zinc-400 focus:bg-white dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:placeholder-zinc-600 dark:focus:border-zinc-500 dark:focus:bg-zinc-900"
+          disabled={loading}
+          className="flex-1 rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-1.5 text-sm text-zinc-700 placeholder-zinc-400 outline-none transition-colors focus:border-zinc-400 focus:bg-white disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:placeholder-zinc-600 dark:focus:border-zinc-500 dark:focus:bg-zinc-900"
         />
         <button
           onClick={addTask}
-          disabled={!input.trim()}
+          disabled={!input.trim() || loading}
           className="rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-40 disabled:cursor-not-allowed dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
         >
           Add

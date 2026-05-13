@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import SiteCard from "./components/SiteCard";
+import DailyBriefing from "./components/DailyBriefing";
 import type { SiteDetail, AgentSummary } from "./api/status/route";
 
 const sites = [
@@ -22,7 +23,7 @@ const sites = [
         platform: 'Instagram',
         schedule: '1 post/day',
         contentPillars: ['Local news', 'Business spotlights', 'Regeneration updates', 'Community events', 'Planning & development'],
-        nextAction: 'Schedule first week of posts in Blotato',
+        nextAction: 'Continue weekly scheduling in Blotato',
       },
       beehiiv: {
         status: 'in_progress' as const,
@@ -42,6 +43,22 @@ const sites = [
     socialAgent: "https://www.theconcurrentcontractor.com/social-agent",
     brandColor: "#FFD700",
     initials: "TC",
+    marketingPlan: {
+      blotato: {
+        status: 'active' as const,
+        statusLabel: 'Active',
+        platform: 'Instagram + YouTube',
+        schedule: '1 post/day',
+        contentPillars: ['IR35 guidance', 'Contracting tips', 'Community wins', 'TCC Command Centre', 'Career transitions'],
+        nextAction: 'Continue weekly scheduling in Blotato',
+      },
+      beehiiv: {
+        status: 'not_started' as const,
+        statusLabel: 'Not set up',
+        cadence: 'Weekly (Constant Contact)',
+        nextAction: 'Complete Constant Contact OAuth setup — flip DEMO_MODE=false',
+      },
+    },
   },
   {
     id: "masteryourcareerpath",
@@ -60,7 +77,7 @@ const sites = [
         platform: 'Instagram',
         schedule: '1 post/day',
         contentPillars: ['Career strategy', 'IR35 & contracting', 'PRIME framework', 'Community wins', 'LinkedIn growth'],
-        nextAction: 'Schedule first week of posts in Blotato',
+        nextAction: 'Continue weekly scheduling in Blotato',
       },
       beehiiv: {
         status: 'in_progress' as const,
@@ -84,10 +101,10 @@ const sites = [
       blotato: {
         status: 'active' as const,
         statusLabel: 'Active',
-        platform: 'Instagram',
+        platform: 'Instagram + TikTok + Pinterest + YouTube',
         schedule: '1 post/day',
         contentPillars: ['Prompt demos', 'Before/after results', 'Quick tutorials', 'Gumroad product spotlights', 'Creator tips'],
-        nextAction: 'Schedule first week of posts in Blotato',
+        nextAction: 'Continue weekly scheduling in Blotato',
       },
       beehiiv: {
         status: 'in_progress' as const,
@@ -107,6 +124,22 @@ const sites = [
     socialAgent: "https://didianolue.co.uk/social-agent",
     brandColor: "#4A7FC1",
     initials: "DA",
+    marketingPlan: {
+      blotato: {
+        status: 'active' as const,
+        statusLabel: 'Active',
+        platform: 'Instagram + Twitter/X + YouTube',
+        schedule: '3x/week',
+        contentPillars: ['Procurement insights', 'Contract wins', 'Commercial leadership', 'IR35 & consulting', 'Behind the brand'],
+        nextAction: 'Continue weekly scheduling in Blotato',
+      },
+      beehiiv: {
+        status: 'not_started' as const,
+        statusLabel: 'Not set up',
+        cadence: 'Monthly newsletter (TBC)',
+        nextAction: 'Choose email provider and set up newsletter',
+      },
+    },
   },
 ];
 
@@ -216,6 +249,10 @@ export default function Home() {
         </div>
       </header>
 
+      {statusMap !== null && (
+        <DailyBriefing statusMap={statusMap} />
+      )}
+
       {statusMap && Object.keys(statusMap).length > 0 && (
         <PortfolioBar statusMap={statusMap} />
       )}
@@ -234,7 +271,7 @@ export default function Home() {
 
       <footer className="mt-auto border-t border-zinc-200 bg-white py-6 dark:border-zinc-800 dark:bg-zinc-900">
         <p className="text-center text-xs text-zinc-400 dark:text-zinc-600">
-          Tasks saved in browser · Status refreshes on load
+          Tasks saved in repo · Status refreshes on load
         </p>
       </footer>
     </div>

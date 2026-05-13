@@ -1,0 +1,16 @@
+{
+  "global": [],
+  "oldoaktown": [],
+  "theconcurrentcontractor": [
+    { "id": "tcc-01", "text": "Wire Stripe payment to trial CTA button on /command-center", "done": false },
+    { "id": "tcc-02", "text": "Complete Constant Contact OAuth setup (flip DEMO_MODE=false)", "done": false },
+    { "id": "tcc-03", "text": "Add CLAUDE.md to repo root", "done": false }
+  ],
+  "masteryourcareerpath": [],
+  "aiviralvideoprompts": [
+    { "id": "aivvp-01", "text": "Add GUMROAD_API_KEY to Vercel env vars to show live revenue", "done": false }
+  ],
+  "didianolue": [
+    { "id": "didi-01", "text": "Add CLAUDE.md to repo root", "done": false }
+  ]
+}

@@ -227,8 +227,8 @@ export default function SiteCard({ site, status }: { site: Site; status?: SiteDe
           )}
           {site.socialAgent && (
             <a href={site.socialAgent} target="_blank" rel="noopener noreferrer"
-              className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 transition-colors hover:border-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-600 dark:text-zinc-300 dark:hover:border-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100">
-              Social
+              className="rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-400 transition-colors hover:border-zinc-400 hover:bg-zinc-50 hover:text-zinc-600 dark:border-zinc-700 dark:text-zinc-500 dark:hover:border-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-400">
+              Social Agent (Legacy)
             </a>
           )}
           {status && (

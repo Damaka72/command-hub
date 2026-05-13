@@ -24,17 +24,22 @@ Stack: Next.js 16, React 19, TypeScript, Tailwind CSS v4, Vercel.
 ```
 command-hub/
 ├── app/
-│   ├── page.tsx              # Main dashboard — site config + PortfolioBar
+│   ├── page.tsx              # Main dashboard — site config + PortfolioBar + DailyBriefing
 │   ├── layout.tsx            # Root layout (Geist font, metadata)
 │   ├── globals.css
 │   ├── login/page.tsx        # Password gate
 │   ├── api/
 │   │   ├── status/route.ts   # Core aggregator — uptime, Vercel, agents, revenue
+│   │   ├── tasks/route.ts    # POST — writes tasks.json back to repo via GitHub API
 │   │   └── auth/route.ts     # Cookie-based auth (HUB_PASSWORD env var)
 │   └── components/
-│       ├── SiteCard.tsx      # Per-site card — tabs: Revenue, Agents, Outstanding, Marketing
-│       ├── TaskList.tsx      # localStorage per-site task list
+│       ├── DailyBriefing.tsx # Today's Focus banner — daily work queue above PortfolioBar
+│       ├── SiteCard.tsx      # Per-site card — tabs: Revenue, Agents, Outstanding, Marketing, Posts
+│       ├── TaskList.tsx      # Per-site task list — hydrates from repo, saves via API
 │       └── RevenueFlow.tsx   # SVG revenue funnel diagram per site
+├── public/
+│   └── data/
+│       └── tasks.json        # Cross-device task storage — pre-seeded with COWORK items
 ├── proxy.ts                  # Middleware auth guard
 ├── SITE-AUDIT.md             # Full audit of all five sites — read this
 └── COWORK.md                 # This file
@@ -112,6 +117,44 @@ Facebook pages and LinkedIn pages share a parent account ID so are excluded from
 | AI Viral Video Prompts | `46493` (IG), `41948` (TikTok), `6423` (Pinterest), `36389` (YT) |
 | Didi Anolue | `46490` (IG @damaka), `18212` (Twitter/X), `36391` (YT) |
 
+## Agent Architecture (Active vs Retired)
+
+Blotato + Claude Cowork now cover social media creation and scheduling. Three agents are retired:
+
+| Agent | Was on | Verdict | Reason |
+|-------|--------|---------|--------|
+| `repurpose` | All 5 sites | **Retired** | Claude Cowork + Blotato MCP handles repurposing directly |
+| `marketing-assets` | All 5 sites | **Retired** | Claude creates posts via Blotato MCP — no separate agent needed |
+| `social` | Didi only | **Retired** | Blotato handles Didi social scheduling |
+
+Retired agents removed from `SITE_AGENT_NAMES` in `status/route.ts`. They no longer appear in Agents tab or agent counts.
+
+Remaining active agents per site type:
+
+| Agent | Sites | Purpose |
+|-------|-------|---------|
+| `curator` | All | Content research — feeds Claude sessions |
+| `newsletter` | All | Beehiiv/email pipeline |
+| `health` | All | Site monitoring |
+| `seo` | All | Content strategy gaps |
+| `insight` | TCC | IR35 news feed |
+| `lead-nurture`, `product` | MYCP | MYCP pipeline |
+| `prompt-pack` | AIVVP | Product creation |
+| `scout`, `outreach`, `cv-tailor`, `packages`, `enquiry` | Didi | Consulting pipeline |
+
+## Task Persistence
+
+Tasks are stored in `public/data/tasks.json` (served at `/data/tasks.json`).
+
+- **Read**: `TaskList` fetches `/data/tasks.json` on mount; falls back to localStorage if unavailable
+- **Write**: `TaskList` POSTs to `/api/tasks` which calls the GitHub Contents API to update the file in-repo
+- **Cross-device**: any device with hub access sees the same tasks (once `GITHUB_TOKEN` is set)
+- **Fallback**: if `GITHUB_TOKEN` not set, tasks save to localStorage only (existing behaviour)
+
+To enable cross-device persistence, add `GITHUB_TOKEN` to Vercel env vars:
+1. Go to github.com/settings/tokens → create a fine-grained PAT scoped to `Damaka72/command-hub` with **Contents: Read and write**
+2. Add to Vercel → command-hub → Settings → Environment Variables as `GITHUB_TOKEN`
+
 ## Environment Variables (Vercel)
 
 | Var | Used for |
@@ -120,6 +163,7 @@ Facebook pages and LinkedIn pages share a parent account ID so are excluded from
 | `HUB_PASSWORD` | Dashboard login gate |
 | `GUMROAD_API_KEY` | Live Gumroad revenue for AIVVP (not yet set) |
 | `BLOTATO_API_KEY` | Blotato schedule count per site (set May 2026) |
+| `GITHUB_TOKEN` | Write tasks.json back to repo (cross-device task sync) |
 
 ## Coding Standards
 
@@ -135,17 +179,21 @@ Facebook pages and LinkedIn pages share a parent account ID so are excluded from
 
 1. **Read this file** (COWORK.md)
 2. **Read SITE-AUDIT.md** — the authoritative record of conflicts and gaps
-3. **Run `git log --oneline -10`** to see what was last changed
-4. **Confirm the current task with Didi** before making any changes
-5. After changes: `git add -A && git commit -m "feat: ..." && git push origin main`
+3. **Open the hub** — Today's Focus panel shows what to work on today
+4. **Run `git log --oneline -10`** to see what was last changed
+5. **Confirm the current task with Didi** before making any changes
+6. After changes: `git add -A && git commit -m "feat: ..." && git push origin main`
 
 ## Current Priority Queue
 
 Work through these in order unless Didi says otherwise:
 
 1. ~~Fix OOT contamination in the four social-agent.html files~~ **DONE (May 2026)**
-2. ~~Replace Buffer with Blotato~~ **DONE (May 2026)** — Marketing Plan tab, readiness checklist, schedule count all updated. `BLOTATO_API_KEY` set in Vercel.
-3. Wire Stripe (or LemonSqueezy) into TCC `app/command-center/page.tsx` CTA
-4. Add `GUMROAD_API_KEY` to Vercel env vars + confirm revenue shows on AIVVP card
-5. Add `CLAUDE.md` to Didi, TCC, and AIVVP repos (currently missing)
-6. Plan first agent run across all sites to populate dashboard data
+2. ~~Replace Buffer with Blotato~~ **DONE (May 2026)**
+3. ~~Daily briefing, agent assessment, cross-device tasks~~ **DONE (May 2026)**
+4. **Wire Stripe** into TCC `app/command-center/page.tsx` CTA — £97/mo revenue blocked
+5. **Add `GUMROAD_API_KEY`** to Vercel env vars — AIVVP revenue shows `—` instead of live figure
+6. **Add `GITHUB_TOKEN`** to Vercel env vars — enables cross-device task persistence
+7. **Add `CLAUDE.md`** to Didi, TCC, and AIVVP repos (3 of 5 missing)
+8. **First agent run** — curator + health across all sites (retired agents excluded)
+9. **Complete Constant Contact OAuth** for TCC — flip `DEMO_MODE=false` in CHAOS Assessment

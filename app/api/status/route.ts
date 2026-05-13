@@ -152,20 +152,18 @@ const SITES: SiteConfig[] = [
       'https://didianolue.co.uk/data/agent-summaries/cv-tailor.json',
       'https://didianolue.co.uk/data/agent-summaries/packages.json',
       'https://didianolue.co.uk/data/agent-summaries/curator.json',
-      'https://didianolue.co.uk/data/agent-summaries/repurpose.json',
       'https://didianolue.co.uk/data/agent-summaries/seo.json',
       'https://didianolue.co.uk/data/agent-summaries/health.json',
-      'https://didianolue.co.uk/data/agent-summaries/social.json',
     ],
   },
 ];
 
 const SITE_AGENT_NAMES: Record<string, string[]> = {
-  oldoaktown:              ['curator', 'newsletter', 'health', 'seo', 'repurpose', 'marketing-assets'],
-  theconcurrentcontractor: ['curator', 'newsletter', 'health', 'seo', 'repurpose', 'insight', 'marketing-assets'],
-  masteryourcareerpath:    ['curator', 'newsletter', 'health', 'seo', 'repurpose', 'lead-nurture', 'product', 'marketing-assets'],
-  aiviralvideoprompts:     ['curator', 'newsletter', 'health', 'seo', 'repurpose', 'prompt-pack', 'marketing-assets'],
-  didianolue:              ['curator', 'newsletter', 'health', 'seo', 'repurpose', 'scout', 'outreach', 'cv-tailor', 'packages', 'social', 'enquiry', 'marketing-assets'],
+  oldoaktown:              ['curator', 'newsletter', 'health', 'seo'],
+  theconcurrentcontractor: ['curator', 'newsletter', 'health', 'seo', 'insight'],
+  masteryourcareerpath:    ['curator', 'newsletter', 'health', 'seo', 'lead-nurture', 'product'],
+  aiviralvideoprompts:     ['curator', 'newsletter', 'health', 'seo', 'prompt-pack'],
+  didianolue:              ['curator', 'newsletter', 'health', 'seo', 'scout', 'outreach', 'cv-tailor', 'packages', 'enquiry'],
 };
 
 const AGENT_DISPLAY_NAMES: Record<string, string> = {
@@ -187,8 +185,8 @@ const AGENT_DISPLAY_NAMES: Record<string, string> = {
   'marketing-assets': 'Marketing Assets',
 };
 
-// Didianolue total (newsletter + 10 revenue agents)
-const DIDIANOLUE_AGENT_TOTAL = 11;
+// Didianolue total (newsletter + 8 revenue agents; repurpose + social retired)
+const DIDIANOLUE_AGENT_TOTAL = 9;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -337,9 +335,9 @@ function computeReadiness(
   site: SiteConfig,
   contentActive: boolean,
 ): ReadinessItem[] {
-  const anyActive   = agentSummaries.some(a => a.status !== 'never_run');
-  const repurpose   = agentSummaries.find(a => a.name === 'repurpose');
-  const themeSet    = !!(coordinator?.weeklyTheme);
+  const anyActive = agentSummaries.some(a => a.status !== 'never_run');
+  const curator   = agentSummaries.find(a => a.name === 'curator');
+  const themeSet  = !!(coordinator?.weeklyTheme);
 
   return [
     {
@@ -371,9 +369,9 @@ function computeReadiness(
       reason: themeSet ? `"${coordinator!.weeklyTheme}"` : 'Run the Social Agent with a weekly theme',
     },
     {
-      label:  'Marketing agent active',
-      ok:     !!(repurpose && repurpose.status !== 'never_run'),
-      reason: (repurpose && repurpose.status !== 'never_run') ? 'Running' : 'Repurpose agent not yet run',
+      label:  'Content curator active',
+      ok:     !!(curator && curator.status !== 'never_run'),
+      reason: (curator && curator.status !== 'never_run') ? 'Running' : 'Curator agent not yet run',
     },
     {
       label:  'Agent data flowing',
