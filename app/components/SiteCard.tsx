@@ -3,6 +3,7 @@
 import { useState } from "react";
 import TaskList from "./TaskList";
 import RevenueFlow from "./RevenueFlow";
+import SocialFeed from "./SocialFeed";
 import type { SiteDetail } from "../api/status/route";
 
 function getBrandTextOnColor(hex: string): string {
@@ -60,7 +61,7 @@ const DEPLOY_STYLES: Record<string, { dot: string; label: string }> = {
   ERROR:    { dot: 'bg-red-400', label: 'ERROR' },
 };
 
-const TABS = ['Revenue', 'Agents', 'Outstanding', 'Marketing'] as const;
+const TABS = ['Revenue', 'Agents', 'Outstanding', 'Marketing', 'Posts'] as const;
 
 function fmt(n: number | null | undefined, prefix = ''): string {
   return n != null ? `${prefix}${n.toLocaleString()}` : '—';
@@ -476,6 +477,11 @@ export default function SiteCard({ site, status }: { site: Site; status?: SiteDe
                   </div>
                 )}
               </div>
+            )}
+
+            {/* Tab 4 — Posts (live from Blotato) */}
+            {activeTab === 4 && (
+              <SocialFeed siteId={site.id} />
             )}
 
           </div>
