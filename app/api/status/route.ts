@@ -52,6 +52,52 @@ export interface CoordinatorData {
   setAt: string;
 }
 
+export interface SubagentStatus {
+  lastRun: string | null;
+  status: 'idle' | 'running' | 'complete' | 'error' | 'never_run';
+  briefGenerated: boolean;
+  briefSummary: string | null;
+}
+
+export interface GraderVerdict {
+  rubricName: string;
+  verdict: 'pass' | 'fail' | 'retry' | 'never_run';
+  retryCount: number;
+  failedCriterion: string | null;
+  lastRun: string | null;
+}
+
+export interface DreamingStatus {
+  lastRun: string | null;
+  nextRun: string | null;
+  mode: 'auto-update' | 'review-before-landing' | null;
+  memoryUpdates: number;
+  patternsExtracted: string[];
+}
+
+export interface PortfolioCoordinator {
+  lastRun: string | null;
+  sourceFile: string;
+  weeklyTheme: string | null;
+  weekCommencing: string | null;
+  campaignObjective: string | null;
+  batchStatus: {
+    approved: number;
+    pending: number;
+    failed: number;
+    readyForReview: boolean;
+  };
+}
+
+export interface DraftItem {
+  siteId: string;
+  platform: string;
+  graderVerdict: 'pass' | 'fail' | 'retry';
+  retryCount: number;
+  failedCriterion: string | null;
+  contentSnippet: string | null;
+}
+
 export interface RevenueConfig {
   source: string;       // 'json_file' | 'gumroad_api' | 'booking_manual'
   label: string;
@@ -73,6 +119,15 @@ export interface SiteDetail {
   scheduledCount: number;
   outstanding: { overdueFollowUps: number; awaitingApproval: number; };
   revenueConfig: RevenueConfig | null;
+  subagentStatus: SubagentStatus | null;
+  graderVerdict: GraderVerdict | null;
+}
+
+export interface StatusResponse {
+  sites: Record<string, SiteDetail>;
+  portfolioCoordinator: PortfolioCoordinator | null;
+  dreaming: DreamingStatus | null;
+  reviewQueue: DraftItem[];
 }
 
 // ─── Static site configuration ───────────────────────────────────────────────
@@ -158,6 +213,9 @@ const SITES: SiteConfig[] = [
   },
 ];
 
+// Legacy per-site agents — still active, shown in the Agents tab.
+// The new multiagent pipeline (subagent, grader) is handled separately
+// via fetchSubagentStatus() and fetchGraderVerdict().
 const SITE_AGENT_NAMES: Record<string, string[]> = {
   oldoaktown:              ['curator', 'newsletter', 'health', 'seo'],
   theconcurrentcontractor: ['curator', 'newsletter', 'health', 'seo', 'insight'],
@@ -329,6 +387,83 @@ async function fetchBlotatoScheduledCounts(): Promise<Record<string, number>> {
   } catch { return {}; }
 }
 
+const SITE_RUBRIC_NAMES: Record<string, string> = {
+  didianolue:              'Authority rubric',
+  masteryourcareerpath:    'PRIME/OPERATE rubric',
+  theconcurrentcontractor: 'Contractor lens rubric',
+  oldoaktown:              'No-fabrication rubric',
+  aiviralvideoprompts:     'Conversion rubric',
+};
+
+async function fetchSubagentStatus(siteUrl: string): Promise<SubagentStatus | null> {
+  const data = await safeFetch(`${siteUrl}/data/agent-summaries/subagent-status.json`);
+  if (!data) return null;
+  return {
+    lastRun:        (data.lastRun        as string)  ?? null,
+    status:         (data.status         as SubagentStatus['status']) ?? 'never_run',
+    briefGenerated: !!(data.briefGenerated),
+    briefSummary:   (data.briefSummary   as string)  ?? null,
+  };
+}
+
+async function fetchGraderVerdict(siteUrl: string, siteId: string): Promise<GraderVerdict | null> {
+  const data = await safeFetch(`${siteUrl}/data/agent-summaries/grader-verdict.json`);
+  if (!data) return null;
+  return {
+    rubricName:      SITE_RUBRIC_NAMES[siteId] ?? 'Outcomes rubric',
+    verdict:         (data.verdict         as GraderVerdict['verdict']) ?? 'never_run',
+    retryCount:      typeof data.retryCount === 'number' ? data.retryCount : 0,
+    failedCriterion: (data.failedCriterion as string) ?? null,
+    lastRun:         (data.lastRun         as string) ?? null,
+  };
+}
+
+async function fetchDreamingStatus(): Promise<DreamingStatus | null> {
+  const data = await safeFetch('https://didianolue.co.uk/data/dreaming-status.json');
+  if (!data) return null;
+  return {
+    lastRun:           (data.lastRun           as string)   ?? null,
+    nextRun:           (data.nextRun           as string)   ?? null,
+    mode:              (data.mode              as DreamingStatus['mode']) ?? null,
+    memoryUpdates:     typeof data.memoryUpdates === 'number' ? data.memoryUpdates : 0,
+    patternsExtracted: Array.isArray(data.patternsExtracted) ? data.patternsExtracted as string[] : [],
+  };
+}
+
+async function fetchPortfolioCoordinator(): Promise<PortfolioCoordinator | null> {
+  const data = await safeFetch('https://didianolue.co.uk/data/content-coordinator.json');
+  if (!data) return null;
+  const approved = typeof data.approved === 'number' ? data.approved : 0;
+  const pending  = typeof data.pending  === 'number' ? data.pending  : 0;
+  const failed   = typeof data.failed   === 'number' ? data.failed   : 0;
+  return {
+    lastRun:           (data.setAt             as string) ?? null,
+    sourceFile:        'content-coordinator.json',
+    weeklyTheme:       (data.weeklyTheme        as string) ?? null,
+    weekCommencing:    (data.weekCommencing     as string) ?? null,
+    campaignObjective: (data.campaignObjective  as string) ?? null,
+    batchStatus: { approved, pending, failed, readyForReview: pending === 0 && approved > 0 },
+  };
+}
+
+async function fetchReviewQueue(): Promise<DraftItem[]> {
+  const results = await Promise.all(
+    SITES.map(async (site): Promise<DraftItem[]> => {
+      const data = await safeFetch(`${site.url}/data/agent-summaries/review-queue.json`);
+      if (!data || !Array.isArray(data.drafts)) return [];
+      return (data.drafts as Array<Record<string, unknown>>).map(d => ({
+        siteId:          site.id,
+        platform:        (d.platform        as string) ?? 'Unknown',
+        graderVerdict:   (d.graderVerdict   as DraftItem['graderVerdict']) ?? 'fail',
+        retryCount:      typeof d.retryCount === 'number' ? d.retryCount : 0,
+        failedCriterion: (d.failedCriterion as string) ?? null,
+        contentSnippet:  (d.contentSnippet  as string) ?? null,
+      }));
+    })
+  );
+  return results.flat();
+}
+
 function computeReadiness(
   agentSummaries: AgentSummary[],
   coordinator: CoordinatorData | null,
@@ -422,18 +557,25 @@ async function fetchRevenueMetrics(
 // ─── Main handler ─────────────────────────────────────────────────────────────
 
 export async function GET() {
-  const blotatoCounts = await fetchBlotatoScheduledCounts();
+  const [blotatoCounts, portfolioCoordinator, dreaming, reviewQueue] = await Promise.all([
+    fetchBlotatoScheduledCounts(),
+    fetchPortfolioCoordinator(),
+    fetchDreamingStatus(),
+    fetchReviewQueue(),
+  ]);
 
   const results = await Promise.all(
     SITES.map(async (site): Promise<[string, SiteDetail]> => {
       // Parallel: uptime + Vercel deploy + newsletter agent + all agent summaries + coordinator
-      const [up, deploy, newsletterData, agentSummaries, coordinator, revenueConfig] = await Promise.all([
+      const [up, deploy, newsletterData, agentSummaries, coordinator, revenueConfig, subagentStatus, graderVerdict] = await Promise.all([
         checkUptime(site.url),
         checkVercel(site.vercelProjectId),
         safeFetch(`${site.url}/data/agent-summaries/newsletter.json`),
         fetchAllAgentSummaries(site.url, site.id),
         fetchCoordinator(site.url, site),
         fetchRevenueConfig(site.url),
+        fetchSubagentStatus(site.url),
+        fetchGraderVerdict(site.url, site.id),
       ]);
 
       // Legacy agent field (backwards compat with existing page.tsx consumer)
@@ -477,11 +619,19 @@ export async function GET() {
         scheduledCount,
         outstanding: { overdueFollowUps, awaitingApproval },
         revenueConfig,
+        subagentStatus,
+        graderVerdict,
       }];
     })
   );
 
-  return NextResponse.json(Object.fromEntries(results), {
+  const response: StatusResponse = {
+    sites: Object.fromEntries(results),
+    portfolioCoordinator,
+    dreaming,
+    reviewQueue,
+  };
+  return NextResponse.json(response, {
     headers: { 'Cache-Control': 'no-store' },
   });
 }

@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { SiteDetail } from "../api/status/route";
+import type { SiteDetail, StatusResponse } from "../api/status/route"; // SiteDetail used in buildItems parameter
+import { SITE_SHORT } from "../lib/siteConstants";
 
 interface WorkItem {
   id: string;
@@ -12,25 +13,17 @@ interface WorkItem {
 }
 
 const STATIC_ITEMS: WorkItem[] = [
-  { id: 's6', priority: 'high', category: 'Revenue',  title: 'Move TCC workshops to MYCP Skool',              detail: 'CHAOS + Concurrent Contractor workshops — see MYCP tasks' },
-  { id: 's4', priority: 'low',  category: 'Dev',      title: 'Add CLAUDE.md to Didi, TCC, AIVVP repos',      detail: '3 of 5 repos missing CLAUDE.md' },
-  { id: 's5', priority: 'low',  category: 'Agents',   title: 'Plan first curator + health agent run',         detail: 'Non-retired agents across all sites' },
+  { id: 's6', priority: 'high', category: 'Revenue', title: 'Move TCC workshops to MYCP Skool', detail: 'CHAOS + Concurrent Contractor workshops — see MYCP tasks' },
 ];
 
-const SITE_SHORT: Record<string, string> = {
-  oldoaktown:              'OOT',
-  theconcurrentcontractor: 'TCC',
-  masteryourcareerpath:    'MYCP',
-  aiviralvideoprompts:     'AIVVP',
-  didianolue:              'Didi',
-};
-
-const PRIORITY_AGENTS = ['curator', 'health', 'seo'];
-
-function buildItems(statusMap: Record<string, SiteDetail>): WorkItem[] {
+function buildItems(
+  sites: Record<string, SiteDetail>,
+  portfolioCoordinator: StatusResponse['portfolioCoordinator'],
+  dreaming: StatusResponse['dreaming'],
+): WorkItem[] {
   const items: WorkItem[] = [...STATIC_ITEMS];
 
-  for (const [siteId, detail] of Object.entries(statusMap)) {
+  for (const [siteId, detail] of Object.entries(sites)) {
     const name = SITE_SHORT[siteId] ?? siteId;
 
     if (detail.outstanding.overdueFollowUps > 0) {
@@ -52,17 +45,59 @@ function buildItems(statusMap: Record<string, SiteDetail>): WorkItem[] {
         detail: 'Open Blotato to schedule content',
       });
     }
+  }
 
-    for (const agentName of PRIORITY_AGENTS) {
-      const agent = detail.agentSummaries.find(a => a.name === agentName);
-      if (agent && agent.status === 'never_run') {
-        items.push({
-          id: `agent-${agentName}-${siteId}`,
-          priority: 'low',
-          category: 'Agents',
-          title: `Run ${agent.displayName} agent · ${name}`,
-        });
-      }
+  // Batch ready for review
+  if (portfolioCoordinator?.batchStatus.readyForReview) {
+    const n = portfolioCoordinator.batchStatus.approved;
+    items.push({
+      id: 'batch-ready',
+      priority: 'high',
+      category: 'Review',
+      title: `${n} draft${n !== 1 ? 's' : ''} ready for review before publishing`,
+      detail: 'Open the Review Queue in each site card',
+    });
+  }
+
+  // Any failed grader verdicts
+  for (const [siteId, detail] of Object.entries(sites)) {
+    const name = SITE_SHORT[siteId] ?? siteId;
+    if (detail.graderVerdict?.verdict === 'fail') {
+      items.push({
+        id: `grader-fail-${siteId}`,
+        priority: 'high',
+        category: 'Grader',
+        title: `Grader failed · ${name}`,
+        detail: detail.graderVerdict.failedCriterion ?? 'Check the Pipeline tab',
+      });
+    }
+  }
+
+  // Lead coordinator hasn't run (no theme set)
+  if (!portfolioCoordinator?.weeklyTheme) {
+    items.push({
+      id: 'coordinator-no-theme',
+      priority: 'med',
+      category: 'Agents',
+      title: 'No weekly theme set — lead coordinator has not run',
+      detail: 'Set the theme in content-coordinator.json to trigger the pipeline',
+    });
+  }
+
+  // Dreaming overdue (hasn't run this week)
+  if (dreaming) {
+    const lastRunDate = dreaming.lastRun ? new Date(dreaming.lastRun) : null;
+    const daysSince = lastRunDate
+      ? Math.floor((Date.now() - lastRunDate.getTime()) / 86400000)
+      : Infinity;
+    if (daysSince > 7) {
+      items.push({
+        id: 'dreaming-overdue',
+        priority: 'low',
+        category: 'Dreaming',
+        title: 'Dreaming has not run this week',
+        detail: `Last run: ${lastRunDate ? lastRunDate.toLocaleDateString('en-GB') : 'never'}`,
+      });
     }
   }
 
@@ -76,15 +111,16 @@ const DOT: Record<WorkItem['priority'], string> = {
   low:  'bg-zinc-400 dark:bg-zinc-500',
 };
 
-export default function DailyBriefing({ statusMap }: { statusMap: Record<string, SiteDetail> }) {
+export default function DailyBriefing({ statusMap }: { statusMap: StatusResponse }) {
   const [open, setOpen] = useState(true);
+  const { sites, portfolioCoordinator, dreaming } = statusMap;
 
   useEffect(() => {
     const stored = localStorage.getItem('hub-briefing-open');
     if (stored !== null) setOpen(stored === 'true');
   }, []);
 
-  const items       = buildItems(statusMap);
+  const items       = buildItems(sites, portfolioCoordinator, dreaming);
   const urgentCount = items.filter(i => i.priority === 'high').length;
   const today       = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
 

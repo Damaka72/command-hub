@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import SiteCard from "./components/SiteCard";
 import DailyBriefing from "./components/DailyBriefing";
-import type { SiteDetail, AgentSummary } from "./api/status/route";
+import AgentCommandCentre from "./components/AgentCommandCentre";
+import type { SiteDetail, AgentSummary, StatusResponse, PortfolioCoordinator } from "./api/status/route";
 
 const sites = [
   {
@@ -149,7 +150,7 @@ function countActiveAgents(summaries: AgentSummary[]): number {
   return summaries.filter(a => a.status !== 'never_run').length;
 }
 
-function PortfolioBar({ statusMap }: { statusMap: StatusMap }) {
+function PortfolioBar({ statusMap, portfolioCoordinator }: { statusMap: StatusMap; portfolioCoordinator: PortfolioCoordinator | null }) {
   const statuses = Object.values(statusMap);
 
   const allRevenueNull = statuses.every(s => s.monthlyRevenue === null);
@@ -207,19 +208,34 @@ function PortfolioBar({ statusMap }: { statusMap: StatusMap }) {
             {scheduled} posts
           </span>
         </span>
+
+        <span className="text-zinc-200 dark:text-zinc-700">|</span>
+
+        <span className="flex items-center gap-1.5 text-xs">
+          <span className="text-zinc-400 dark:text-zinc-500">Batch</span>
+          <span className={`font-semibold ${
+            (portfolioCoordinator?.batchStatus.approved ?? 0) === 5
+              ? 'text-emerald-600 dark:text-emerald-400'
+              : (portfolioCoordinator?.batchStatus.approved ?? 0) > 0
+                ? 'text-amber-600 dark:text-amber-400'
+                : 'text-zinc-400'
+          }`}>
+            {portfolioCoordinator?.batchStatus.approved ?? 0}/5 approved
+          </span>
+        </span>
       </div>
     </div>
   );
 }
 
 export default function Home() {
-  const [statusMap, setStatusMap] = useState<StatusMap | null>(null);
+  const [statusMap, setStatusMap] = useState<StatusResponse | null>(null);
 
   useEffect(() => {
     fetch('/api/status')
       .then(r => r.json())
       .then(setStatusMap)
-      .catch(() => setStatusMap({}));
+      .catch(() => setStatusMap({ sites: {}, portfolioCoordinator: null, dreaming: null, reviewQueue: [] }));
   }, []);
 
   return (
@@ -239,10 +255,10 @@ export default function Home() {
               {statusMap === null ? (
                 <span className="h-2 w-2 animate-pulse rounded-full bg-zinc-300 dark:bg-zinc-600" />
               ) : (
-                <span className={`h-2 w-2 rounded-full ${Object.values(statusMap).every(s => s.up) ? 'bg-emerald-500' : 'bg-amber-400'}`} />
+                <span className={`h-2 w-2 rounded-full ${Object.values(statusMap.sites).every(s => s.up) ? 'bg-emerald-500' : 'bg-amber-400'}`} />
               )}
               <span className="text-sm font-medium text-zinc-600 dark:text-zinc-300">
-                {statusMap === null ? 'Checking…' : `${Object.values(statusMap).filter(s => s.up).length}/${sites.length} up`}
+                {statusMap === null ? 'Checking…' : `${Object.values(statusMap.sites).filter(s => s.up).length}/${sites.length} up`}
               </span>
             </div>
           </div>
@@ -253,8 +269,16 @@ export default function Home() {
         <DailyBriefing statusMap={statusMap} />
       )}
 
-      {statusMap && Object.keys(statusMap).length > 0 && (
-        <PortfolioBar statusMap={statusMap} />
+      {statusMap && Object.keys(statusMap.sites).length > 0 && (
+        <PortfolioBar statusMap={statusMap.sites} portfolioCoordinator={statusMap.portfolioCoordinator} />
+      )}
+
+      {statusMap && (
+        <AgentCommandCentre
+          portfolioCoordinator={statusMap.portfolioCoordinator}
+          dreaming={statusMap.dreaming}
+          sites={statusMap.sites}
+        />
       )}
 
       <main className="mx-auto max-w-6xl px-6 py-10">
@@ -263,7 +287,8 @@ export default function Home() {
             <SiteCard
               key={site.id}
               site={site}
-              status={statusMap?.[site.id]}
+              status={statusMap?.sites[site.id]}
+              reviewQueue={statusMap?.reviewQueue ?? []}
             />
           ))}
         </div>
