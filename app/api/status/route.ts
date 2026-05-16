@@ -3,10 +3,13 @@ import { createClient } from '@supabase/supabase-js';
 import fs from 'fs';
 import path from 'path';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-);
+let _supabase: ReturnType<typeof createClient> | null = null;
+function getSupabase() {
+  return (_supabase ??= createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  ));
+}
 
 const VERCEL_TOKEN   = process.env.VERCEL_TOKEN;
 const VERCEL_TEAM_ID = 'team_2fG7WKNEcvEFVhRPxREhEgs8';
@@ -418,7 +421,7 @@ async function fetchSubagentStatus(siteUrl: string, siteId: string): Promise<Sub
   const local = readLocalJson<SubagentStatus>(`data/sites/${siteId}/subagent-status.json`);
   if (local) return local;
   // 2. Supabase (written by pipeline, readable on Vercel)
-  const { data: row } = await supabase
+  const { data: row } = await getSupabase()
     .from('pipeline_site_data')
     .select('subagent_status')
     .eq('site_id', siteId)
@@ -440,7 +443,7 @@ async function fetchGraderVerdict(siteUrl: string, siteId: string): Promise<Grad
   const local = readLocalJson<GraderVerdict>(`data/sites/${siteId}/grader-verdict.json`);
   if (local) return local;
   // 2. Supabase
-  const { data: row } = await supabase
+  const { data: row } = await getSupabase()
     .from('pipeline_site_data')
     .select('grader_verdict')
     .eq('site_id', siteId)
