@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import fs from 'fs';
+import path from 'path';
 
 const VERCEL_TOKEN   = process.env.VERCEL_TOKEN;
 const VERCEL_TEAM_ID = 'team_2fG7WKNEcvEFVhRPxREhEgs8';
@@ -266,6 +268,16 @@ async function safeFetch(url: string, timeoutMs = 4000): Promise<Record<string, 
   } catch { return null; }
 }
 
+function readLocalJson<T>(filePath: string): T | null {
+  try {
+    const full = path.join(process.cwd(), filePath);
+    if (!fs.existsSync(full)) return null;
+    return JSON.parse(fs.readFileSync(full, 'utf-8')) as T;
+  } catch {
+    return null;
+  }
+}
+
 async function checkUptime(url: string): Promise<boolean> {
   try {
     const res = await fetch(url, { method: 'HEAD', signal: AbortSignal.timeout(5000) });
@@ -395,7 +407,11 @@ const SITE_RUBRIC_NAMES: Record<string, string> = {
   aiviralvideoprompts:     'Conversion rubric',
 };
 
-async function fetchSubagentStatus(siteUrl: string): Promise<SubagentStatus | null> {
+async function fetchSubagentStatus(siteUrl: string, siteId: string): Promise<SubagentStatus | null> {
+  // Try local data directory first (written by npm run pipeline)
+  const local = readLocalJson<SubagentStatus>(`data/sites/${siteId}/subagent-status.json`);
+  if (local) return local;
+  // Fall back to network fetch (for external sites)
   const data = await safeFetch(`${siteUrl}/data/agent-summaries/subagent-status.json`);
   if (!data) return null;
   return {
@@ -407,6 +423,10 @@ async function fetchSubagentStatus(siteUrl: string): Promise<SubagentStatus | nu
 }
 
 async function fetchGraderVerdict(siteUrl: string, siteId: string): Promise<GraderVerdict | null> {
+  // Try local data directory first
+  const local = readLocalJson<GraderVerdict>(`data/sites/${siteId}/grader-verdict.json`);
+  if (local) return local;
+  // Fall back to network fetch
   const data = await safeFetch(`${siteUrl}/data/agent-summaries/grader-verdict.json`);
   if (!data) return null;
   return {
@@ -419,6 +439,10 @@ async function fetchGraderVerdict(siteUrl: string, siteId: string): Promise<Grad
 }
 
 async function fetchDreamingStatus(): Promise<DreamingStatus | null> {
+  // Try local first
+  const local = readLocalJson<DreamingStatus>('data/dreaming-status.json');
+  if (local) return local;
+  // Fall back to network
   const data = await safeFetch('https://didianolue.co.uk/data/dreaming-status.json');
   if (!data) return null;
   return {
@@ -447,21 +471,25 @@ async function fetchPortfolioCoordinator(): Promise<PortfolioCoordinator | null>
 }
 
 async function fetchReviewQueue(): Promise<DraftItem[]> {
-  const results = await Promise.all(
-    SITES.map(async (site): Promise<DraftItem[]> => {
-      const data = await safeFetch(`${site.url}/data/agent-summaries/review-queue.json`);
-      if (!data || !Array.isArray(data.drafts)) return [];
-      return (data.drafts as Array<Record<string, unknown>>).map(d => ({
-        siteId:          site.id,
-        platform:        (d.platform        as string) ?? 'Unknown',
-        graderVerdict:   (d.graderVerdict   as DraftItem['graderVerdict']) ?? 'fail',
-        retryCount:      typeof d.retryCount === 'number' ? d.retryCount : 0,
-        failedCriterion: (d.failedCriterion as string) ?? null,
-        contentSnippet:  (d.contentSnippet  as string) ?? null,
-      }));
-    })
-  );
-  return results.flat();
+  const siteIds = ['didianolue', 'masteryourcareerpath', 'theconcurrentcontractor', 'oldoaktown', 'aiviralvideoprompts'];
+  const allItems: DraftItem[] = [];
+
+  for (const siteId of siteIds) {
+    // Try local first
+    const local = readLocalJson<{ drafts: DraftItem[] }>(`data/sites/${siteId}/review-queue.json`);
+    if (local?.drafts) {
+      allItems.push(...local.drafts);
+      continue;
+    }
+    // Fall back to network
+    const site = SITES.find(s => s.id === siteId);
+    if (!site) continue;
+    const data = await safeFetch(`${site.url}/data/agent-summaries/review-queue.json`);
+    if (!data || !Array.isArray(data.drafts)) continue;
+    allItems.push(...(data.drafts as DraftItem[]));
+  }
+
+  return allItems;
 }
 
 function computeReadiness(
@@ -574,7 +602,7 @@ export async function GET() {
         fetchAllAgentSummaries(site.url, site.id),
         fetchCoordinator(site.url, site),
         fetchRevenueConfig(site.url),
-        fetchSubagentStatus(site.url),
+        fetchSubagentStatus(site.url, site.id),
         fetchGraderVerdict(site.url, site.id),
       ]);
 
