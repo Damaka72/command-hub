@@ -1,6 +1,15 @@
 import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 import fs from 'fs';
 import path from 'path';
+
+let _supabase: ReturnType<typeof createClient> | null = null;
+function getSupabase() {
+  return (_supabase ??= createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  ));
+}
 
 const VERCEL_TOKEN   = process.env.VERCEL_TOKEN;
 const VERCEL_TEAM_ID = 'team_2fG7WKNEcvEFVhRPxREhEgs8';
@@ -408,10 +417,18 @@ const SITE_RUBRIC_NAMES: Record<string, string> = {
 };
 
 async function fetchSubagentStatus(siteUrl: string, siteId: string): Promise<SubagentStatus | null> {
-  // Try local data directory first (written by npm run pipeline)
+  // 1. Local file (written by npm run pipeline on this machine)
   const local = readLocalJson<SubagentStatus>(`data/sites/${siteId}/subagent-status.json`);
   if (local) return local;
-  // Fall back to network fetch (for external sites)
+  // 2. Supabase (written by pipeline, readable on Vercel)
+  const { data: rawRow0 } = await getSupabase()
+    .from('pipeline_site_data')
+    .select('subagent_status')
+    .eq('site_id', siteId)
+    .single();
+  const row0 = rawRow0 as unknown as { subagent_status: unknown } | null;
+  if (row0?.subagent_status) return row0.subagent_status as SubagentStatus;
+  // 3. Network fetch (legacy fallback)
   const data = await safeFetch(`${siteUrl}/data/agent-summaries/subagent-status.json`);
   if (!data) return null;
   return {
@@ -423,10 +440,18 @@ async function fetchSubagentStatus(siteUrl: string, siteId: string): Promise<Sub
 }
 
 async function fetchGraderVerdict(siteUrl: string, siteId: string): Promise<GraderVerdict | null> {
-  // Try local data directory first
+  // 1. Local file
   const local = readLocalJson<GraderVerdict>(`data/sites/${siteId}/grader-verdict.json`);
   if (local) return local;
-  // Fall back to network fetch
+  // 2. Supabase
+  const { data: rawRow1 } = await getSupabase()
+    .from('pipeline_site_data')
+    .select('grader_verdict')
+    .eq('site_id', siteId)
+    .single();
+  const row1 = rawRow1 as unknown as { grader_verdict: unknown } | null;
+  if (row1?.grader_verdict) return row1.grader_verdict as GraderVerdict;
+  // 3. Network fetch
   const data = await safeFetch(`${siteUrl}/data/agent-summaries/grader-verdict.json`);
   if (!data) return null;
   return {
@@ -439,10 +464,10 @@ async function fetchGraderVerdict(siteUrl: string, siteId: string): Promise<Grad
 }
 
 async function fetchDreamingStatus(): Promise<DreamingStatus | null> {
-  // Try local first
+  // 1. Local file
   const local = readLocalJson<DreamingStatus>('data/dreaming-status.json');
   if (local) return local;
-  // Fall back to network
+  // 2. Network fetch
   const data = await safeFetch('https://didianolue.co.uk/data/dreaming-status.json');
   if (!data) return null;
   return {
@@ -455,17 +480,19 @@ async function fetchDreamingStatus(): Promise<DreamingStatus | null> {
 }
 
 async function fetchPortfolioCoordinator(): Promise<PortfolioCoordinator | null> {
-  const data = await safeFetch('https://didianolue.co.uk/data/content-coordinator.json');
-  if (!data) return null;
-  const approved = typeof data.approved === 'number' ? data.approved : 0;
-  const pending  = typeof data.pending  === 'number' ? data.pending  : 0;
-  const failed   = typeof data.failed   === 'number' ? data.failed   : 0;
+  // Read from local file first, then fall back to the live site
+  const local = readLocalJson<{ weeklyTheme?: string; weekCommencing?: string; campaignObjective?: string; setAt?: string }>('data/content-coordinator.json');
+  const src = local ?? await safeFetch('https://didianolue.co.uk/data/content-coordinator.json');
+  if (!src) return null;
+  const approved = typeof (src as Record<string, unknown>).approved === 'number' ? (src as Record<string, unknown>).approved as number : 0;
+  const pending  = typeof (src as Record<string, unknown>).pending  === 'number' ? (src as Record<string, unknown>).pending  as number : 0;
+  const failed   = typeof (src as Record<string, unknown>).failed   === 'number' ? (src as Record<string, unknown>).failed   as number : 0;
   return {
-    lastRun:           (data.setAt             as string) ?? null,
+    lastRun:           ((src as Record<string, unknown>).setAt          as string) ?? null,
     sourceFile:        'content-coordinator.json',
-    weeklyTheme:       (data.weeklyTheme        as string) ?? null,
-    weekCommencing:    (data.weekCommencing     as string) ?? null,
-    campaignObjective: (data.campaignObjective  as string) ?? null,
+    weeklyTheme:       ((src as Record<string, unknown>).weeklyTheme    as string) ?? null,
+    weekCommencing:    ((src as Record<string, unknown>).weekCommencing as string) ?? null,
+    campaignObjective: ((src as Record<string, unknown>).campaignObjective as string) ?? null,
     batchStatus: { approved, pending, failed, readyForReview: pending === 0 && approved > 0 },
   };
 }
@@ -475,13 +502,21 @@ async function fetchReviewQueue(): Promise<DraftItem[]> {
   const allItems: DraftItem[] = [];
 
   for (const siteId of siteIds) {
-    // Try local first
+    // 1. Local file
     const local = readLocalJson<{ drafts: DraftItem[] }>(`data/sites/${siteId}/review-queue.json`);
-    if (local?.drafts) {
-      allItems.push(...local.drafts);
-      continue;
+    if (local?.drafts) { allItems.push(...local.drafts); continue; }
+    // 2. Supabase
+    const { data: rawRow2 } = await getSupabase()
+      .from('pipeline_site_data')
+      .select('review_queue')
+      .eq('site_id', siteId)
+      .single();
+    const row2 = rawRow2 as unknown as { review_queue: unknown } | null;
+    if (row2?.review_queue) {
+      const q = row2.review_queue as { drafts?: DraftItem[] };
+      if (q.drafts?.length) { allItems.push(...q.drafts); continue; }
     }
-    // Fall back to network
+    // 3. Network fetch (legacy)
     const site = SITES.find(s => s.id === siteId);
     if (!site) continue;
     const data = await safeFetch(`${site.url}/data/agent-summaries/review-queue.json`);

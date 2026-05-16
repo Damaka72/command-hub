@@ -1,10 +1,32 @@
 import Anthropic from '@anthropic-ai/sdk';
+import { createClient } from '@supabase/supabase-js';
 import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
 
 // Load .env.local for API keys when running outside Next.js
 dotenv.config({ path: path.join(process.cwd(), '.env.local') });
+
+// ── Supabase client ───────────────────────────────────────────────────────────
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+export const supabase = createClient(supabaseUrl, supabaseKey);
+
+export async function pushSiteDataToSupabase(
+  siteId: string,
+  subagentStatus: unknown,
+  graderVerdict: unknown,
+  reviewQueue: unknown,
+): Promise<void> {
+  await supabase.from('pipeline_site_data').upsert({
+    site_id:         siteId,
+    subagent_status: subagentStatus,
+    grader_verdict:  graderVerdict,
+    review_queue:    reviewQueue,
+    updated_at:      new Date().toISOString(),
+  }, { onConflict: 'site_id' });
+}
 
 // ── Claude client ─────────────────────────────────────────────────────────────
 
