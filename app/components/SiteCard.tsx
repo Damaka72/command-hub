@@ -320,12 +320,12 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
         <div className="border-t border-zinc-100 dark:border-zinc-800">
 
           {/* Tab bar */}
-          <div className="flex overflow-x-auto border-b border-zinc-100 scrollbar-none dark:border-zinc-800">
+          <div className="flex flex-wrap border-b border-zinc-100 dark:border-zinc-800">
             {TABS.map((tab, i) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(i)}
-                className={`flex-shrink-0 px-3 py-2.5 text-xs font-medium transition-colors ${
+                className={`px-3 py-2.5 text-xs font-medium transition-colors ${
                   activeTab === i
                     ? 'border-b-2 border-zinc-900 text-zinc-900 dark:border-zinc-100 dark:text-zinc-100'
                     : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300'
