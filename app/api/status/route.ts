@@ -421,12 +421,13 @@ async function fetchSubagentStatus(siteUrl: string, siteId: string): Promise<Sub
   const local = readLocalJson<SubagentStatus>(`data/sites/${siteId}/subagent-status.json`);
   if (local) return local;
   // 2. Supabase (written by pipeline, readable on Vercel)
-  const { data: row } = await getSupabase()
+  const { data: rawRow0 } = await getSupabase()
     .from('pipeline_site_data')
     .select('subagent_status')
     .eq('site_id', siteId)
     .single();
-  if (row?.subagent_status) return row.subagent_status as SubagentStatus;
+  const row0 = rawRow0 as unknown as { subagent_status: unknown } | null;
+  if (row0?.subagent_status) return row0.subagent_status as SubagentStatus;
   // 3. Network fetch (legacy fallback)
   const data = await safeFetch(`${siteUrl}/data/agent-summaries/subagent-status.json`);
   if (!data) return null;
@@ -443,12 +444,13 @@ async function fetchGraderVerdict(siteUrl: string, siteId: string): Promise<Grad
   const local = readLocalJson<GraderVerdict>(`data/sites/${siteId}/grader-verdict.json`);
   if (local) return local;
   // 2. Supabase
-  const { data: row } = await getSupabase()
+  const { data: rawRow1 } = await getSupabase()
     .from('pipeline_site_data')
     .select('grader_verdict')
     .eq('site_id', siteId)
     .single();
-  if (row?.grader_verdict) return row.grader_verdict as GraderVerdict;
+  const row1 = rawRow1 as unknown as { grader_verdict: unknown } | null;
+  if (row1?.grader_verdict) return row1.grader_verdict as GraderVerdict;
   // 3. Network fetch
   const data = await safeFetch(`${siteUrl}/data/agent-summaries/grader-verdict.json`);
   if (!data) return null;
@@ -504,13 +506,14 @@ async function fetchReviewQueue(): Promise<DraftItem[]> {
     const local = readLocalJson<{ drafts: DraftItem[] }>(`data/sites/${siteId}/review-queue.json`);
     if (local?.drafts) { allItems.push(...local.drafts); continue; }
     // 2. Supabase
-    const { data: row } = await supabase
+    const { data: rawRow2 } = await getSupabase()
       .from('pipeline_site_data')
       .select('review_queue')
       .eq('site_id', siteId)
       .single();
-    if (row?.review_queue) {
-      const q = row.review_queue as { drafts?: DraftItem[] };
+    const row2 = rawRow2 as unknown as { review_queue: unknown } | null;
+    if (row2?.review_queue) {
+      const q = row2.review_queue as { drafts?: DraftItem[] };
       if (q.drafts?.length) { allItems.push(...q.drafts); continue; }
     }
     // 3. Network fetch (legacy)
