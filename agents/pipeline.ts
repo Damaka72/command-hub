@@ -16,7 +16,7 @@ import { ReviewQueueFile, ReviewItem, PipelineSession } from './types.js';
 import { runCoordinator } from './coordinator.js';
 import { runSubagents } from './subagents.js';
 import { runGraders } from './grader.js';
-import { writeJson, sitePath, sessionPath, log, logStep, logOk, logError, now } from './utils.js';
+import { writeJson, readJson, sitePath, sessionPath, log, logStep, logOk, logError, now, pushSiteDataToSupabase } from './utils.js';
 
 async function run(): Promise<void> {
   const runId = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
@@ -63,6 +63,14 @@ async function run(): Promise<void> {
     };
 
     writeJson(sitePath(result.siteId, 'review-queue.json'), queue);
+
+    // Push to Supabase so the live dashboard can read it
+    let subagentStatus = null;
+    let graderVerdict  = null;
+    try { subagentStatus = readJson(sitePath(result.siteId, 'subagent-status.json')); } catch { /* not written yet */ }
+    try { graderVerdict  = readJson(sitePath(result.siteId, 'grader-verdict.json'));  } catch { /* not written yet */ }
+    await pushSiteDataToSupabase(result.siteId, subagentStatus, graderVerdict, queue);
+
     logOk(`${result.siteId} — review-queue.json written`);
   }
 
