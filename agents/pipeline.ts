@@ -21,21 +21,28 @@ import { writeJson, readJson, sitePath, sessionPath, log, logStep, logOk, logErr
 async function run(): Promise<void> {
   const runId = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 
+  // Parse optional --site flag: npm run pipeline -- --site masteryourcareerpath
+  const siteArg = process.argv.indexOf('--site');
+  const targetSites = siteArg !== -1 ? process.argv.slice(siteArg + 1).filter(a => !a.startsWith('--')) : undefined;
+
   log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   log('  Command Hub — Content Pipeline');
   log(`  Run: ${runId}`);
+  if (targetSites?.length) log(`  Sites: ${targetSites.join(', ')}`);
   log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
+  const siteCount = targetSites?.length ?? 5;
+
   // ── Step 1: Lead coordinator ─────────────────────────────────────────────────
-  logStep('▶', 'Lead coordinator generating 5 site briefs…');
-  const { coordinator, briefs } = await runCoordinator();
+  logStep('▶', `Lead coordinator generating ${siteCount} site brief${siteCount === 1 ? '' : 's'}…`);
+  const { coordinator, briefs } = await runCoordinator(targetSites);
   log(`\n  Theme: "${coordinator.weeklyTheme}"`);
 
   // ── Step 2: Five subagents ───────────────────────────────────────────────────
-  logStep('▶', 'Running 5 subagents in parallel…');
+  logStep('▶', 'Running subagents in parallel…');
   const drafts = await runSubagents(briefs);
 
-  // ── Step 3: Five graders ─────────────────────────────────────────────────────
+  // ── Step 3: Graders ──────────────────────────────────────────────────────────
   logStep('▶', 'Running graders…');
   const graderResults = await runGraders(drafts, briefs);
 
@@ -88,7 +95,7 @@ async function run(): Promise<void> {
 
   // ── Summary ──────────────────────────────────────────────────────────────────
   log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  log(`  Batch complete — ${approved.length}/5 approved · ${failed.length} failed`);
+  log(`  Batch complete — ${approved.length}/${siteCount} approved · ${failed.length} failed`);
   log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
   if (approved.length > 0) {

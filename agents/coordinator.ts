@@ -46,7 +46,7 @@ Return a JSON object with these exact fields:
   return brief;
 }
 
-export async function runCoordinator(): Promise<{
+export async function runCoordinator(siteIds?: string[]): Promise<{
   coordinator: CoordinatorData;
   briefs: SiteBrief[];
 }> {
@@ -58,9 +58,17 @@ export async function runCoordinator(): Promise<{
     );
   }
 
+  const sites = siteIds
+    ? SITE_CONFIGS.filter(s => siteIds.includes(s.id))
+    : SITE_CONFIGS;
+
+  if (siteIds && sites.length === 0) {
+    throw new Error(`No matching site configs for: ${siteIds.join(', ')}`);
+  }
+
   const briefs: SiteBrief[] = [];
 
-  for (const site of SITE_CONFIGS) {
+  for (const site of sites) {
     try {
       const brief = await generateBrief(coordinator, site.id);
       briefs.push(brief);
