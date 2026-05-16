@@ -3,7 +3,8 @@
 import { useState } from "react";
 import TaskList from "./TaskList";
 import RevenueFlow from "./RevenueFlow";
-import type { SiteDetail } from "../api/status/route";
+import SocialFeed from "./SocialFeed";
+import type { SiteDetail, DraftItem } from "../api/status/route";
 
 function getBrandTextOnColor(hex: string): string {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -60,7 +61,65 @@ const DEPLOY_STYLES: Record<string, { dot: string; label: string }> = {
   ERROR:    { dot: 'bg-red-400', label: 'ERROR' },
 };
 
-const TABS = ['Revenue', 'Agents', 'Outstanding', 'Marketing'] as const;
+const SUBAGENT_PILL: Record<string, string> = {
+  idle:      'bg-zinc-200 text-zinc-600 dark:bg-zinc-700 dark:text-zinc-400',
+  running:   'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 animate-pulse',
+  complete:  'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
+  error:     'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
+  never_run: 'bg-zinc-100 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500',
+};
+
+const GRADER_PILL: Record<string, string> = {
+  pass:  'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
+  fail:  'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
+  retry: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
+};
+
+const SITE_RUBRIC: Record<string, { pass: string[]; fail: string }> = {
+  didianolue: {
+    pass: [
+      'Communicates full-lifecycle procurement authority',
+      'Speaks to senior commercial or public-sector audiences',
+      'Contains a clear next step (contact, consult, connect)',
+    ],
+    fail: 'Fails if generic — no specific domain expertise visible',
+  },
+  masteryourcareerpath: {
+    pass: [
+      'Reinforces or references PRIME or OPERATE frameworks',
+      'Speaks to professionals seeking career transformation',
+      'Includes a path to Skool community, course, or cohort',
+    ],
+    fail: 'Fails if frameworks are absent or unnamed',
+  },
+  theconcurrentcontractor: {
+    pass: [
+      'Written through the lens of a practising UK IT contractor',
+      'Addresses IR35, rate strategy, or market intel',
+      'Practical and peer-to-peer in tone — not advisory',
+    ],
+    fail: 'Fails if it reads as generic career or recruitment content',
+  },
+  oldoaktown: {
+    pass: [
+      'Every factual claim is verifiable — no invented businesses or events',
+      'Rooted in Old Oak Common or Park Royal regeneration area',
+      'Hyperlocal voice — community-first, not corporate',
+    ],
+    fail: 'Fails on any fabricated local detail — zero tolerance',
+  },
+  aiviralvideoprompts: {
+    pass: [
+      'Contains a clear conversion action (link, CTA, offer)',
+      'Hook lands in the first line — no warm-up sentences',
+      'Addresses a specific creator pain point, not generic AI hype',
+      'Platform-appropriate length and format',
+    ],
+    fail: 'Fails if no specific prompt example is included',
+  },
+};
+
+const TABS = ['Revenue', 'Agents', 'Pipeline', 'Outstanding', 'Marketing', 'Posts'] as const;
 
 function fmt(n: number | null | undefined, prefix = ''): string {
   return n != null ? `${prefix}${n.toLocaleString()}` : '—';
@@ -88,10 +147,13 @@ function StatusBadge({ status }: { status: string }) {
   return <span className="text-xs font-medium text-emerald-500">Active</span>;
 }
 
-export default function SiteCard({ site, status }: { site: Site; status?: SiteDetail }) {
+export default function SiteCard({ site, status, reviewQueue = [] }: { site: Site; status?: SiteDetail; reviewQueue?: DraftItem[] }) {
   const [expanded,      setExpanded]      = useState(false);
   const [activeTab,     setActiveTab]     = useState(0);
   const [showReadiness, setShowReadiness] = useState(false);
+  const [showRubric,    setShowRubric]    = useState(false);
+
+  const siteReviewQueue = reviewQueue.filter(item => item.siteId === site.id);
 
   const deploy         = status?.deploy ?? null;
   const deployStyle    = deploy ? (DEPLOY_STYLES[deploy.state] ?? { dot: 'bg-zinc-400', label: deploy.state }) : null;
@@ -226,8 +288,8 @@ export default function SiteCard({ site, status }: { site: Site; status?: SiteDe
           )}
           {site.socialAgent && (
             <a href={site.socialAgent} target="_blank" rel="noopener noreferrer"
-              className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 transition-colors hover:border-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-600 dark:text-zinc-300 dark:hover:border-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100">
-              Social
+              className="rounded-lg border border-zinc-100 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-500 dark:border-zinc-800 dark:text-zinc-600 dark:hover:border-zinc-700 dark:hover:bg-zinc-800/50 dark:hover:text-zinc-500">
+              Legacy Social Agent
             </a>
           )}
           {status && (
@@ -326,29 +388,147 @@ export default function SiteCard({ site, status }: { site: Site; status?: SiteDe
 
             {/* Tab 1 — Agent Activity */}
             {activeTab === 1 && (
-              <div className="flex flex-col gap-2">
-                {agentSummaries.length === 0 ? (
-                  <p className="text-xs text-zinc-400">No agent data available</p>
-                ) : agentSummaries.map(agent => (
-                  <div key={agent.name} className="flex items-center justify-between rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800">
-                    <div>
-                      <p className="text-xs font-medium text-zinc-700 dark:text-zinc-300">{agent.displayName}</p>
-                      {agent.lastAction && (
-                        <p className="text-xs text-zinc-400 dark:text-zinc-500">{agent.lastAction}</p>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      {agent.ago && <span className="text-xs text-zinc-400">{agent.ago}</span>}
-                      <StatusBadge status={agent.status} />
-                    </div>
+              <div className="flex flex-col gap-4">
+
+                {/* Pipeline Agents */}
+                {(status.subagentStatus || status.graderVerdict) && (
+                  <div className="flex flex-col gap-2">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Pipeline Agents</p>
+                    {status.subagentStatus && (
+                      <div className="flex items-center justify-between rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800">
+                        <p className="text-xs font-medium text-zinc-700 dark:text-zinc-300">Subagent</p>
+                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${SUBAGENT_PILL[status.subagentStatus.status] ?? SUBAGENT_PILL.never_run}`}>
+                          {status.subagentStatus.status.replace('_', ' ')}
+                        </span>
+                      </div>
+                    )}
+                    {status.graderVerdict && (
+                      <div className="flex items-center justify-between rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800">
+                        <p className="text-xs font-medium text-zinc-700 dark:text-zinc-300">Grader</p>
+                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                          status.graderVerdict.verdict !== 'never_run'
+                            ? (GRADER_PILL[status.graderVerdict.verdict] ?? '')
+                            : 'bg-zinc-100 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500'
+                        }`}>
+                          {status.graderVerdict.verdict.replace('_', ' ')}
+                        </span>
+                      </div>
+                    )}
                   </div>
-                ))}
+                )}
+
+                {/* Legacy Agents */}
+                <div className="flex flex-col gap-2">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Legacy Agents</p>
+                  {agentSummaries.length === 0 ? (
+                    <p className="text-xs text-zinc-400">No agent data available</p>
+                  ) : agentSummaries.map(agent => (
+                    <div key={agent.name} className="flex items-center justify-between rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800">
+                      <div>
+                        <p className="text-xs font-medium text-zinc-700 dark:text-zinc-300">{agent.displayName}</p>
+                        {agent.lastAction && (
+                          <p className="text-xs text-zinc-400 dark:text-zinc-500">{agent.lastAction}</p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {agent.ago && <span className="text-xs text-zinc-400">{agent.ago}</span>}
+                        <StatusBadge status={agent.status} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
               </div>
             )}
 
-            {/* Tab 2 — Outstanding */}
+            {/* Tab 2 — Pipeline */}
             {activeTab === 2 && (
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-4">
+
+                {/* Section 1 — Subagent */}
+                <div className="flex flex-col gap-2">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Subagent</p>
+                  {status.subagentStatus ? (
+                    <>
+                      <span className={`self-start rounded-full px-2.5 py-0.5 text-xs font-medium ${SUBAGENT_PILL[status.subagentStatus.status] ?? SUBAGENT_PILL.never_run}`}>
+                        {status.subagentStatus.status.replace('_', ' ')}
+                      </span>
+                      {status.subagentStatus.briefGenerated && status.subagentStatus.briefSummary ? (
+                        <div className="rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800">
+                          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Brief this week</p>
+                          <p className="text-xs text-zinc-600 dark:text-zinc-300">{status.subagentStatus.briefSummary}</p>
+                        </div>
+                      ) : (
+                        <p className="text-xs text-zinc-400 dark:text-zinc-500">No brief generated yet — lead coordinator has not run</p>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-xs text-zinc-400 dark:text-zinc-500">No brief generated yet — lead coordinator has not run</p>
+                  )}
+                </div>
+
+                {/* Section 2 — Grader */}
+                <div className="flex flex-col gap-2">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+                    Outcomes Grader{status.graderVerdict ? ` · ${status.graderVerdict.rubricName}` : ''}
+                  </p>
+                  {status.graderVerdict && status.graderVerdict.verdict !== 'never_run' ? (
+                    <>
+                      <span className={`self-start rounded-full px-2.5 py-0.5 text-xs font-medium ${GRADER_PILL[status.graderVerdict.verdict] ?? ''}`}>
+                        {status.graderVerdict.verdict}
+                      </span>
+                      {status.graderVerdict.retryCount > 0 && (
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                          Retried {status.graderVerdict.retryCount} time(s)
+                        </p>
+                      )}
+                      {status.graderVerdict.failedCriterion && (
+                        <div className="rounded-lg bg-red-50 px-3 py-2 dark:bg-red-900/20">
+                          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-red-500 dark:text-red-400">Failed Criterion</p>
+                          <p className="text-xs text-red-700 dark:text-red-300">{status.graderVerdict.failedCriterion}</p>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-xs text-zinc-400 dark:text-zinc-500">Grader has not run yet</p>
+                  )}
+                </div>
+
+                {/* Section 3 — Rubric criteria (collapsible) */}
+                <div className="border-t border-zinc-100 pt-3 dark:border-zinc-800">
+                  <button
+                    onClick={() => setShowRubric(r => !r)}
+                    className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-400"
+                  >
+                    Rubric {showRubric ? '▲' : '▼'}
+                  </button>
+                  {showRubric && (
+                    <div className="mt-2 flex flex-col gap-1">
+                      {(SITE_RUBRIC[site.id]?.pass ?? []).map((criterion, i) => (
+                        <div key={i} className="flex items-start gap-2 text-xs">
+                          <span className="mt-0.5 flex-shrink-0 font-medium text-emerald-500">✓</span>
+                          <span className="text-zinc-600 dark:text-zinc-400">{criterion}</span>
+                        </div>
+                      ))}
+                      {SITE_RUBRIC[site.id]?.fail && (
+                        <div className="flex items-start gap-2 text-xs">
+                          <span className="mt-0.5 flex-shrink-0 font-medium text-red-500">✗</span>
+                          <span className="text-zinc-600 dark:text-zinc-400">{SITE_RUBRIC[site.id].fail}</span>
+                        </div>
+                      )}
+                      {!SITE_RUBRIC[site.id] && (
+                        <p className="text-xs text-zinc-400 dark:text-zinc-500">No rubric defined for this site</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+              </div>
+            )}
+
+            {/* Tab 3 — Outstanding */}
+            {activeTab === 3 && (
+              <div id="review-queue" className="flex flex-col gap-3">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="rounded-lg bg-zinc-50 px-3 py-3 dark:bg-zinc-800">
                     <p className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Overdue Follow-ups</p>
@@ -368,11 +548,49 @@ export default function SiteCard({ site, status }: { site: Site; status?: SiteDe
                     Nothing outstanding — run agents to populate
                   </p>
                 )}
+
+                {/* Review Queue */}
+                <div className="flex flex-col gap-2 border-t border-zinc-100 pt-3 dark:border-zinc-800">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Review Queue</p>
+                  {siteReviewQueue.length === 0 ? (
+                    <p className="text-xs text-zinc-400 dark:text-zinc-500">Nothing awaiting review</p>
+                  ) : siteReviewQueue.map((item, i) => (
+                    <div key={i} className="flex flex-col gap-1.5 rounded-lg border border-zinc-100 p-3 dark:border-zinc-800">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="rounded-full bg-zinc-200 px-2 py-0.5 text-[10px] font-medium text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">
+                          {item.platform}
+                        </span>
+                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${GRADER_PILL[item.graderVerdict] ?? ''}`}>
+                          {item.graderVerdict}
+                        </span>
+                        {item.retryCount > 0 && (
+                          <span className="text-xs text-zinc-500 dark:text-zinc-400">Retry ×{item.retryCount}</span>
+                        )}
+                      </div>
+                      {item.failedCriterion && (
+                        <div className="rounded-md bg-red-50 px-2 py-1.5 dark:bg-red-900/20">
+                          <p className="text-xs text-red-700 dark:text-red-300">
+                            <span className="font-medium">Failed criterion: </span>&ldquo;{item.failedCriterion}&rdquo;
+                          </p>
+                        </div>
+                      )}
+                      {item.contentSnippet && (
+                        <div className="rounded-md bg-zinc-50 px-2 py-1.5 dark:bg-zinc-800">
+                          <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                            <span className="font-medium">Preview: </span>
+                            &ldquo;{item.contentSnippet.slice(0, 80)}{item.contentSnippet.length > 80 ? '…' : ''}&rdquo;
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
               </div>
             )}
 
-            {/* Tab 3 — Marketing Assets */}
-            {activeTab === 3 && (
+            {/* Tab 4 — Marketing Assets */}
+            {activeTab === 4 && (
               <div className="flex flex-col gap-3">
                 {coordinator ? (
                   <>
@@ -476,6 +694,11 @@ export default function SiteCard({ site, status }: { site: Site; status?: SiteDe
                   </div>
                 )}
               </div>
+            )}
+
+            {/* Tab 5 — Posts (live from Blotato) */}
+            {activeTab === 5 && (
+              <SocialFeed siteId={site.id} />
             )}
 
           </div>

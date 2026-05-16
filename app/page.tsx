@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import SiteCard from "./components/SiteCard";
-import type { SiteDetail, AgentSummary } from "./api/status/route";
+import DailyBriefing from "./components/DailyBriefing";
+import AgentCommandCentre from "./components/AgentCommandCentre";
+import type { SiteDetail, AgentSummary, StatusResponse, PortfolioCoordinator } from "./api/status/route";
 
 const sites = [
   {
@@ -22,7 +24,7 @@ const sites = [
         platform: 'Instagram',
         schedule: '1 post/day',
         contentPillars: ['Local news', 'Business spotlights', 'Regeneration updates', 'Community events', 'Planning & development'],
-        nextAction: 'Schedule first week of posts in Blotato',
+        nextAction: 'Continue weekly scheduling in Blotato',
       },
       beehiiv: {
         status: 'in_progress' as const,
@@ -42,6 +44,22 @@ const sites = [
     socialAgent: "https://www.theconcurrentcontractor.com/social-agent",
     brandColor: "#FFD700",
     initials: "TC",
+    marketingPlan: {
+      blotato: {
+        status: 'active' as const,
+        statusLabel: 'Active',
+        platform: 'Instagram + YouTube',
+        schedule: '1 post/day',
+        contentPillars: ['IR35 guidance', 'Contracting tips', 'Community wins', 'TCC Command Centre', 'Career transitions'],
+        nextAction: 'Continue weekly scheduling in Blotato',
+      },
+      beehiiv: {
+        status: 'not_started' as const,
+        statusLabel: 'Not set up',
+        cadence: 'Weekly (Constant Contact)',
+        nextAction: 'Complete Constant Contact OAuth setup — flip DEMO_MODE=false',
+      },
+    },
   },
   {
     id: "masteryourcareerpath",
@@ -60,7 +78,7 @@ const sites = [
         platform: 'Instagram',
         schedule: '1 post/day',
         contentPillars: ['Career strategy', 'IR35 & contracting', 'PRIME framework', 'Community wins', 'LinkedIn growth'],
-        nextAction: 'Schedule first week of posts in Blotato',
+        nextAction: 'Continue weekly scheduling in Blotato',
       },
       beehiiv: {
         status: 'in_progress' as const,
@@ -84,10 +102,10 @@ const sites = [
       blotato: {
         status: 'active' as const,
         statusLabel: 'Active',
-        platform: 'Instagram',
+        platform: 'Instagram + TikTok + Pinterest + YouTube',
         schedule: '1 post/day',
         contentPillars: ['Prompt demos', 'Before/after results', 'Quick tutorials', 'Gumroad product spotlights', 'Creator tips'],
-        nextAction: 'Schedule first week of posts in Blotato',
+        nextAction: 'Continue weekly scheduling in Blotato',
       },
       beehiiv: {
         status: 'in_progress' as const,
@@ -107,6 +125,22 @@ const sites = [
     socialAgent: "https://didianolue.co.uk/social-agent",
     brandColor: "#4A7FC1",
     initials: "DA",
+    marketingPlan: {
+      blotato: {
+        status: 'active' as const,
+        statusLabel: 'Active',
+        platform: 'Instagram + Twitter/X + YouTube',
+        schedule: '3x/week',
+        contentPillars: ['Procurement insights', 'Contract wins', 'Commercial leadership', 'IR35 & consulting', 'Behind the brand'],
+        nextAction: 'Continue weekly scheduling in Blotato',
+      },
+      beehiiv: {
+        status: 'not_started' as const,
+        statusLabel: 'Not set up',
+        cadence: 'Monthly newsletter (TBC)',
+        nextAction: 'Choose email provider and set up newsletter',
+      },
+    },
   },
 ];
 
@@ -116,7 +150,7 @@ function countActiveAgents(summaries: AgentSummary[]): number {
   return summaries.filter(a => a.status !== 'never_run').length;
 }
 
-function PortfolioBar({ statusMap }: { statusMap: StatusMap }) {
+function PortfolioBar({ statusMap, portfolioCoordinator }: { statusMap: StatusMap; portfolioCoordinator: PortfolioCoordinator | null }) {
   const statuses = Object.values(statusMap);
 
   const allRevenueNull = statuses.every(s => s.monthlyRevenue === null);
@@ -174,19 +208,34 @@ function PortfolioBar({ statusMap }: { statusMap: StatusMap }) {
             {scheduled} posts
           </span>
         </span>
+
+        <span className="text-zinc-200 dark:text-zinc-700">|</span>
+
+        <span className="flex items-center gap-1.5 text-xs">
+          <span className="text-zinc-400 dark:text-zinc-500">Batch</span>
+          <span className={`font-semibold ${
+            (portfolioCoordinator?.batchStatus.approved ?? 0) === 5
+              ? 'text-emerald-600 dark:text-emerald-400'
+              : (portfolioCoordinator?.batchStatus.approved ?? 0) > 0
+                ? 'text-amber-600 dark:text-amber-400'
+                : 'text-zinc-400'
+          }`}>
+            {portfolioCoordinator?.batchStatus.approved ?? 0}/5 approved
+          </span>
+        </span>
       </div>
     </div>
   );
 }
 
 export default function Home() {
-  const [statusMap, setStatusMap] = useState<StatusMap | null>(null);
+  const [statusMap, setStatusMap] = useState<StatusResponse | null>(null);
 
   useEffect(() => {
     fetch('/api/status')
       .then(r => r.json())
       .then(setStatusMap)
-      .catch(() => setStatusMap({}));
+      .catch(() => setStatusMap({ sites: {}, portfolioCoordinator: null, dreaming: null, reviewQueue: [] }));
   }, []);
 
   return (
@@ -202,22 +251,42 @@ export default function Home() {
                 Didi Anolue · {sites.length} sites
               </p>
             </div>
+            <div className="flex items-center gap-3">
+              <a
+                href="/guide"
+                className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-400 dark:hover:bg-zinc-800"
+              >
+                Operations Guide
+              </a>
             <div className="flex items-center gap-2 rounded-full bg-zinc-100 px-4 py-2 dark:bg-zinc-800">
               {statusMap === null ? (
                 <span className="h-2 w-2 animate-pulse rounded-full bg-zinc-300 dark:bg-zinc-600" />
               ) : (
-                <span className={`h-2 w-2 rounded-full ${Object.values(statusMap).every(s => s.up) ? 'bg-emerald-500' : 'bg-amber-400'}`} />
+                <span className={`h-2 w-2 rounded-full ${Object.values(statusMap.sites).every(s => s.up) ? 'bg-emerald-500' : 'bg-amber-400'}`} />
               )}
               <span className="text-sm font-medium text-zinc-600 dark:text-zinc-300">
-                {statusMap === null ? 'Checking…' : `${Object.values(statusMap).filter(s => s.up).length}/${sites.length} up`}
+                {statusMap === null ? 'Checking…' : `${Object.values(statusMap.sites).filter(s => s.up).length}/${sites.length} up`}
               </span>
+            </div>
             </div>
           </div>
         </div>
       </header>
 
-      {statusMap && Object.keys(statusMap).length > 0 && (
-        <PortfolioBar statusMap={statusMap} />
+      {statusMap !== null && (
+        <DailyBriefing statusMap={statusMap} />
+      )}
+
+      {statusMap && Object.keys(statusMap.sites).length > 0 && (
+        <PortfolioBar statusMap={statusMap.sites} portfolioCoordinator={statusMap.portfolioCoordinator} />
+      )}
+
+      {statusMap && (
+        <AgentCommandCentre
+          portfolioCoordinator={statusMap.portfolioCoordinator}
+          dreaming={statusMap.dreaming}
+          sites={statusMap.sites}
+        />
       )}
 
       <main className="mx-auto max-w-6xl px-6 py-10">
@@ -226,7 +295,8 @@ export default function Home() {
             <SiteCard
               key={site.id}
               site={site}
-              status={statusMap?.[site.id]}
+              status={statusMap?.sites[site.id]}
+              reviewQueue={statusMap?.reviewQueue ?? []}
             />
           ))}
         </div>
@@ -234,7 +304,7 @@ export default function Home() {
 
       <footer className="mt-auto border-t border-zinc-200 bg-white py-6 dark:border-zinc-800 dark:bg-zinc-900">
         <p className="text-center text-xs text-zinc-400 dark:text-zinc-600">
-          Tasks saved in browser · Status refreshes on load
+          Tasks saved in repo · Status refreshes on load
         </p>
       </footer>
     </div>

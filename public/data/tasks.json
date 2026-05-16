@@ -1,0 +1,23 @@
+{
+  "global": [],
+  "oldoaktown": [],
+  "theconcurrentcontractor": [
+    { "id": "tcc-02", "text": "Complete Constant Contact OAuth setup (flip DEMO_MODE=false)", "done": false },
+    { "id": "tcc-03", "text": "Add CLAUDE.md to repo root", "done": true },
+    { "id": "tcc-04", "text": "Update /workshops pages to link to MYCP Skool (both workshops moving)", "done": false },
+    { "id": "tcc-05", "text": "Remove Command Center references from site (page, terms, email sequence)", "done": false }
+  ],
+  "masteryourcareerpath": [
+    { "id": "mycp-01", "text": "Add CHAOS Workshop to Skool community as a classroom/course", "done": false },
+    { "id": "mycp-02", "text": "Add Concurrent Contractor Workshop to Skool community as a classroom/course", "done": false },
+    { "id": "mycp-03", "text": "Set pricing for both workshops in Skool (or keep free for members)", "done": false },
+    { "id": "mycp-04", "text": "Update TCC /workshops links to point to new Skool URLs", "done": false }
+  ],
+  "aiviralvideoprompts": [
+    { "id": "aivvp-01", "text": "Add GUMROAD_API_KEY to Vercel env vars to show live revenue", "done": true },
+    { "id": "aivvp-02", "text": "Add CLAUDE.md to repo root", "done": true }
+  ],
+  "didianolue": [
+    { "id": "didi-01", "text": "Add CLAUDE.md to repo root", "done": true }
+  ]
+}
