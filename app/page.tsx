@@ -251,6 +251,13 @@ export default function Home() {
                 Didi Anolue · {sites.length} sites
               </p>
             </div>
+            <div className="flex items-center gap-3">
+              <a
+                href="/guide"
+                className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-400 dark:hover:bg-zinc-800"
+              >
+                Operations Guide
+              </a>
             <div className="flex items-center gap-2 rounded-full bg-zinc-100 px-4 py-2 dark:bg-zinc-800">
               {statusMap === null ? (
                 <span className="h-2 w-2 animate-pulse rounded-full bg-zinc-300 dark:bg-zinc-600" />
@@ -260,6 +267,7 @@ export default function Home() {
               <span className="text-sm font-medium text-zinc-600 dark:text-zinc-300">
                 {statusMap === null ? 'Checking…' : `${Object.values(statusMap.sites).filter(s => s.up).length}/${sites.length} up`}
               </span>
+            </div>
             </div>
           </div>
         </div>
