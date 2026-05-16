@@ -1,4 +1,4 @@
-// ── Site definitions, prompts and rubrics ────────────────────────────────────
+// ── Site definitions, prompts and rubrics ───────────────────────────────────────────────
 // Each site has: its audience, its tone, its platforms, its subagent system
 // prompt, and its grader rubric. Edit these to tune agent behaviour.
 
@@ -13,7 +13,9 @@ export interface SiteConfig {
   passChecks: string[];
   failCheck: string;
   subagentSystemPrompt: string;
-  primaryPlatform: string; // the platform to draft for by default
+  primaryPlatform: string;
+  automateBlotato: boolean;    // false = owner manages posting manually
+  blotatoPlatforms: string[];  // platforms to draft + auto-schedule via Blotato
 }
 
 export const SITE_CONFIGS: SiteConfig[] = [
@@ -23,6 +25,8 @@ export const SITE_CONFIGS: SiteConfig[] = [
     url: 'didianolue.co.uk',
     platforms: ['LinkedIn', 'X (Twitter)'],
     primaryPlatform: 'LinkedIn',
+    automateBlotato: false,
+    blotatoPlatforms: [],
     audience: 'Senior commercial leaders, procurement directors, public-sector decision-makers',
     tone: 'Authoritative, warm, expert — never generic',
     rubricName: 'Authority rubric',
@@ -47,6 +51,8 @@ UK English throughout. No Americanisms.`,
     url: 'masteryourcareerpath.com',
     platforms: ['LinkedIn', 'Instagram', 'TikTok'],
     primaryPlatform: 'LinkedIn',
+    automateBlotato: true,
+    blotatoPlatforms: ['LinkedIn', 'Instagram', 'TikTok', 'Facebook'],
     audience: 'Professionals seeking career transformation — particularly those moving into contracting, consultancy, or senior roles',
     tone: 'Encouraging, practical, aspirational — not motivational fluff',
     rubricName: 'PRIME/OPERATE rubric',
@@ -77,6 +83,8 @@ At least one of the two frameworks (PRIME or OPERATE) must be referenced by name
     url: 'theconcurrentcontractor.com',
     platforms: ['LinkedIn', 'X (Twitter)'],
     primaryPlatform: 'LinkedIn',
+    automateBlotato: true,
+    blotatoPlatforms: ['LinkedIn', 'Instagram', 'Facebook'],
     audience: 'Practising UK IT contractors — people already contracting, not people considering it',
     tone: 'Straight-talking, knowledgeable, peer-to-peer — never advisory or preachy',
     rubricName: 'Contractor lens rubric',
@@ -101,6 +109,8 @@ Never write generic career content. Never sound like a recruiter. Never be preac
     url: 'oldoaktown.co.uk',
     platforms: ['Facebook', 'Instagram', 'X (Twitter)'],
     primaryPlatform: 'Instagram',
+    automateBlotato: true,
+    blotatoPlatforms: ['Instagram', 'Facebook', 'LinkedIn'],
     audience: 'Residents, businesses, and stakeholders in the Old Oak Common and Park Royal regeneration area in West London',
     tone: 'Community-first, factual, local — never corporate',
     rubricName: 'No-fabrication rubric',
@@ -127,6 +137,8 @@ If you cannot make a factual, verifiable post from the brief you have been given
     url: 'aiviralvideoprompts.com',
     platforms: ['TikTok', 'Instagram', 'X (Twitter)'],
     primaryPlatform: 'TikTok',
+    automateBlotato: true,
+    blotatoPlatforms: ['TikTok', 'Instagram', 'Facebook', 'LinkedIn'],
     audience: 'Content creators, social media managers, and entrepreneurs who want to produce high-performing video content using AI tools',
     tone: 'Energetic, creative, results-focused — show don\'t tell',
     rubricName: 'Conversion rubric',
