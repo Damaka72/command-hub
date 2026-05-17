@@ -1,4 +1,4 @@
-// ── Site Subagents ────────────────────────────────────────────────────────────
+// ── Site Subagents ────────────────────────────────────────────────────────────────────────────
 // For automated sites: one draft per platform in blotatoPlatforms.
 // For manual sites (didianolue): one draft for the primary platform only.
 
@@ -9,11 +9,11 @@ import {
   MODEL_GENERATION, logOk, logError, now,
 } from './utils.js';
 
-// ── Platform format guidelines injected into every subagent prompt ────────────
+// ── Platform format guidelines injected into every subagent prompt ────────────────────
 
 const PLATFORM_GUIDELINES: Record<string, string> = {
   linkedin:  'LinkedIn post: 800–1500 characters. Strong hook in line 1 — make the reader stop scrolling. No hashtags unless naturally relevant. Single clear CTA at the end.',
-  instagram: 'Instagram caption: 150–200 words. Hook in line 1. 5–8 relevant hashtags on a new line at the end. (You are writing the caption only — the owner will add the image or reel in Blotato before it publishes.)',
+  instagram: 'Instagram caption: 150–200 words. Hook in line 1. 3–5 relevant hashtags on a new line at the end — maximum 5, no exceptions. (You are writing the caption only — the owner will add the image or reel in Blotato before it publishes.)',
   tiktok:    'TikTok caption/script: max 150 words. The first line IS the scroll-stopper — treat it as the video hook. Write as both caption and script guide. (The owner will attach the video in Blotato before it publishes.)',
   facebook:  'Facebook post: 100–200 words. Conversational, community-first tone. No more than 2 hashtags. Direct and relatable — not corporate.',
   twitter:   'X/Twitter post: max 280 characters. No filler. Every word earns its place.',
