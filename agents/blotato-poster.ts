@@ -92,7 +92,7 @@ async function scheduleOne(
       Authorization:  `Bearer ${BLOTATO_KEY}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ post: { accountId: config.accountId, target, content, scheduledTime: scheduledAt() } }),
+    body: JSON.stringify({ post: { accountId: config.accountId, target, content }, scheduledTime: scheduledAt() }),
     signal: AbortSignal.timeout(15000),
   });
 
