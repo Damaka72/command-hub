@@ -1,0 +1,47 @@
+name: Daily Content Pipeline
+
+on:
+  schedule:
+    # Runs at 07:00 UTC every day (8am BST / 7am GMT)
+    - cron: '0 7 * * *'
+  workflow_dispatch:
+    inputs:
+      site:
+        description: 'Run for a single site only (e.g. masteryourcareerpath). Leave blank for all sites.'
+        required: false
+        default: ''
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Write .env.local
+        run: |
+          cat > .env.local <<EOF
+          ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          BLOTATO_API_KEY=${{ secrets.BLOTATO_API_KEY }}
+          EOF
+
+      - name: Run pipeline (all sites)
+        if: ${{ github.event.inputs.site == '' }}
+        run: npm run pipeline
+
+      - name: Run pipeline (single site)
+        if: ${{ github.event.inputs.site != '' }}
+        run: npm run pipeline -- --site ${{ github.event.inputs.site }}
