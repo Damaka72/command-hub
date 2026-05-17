@@ -1,4 +1,4 @@
-// ── Site Subagents ───────────────────────────────────────────────────────────────
+// ── Site Subagents ────────────────────────────────────────────────────────────
 // For automated sites: one draft per platform in blotatoPlatforms.
 // For manual sites (didianolue): one draft for the primary platform only.
 
@@ -9,7 +9,7 @@ import {
   MODEL_GENERATION, logOk, logError, now,
 } from './utils.js';
 
-// ── Platform format guidelines injected into every subagent prompt ─────────────
+// ── Platform format guidelines injected into every subagent prompt ────────────
 
 const PLATFORM_GUIDELINES: Record<string, string> = {
   linkedin:  'LinkedIn post: 800–1500 characters. Strong hook in line 1 — make the reader stop scrolling. No hashtags unless naturally relevant. Single clear CTA at the end.',

@@ -1,4 +1,4 @@
-// ── Blotato Scheduler ────────────────────────────────────────────────────────────
+// ── Blotato Scheduler ─────────────────────────────────────────────────────────
 // Schedules approved drafts in Blotato 48h from now so they sit in the
 // queue for review and media attachment before publishing.
 
@@ -12,7 +12,7 @@ dotenv.config({ path: path.join(process.cwd(), '.env.local') });
 const BLOTATO_KEY  = process.env.BLOTATO_API_KEY;
 const BLOTATO_BASE = 'https://backend.blotato.com/v2';
 
-// ── Account map: siteId → platform → Blotato credentials ─────────────────
+// ── Account map: siteId → platform → Blotato credentials ─────────────────────
 
 interface AccountConfig {
   accountId: string;

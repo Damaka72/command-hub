@@ -36,15 +36,20 @@ async function run(): Promise<void> {
   log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
   // ── Step 1: Lead coordinator ─────────────────────────────────────────────────
-  const activeSites = targetSites ?? SITE_CONFIGS.map(s => s.id);
-  const siteCount   = activeSites.length;
+  const sites      = targetSites ?? SITE_CONFIGS.map(s => s.id);
+  const siteCount  = sites.length;
+  const draftCount = (targetSites ?? SITE_CONFIGS)
+    .reduce((n, id) => {
+      const cfg = SITE_CONFIGS.find(s => s.id === (typeof id === 'string' ? id : id));
+      return n + (cfg?.automateBlotato ? cfg.blotatoPlatforms.length : 1);
+    }, 0);
 
   logStep('▶', `Lead coordinator generating ${siteCount} site brief${siteCount === 1 ? '' : 's'}…`);
   const { coordinator, briefs } = await runCoordinator(targetSites);
   log(`\n  Theme: "${coordinator.weeklyTheme}"`);
 
-  // ── Step 2: Subagents (one draft per platform per site) ─────────────────────
-  logStep('▶', 'Running subagents — drafting for all platforms…');
+  // ── Step 2: Subagents (one draft per platform per site) ──────────────────────
+  logStep('▶', `Running subagents — ${draftCount} draft${draftCount === 1 ? '' : 's'} across ${siteCount} site${siteCount === 1 ? '' : 's'}…`);
   const drafts = await runSubagents(briefs);
 
   // ── Step 3: Graders ──────────────────────────────────────────────────────────
@@ -54,7 +59,7 @@ async function run(): Promise<void> {
   const approved = graderResults.filter(r => r.verdict === 'pass');
   const failed   = graderResults.filter(r => r.verdict === 'fail');
 
-  // ── Step 4: Schedule in Blotato ──────────────────────────────────────────
+  // ── Step 4: Schedule in Blotato ──────────────────────────────────────────────
   logStep('▶', 'Scheduling approved drafts in Blotato (48h window for your review)…');
   const automatedResults = approved.filter(r => {
     const cfg = SITE_CONFIGS.find(s => s.id === r.siteId);
@@ -62,7 +67,7 @@ async function run(): Promise<void> {
   });
   await scheduleApprovedDrafts(automatedResults);
 
-  // ── Step 5: Write review queues + push to Supabase ───────────────────────
+  // ── Step 5: Write review queues + push to Supabase ───────────────────────────
   logStep('▶', 'Writing outputs to Supabase…');
 
   // Group results by site so we write one review-queue.json per site
@@ -110,7 +115,7 @@ async function run(): Promise<void> {
 
   // ── Summary ──────────────────────────────────────────────────────────────────
   log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  log(`  Batch complete — ${approved.length}/${drafts.length} drafts approved · ${failed.length} failed`);
+  log(`  Batch complete — ${approved.length}/${drafts.length} approved · ${failed.length} failed`);
   log(`  ${automatedResults.length} scheduled in Blotato (48h window)`);
   log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
