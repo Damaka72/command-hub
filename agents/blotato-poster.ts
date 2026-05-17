@@ -70,12 +70,12 @@ async function scheduleOne(
   }
 
   const target: Record<string, unknown> = {
-    accountId: config.accountId,
-    platform:  config.platform,
+    targetType: config.platform,
   };
   if (config.pageId) target.pageId = config.pageId;
 
   const content: Record<string, unknown> = {
+    platform:  config.platform,
     text,
     mediaUrls: [],
   };
@@ -97,7 +97,7 @@ async function scheduleOne(
       Authorization:  `Bearer ${BLOTATO_KEY}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ post: { target, content, scheduledTime: scheduledAt() } }),
+    body: JSON.stringify({ post: { accountId: config.accountId, target, content, scheduledTime: scheduledAt() } }),
     signal: AbortSignal.timeout(15000),
   });
 
