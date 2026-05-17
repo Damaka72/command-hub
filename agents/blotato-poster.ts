@@ -69,7 +69,7 @@ async function scheduleOne(
     return;
   }
 
-  const body: Record<string, unknown> = {
+  const post: Record<string, unknown> = {
     accountId:     config.accountId,
     platform:      config.platform,
     text,
@@ -77,17 +77,17 @@ async function scheduleOne(
     mediaUrls:     [],
   };
 
-  if (config.pageId) body.pageId = config.pageId;
+  if (config.pageId) post.pageId = config.pageId;
 
   // TikTok requires these fields; set safe defaults — user adjusts in Blotato
   if (key === 'tiktok') {
-    body.privacyLevel      = 'SELF_ONLY';
-    body.disabledComments  = false;
-    body.disabledDuet      = false;
-    body.disabledStitch    = false;
-    body.isBrandedContent  = false;
-    body.isYourBrand       = false;
-    body.isAiGenerated     = true;
+    post.privacyLevel      = 'SELF_ONLY';
+    post.disabledComments  = false;
+    post.disabledDuet      = false;
+    post.disabledStitch    = false;
+    post.isBrandedContent  = false;
+    post.isYourBrand       = false;
+    post.isAiGenerated     = true;
   }
 
   const res = await fetch(`${BLOTATO_BASE}/posts`, {
@@ -96,7 +96,7 @@ async function scheduleOne(
       Authorization:  `Bearer ${BLOTATO_KEY}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify({ post }),
     signal: AbortSignal.timeout(15000),
   });
 
