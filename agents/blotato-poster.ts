@@ -74,22 +74,22 @@ async function scheduleOne(
   };
   if (config.pageId) target.pageId = config.pageId;
 
+  // TikTok fields go in target, not content
+  if (key === 'tiktok') {
+    target.privacyLevel     = 'SELF_ONLY';
+    target.disabledComments = false;
+    target.disabledDuet     = false;
+    target.disabledStitch   = false;
+    target.isBrandedContent = false;
+    target.isYourBrand      = false;
+    target.isAiGenerated    = true;
+  }
+
   const content: Record<string, unknown> = {
     platform:  config.platform,
     text,
     mediaUrls: [],
   };
-
-  // TikTok requires these fields; set safe defaults — user adjusts in Blotato
-  if (key === 'tiktok') {
-    content.privacyLevel     = 'SELF_ONLY';
-    content.disabledComments = false;
-    content.disabledDuet     = false;
-    content.disabledStitch   = false;
-    content.isBrandedContent = false;
-    content.isYourBrand      = false;
-    content.isAiGenerated    = true;
-  }
 
   const res = await fetch(`${BLOTATO_BASE}/posts`, {
     method:  'POST',
