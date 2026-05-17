@@ -1,4 +1,4 @@
-// ── Site definitions, prompts and rubrics ────────────────────────────────────
+// ── Site definitions, prompts and rubrics ───────────────────────────────────────────────
 // Each site has: its audience, its tone, its platforms, its subagent system
 // prompt, and its grader rubric. Edit these to tune agent behaviour.
 
