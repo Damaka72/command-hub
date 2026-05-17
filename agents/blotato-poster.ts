@@ -69,21 +69,16 @@ async function scheduleOne(
     return;
   }
 
+  // TikTok requires a video — can't schedule text-only. Text is in the dashboard review queue.
+  if (key === 'tiktok') {
+    logWarn(`Blotato: ${siteId}/tiktok — skipped (TikTok requires video; use the review queue text when recording)`);
+    return;
+  }
+
   const target: Record<string, unknown> = {
     targetType: config.platform,
   };
   if (config.pageId) target.pageId = config.pageId;
-
-  // TikTok fields go in target, not content
-  if (key === 'tiktok') {
-    target.privacyLevel     = 'SELF_ONLY';
-    target.disabledComments = false;
-    target.disabledDuet     = false;
-    target.disabledStitch   = false;
-    target.isBrandedContent = false;
-    target.isYourBrand      = false;
-    target.isAiGenerated    = true;
-  }
 
   const content: Record<string, unknown> = {
     platform:  config.platform,
