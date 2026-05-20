@@ -148,7 +148,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export default function SiteCard({ site, status, reviewQueue = [] }: { site: Site; status?: SiteDetail; reviewQueue?: DraftItem[] }) {
-  const [expanded,      setExpanded]      = useState(false);
+  const [showTech,      setShowTech]      = useState(false);
   const [activeTab,     setActiveTab]     = useState(0);
   const [showReadiness, setShowReadiness] = useState(false);
   const [showRubric,    setShowRubric]    = useState(false);
@@ -225,8 +225,10 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
               <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">{agentLabel ?? '—'}</span>
             </div>
             <div className="flex flex-col gap-0.5 px-3 py-2">
-              <span className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Activity</span>
-              <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">{status.lastActivity ?? '—'}</span>
+              <span className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Scheduled</span>
+              <span className={`text-xs font-semibold ${status.scheduledCount > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-zinc-400'}`}>
+                {status.scheduledCount}
+              </span>
             </div>
             <div className="flex flex-col gap-0.5 px-3 py-2">
               <span className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Ready</span>
@@ -274,51 +276,56 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
           </div>
         </div>
 
-        {/* ── Action buttons ── */}
-        <div className="flex flex-wrap gap-2">
-          <a href={site.github} target="_blank" rel="noopener noreferrer"
-            className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 transition-colors hover:border-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-600 dark:text-zinc-300 dark:hover:border-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100">
-            GitHub
-          </a>
-          {site.admin && (
-            <a href={site.admin} target="_blank" rel="noopener noreferrer"
-              className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 transition-colors hover:border-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-600 dark:text-zinc-300 dark:hover:border-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100">
-              Admin
-            </a>
-          )}
-          {site.socialAgent && (
-            <a href={site.socialAgent} target="_blank" rel="noopener noreferrer"
-              className="rounded-lg border border-zinc-100 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-500 dark:border-zinc-800 dark:text-zinc-600 dark:hover:border-zinc-700 dark:hover:bg-zinc-800/50 dark:hover:text-zinc-500">
-              Legacy Social Agent
-            </a>
-          )}
-          {status && (
-            <button
-              onClick={() => setExpanded(e => !e)}
-              className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 transition-colors hover:border-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-600 dark:text-zinc-300 dark:hover:border-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100">
-              {expanded ? 'Less ↑' : 'More ↓'}
-            </button>
-          )}
-          <a href={`https://${site.url}`} target="_blank" rel="noopener noreferrer"
-            className="rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300">
-            Visit →
-          </a>
-        </div>
-
-        {/* ── URL pill ── */}
+        {/* ── URL pill + Visit ── */}
         <div className="flex items-center gap-2 rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800">
           <span className="text-xs font-medium text-zinc-400 dark:text-zinc-500">URL</span>
-          <span className="font-mono text-sm text-zinc-600 dark:text-zinc-300">{site.url}</span>
+          <span className="flex-1 font-mono text-sm text-zinc-600 dark:text-zinc-300">{site.url}</span>
+          <a href={`https://${site.url}`} target="_blank" rel="noopener noreferrer"
+            className="shrink-0 rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300">
+            Visit →
+          </a>
         </div>
 
         {/* ── Task list ── */}
         <TaskList siteId={site.id} />
       </div>
 
-      {/* ── Expanded panel ── */}
-      {expanded && status && (
-        <div className="border-t border-zinc-100 dark:border-zinc-800">
+      {/* ── Technical section ── */}
+      <div className="border-t border-zinc-100 dark:border-zinc-800">
+        <button
+          onClick={() => setShowTech(t => !t)}
+          className="flex w-full items-center justify-between px-6 py-3 text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
+        >
+          <span>Technical</span>
+          <span>{showTech ? '↑' : '↓'}</span>
+        </button>
 
+        {showTech && (
+          <div className="border-t border-zinc-100 dark:border-zinc-800">
+
+            {/* Links */}
+            <div className="flex flex-wrap gap-2 px-6 py-4">
+              <a href={site.github} target="_blank" rel="noopener noreferrer"
+                className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 transition-colors hover:border-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-600 dark:text-zinc-300 dark:hover:border-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100">
+                GitHub
+              </a>
+              {site.admin && (
+                <a href={site.admin} target="_blank" rel="noopener noreferrer"
+                  className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 transition-colors hover:border-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-600 dark:text-zinc-300 dark:hover:border-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100">
+                  Admin
+                </a>
+              )}
+              {site.socialAgent && (
+                <a href={site.socialAgent} target="_blank" rel="noopener noreferrer"
+                  className="rounded-lg border border-zinc-100 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-500 dark:border-zinc-800 dark:text-zinc-600 dark:hover:border-zinc-700 dark:hover:bg-zinc-800/50 dark:hover:text-zinc-500">
+                  Legacy Social Agent
+                </a>
+              )}
+            </div>
+
+            {/* Detail tabs — only when status data is available */}
+            {status && (
+              <>
           {/* Tab bar — flex-wrap so all 6 tabs always visible on narrow cards */}
           <div className="flex flex-wrap border-b border-zinc-100 dark:border-zinc-800">
             {TABS.map((tab, i) => (
@@ -701,9 +708,12 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
               <SocialFeed siteId={site.id} />
             )}
 
+              </div>
+            </>
+          )}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
