@@ -5,6 +5,7 @@ import SiteCard from "./components/SiteCard";
 import DailyBriefing from "./components/DailyBriefing";
 import AgentCommandCentre from "./components/AgentCommandCentre";
 import SidebarTasks from "./components/SidebarTasks";
+import DiPipeline from "./components/DiPipeline";
 import type { SiteDetail, AgentSummary, StatusResponse, PortfolioCoordinator } from "./api/status/route";
 
 const sites = [
@@ -311,6 +312,7 @@ export default function Home() {
                 />
               ))}
             </div>
+            <DiPipeline />
           </main>
 
           <footer className="shrink-0 border-t border-zinc-200 bg-white py-6 dark:border-zinc-800 dark:bg-zinc-900">
