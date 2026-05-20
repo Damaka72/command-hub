@@ -650,7 +650,9 @@ export async function GET() {
 
       const [revenue, monthlyRevenue] = await Promise.all([
         fetchRevenueMetrics(site, newsletterData, agentSummaries),
-        resolveMonthlyRevenue(revenueConfig),
+        site.id === 'aiviralvideoprompts' && process.env.GUMROAD_ACCESS
+          ? fetchGumroadMonthlyRevenue(process.env.GUMROAD_ACCESS)
+          : resolveMonthlyRevenue(revenueConfig),
       ]);
       const readiness = computeReadiness(agentSummaries, coordinator, site, !!(revenue.contentActive));
 
