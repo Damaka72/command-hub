@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import SiteCard from "./components/SiteCard";
 import DailyBriefing from "./components/DailyBriefing";
 import AgentCommandCentre from "./components/AgentCommandCentre";
+import SidebarTasks from "./components/SidebarTasks";
+import DiPipeline from "./components/DiPipeline";
 import type { SiteDetail, AgentSummary, StatusResponse, PortfolioCoordinator } from "./api/status/route";
 
 const sites = [
@@ -239,8 +241,10 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
-      <header className="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="flex h-screen flex-col bg-zinc-50 dark:bg-zinc-950">
+
+      {/* ── Header ── */}
+      <header className="shrink-0 border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
         <div className="mx-auto max-w-6xl px-6 py-6">
           <div className="flex items-center justify-between">
             <div>
@@ -258,55 +262,67 @@ export default function Home() {
               >
                 Operations Guide
               </a>
-            <div className="flex items-center gap-2 rounded-full bg-zinc-100 px-4 py-2 dark:bg-zinc-800">
-              {statusMap === null ? (
-                <span className="h-2 w-2 animate-pulse rounded-full bg-zinc-300 dark:bg-zinc-600" />
-              ) : (
-                <span className={`h-2 w-2 rounded-full ${Object.values(statusMap.sites).every(s => s.up) ? 'bg-emerald-500' : 'bg-amber-400'}`} />
-              )}
-              <span className="text-sm font-medium text-zinc-600 dark:text-zinc-300">
-                {statusMap === null ? 'Checking…' : `${Object.values(statusMap.sites).filter(s => s.up).length}/${sites.length} up`}
-              </span>
-            </div>
+              <div className="flex items-center gap-2 rounded-full bg-zinc-100 px-4 py-2 dark:bg-zinc-800">
+                {statusMap === null ? (
+                  <span className="h-2 w-2 animate-pulse rounded-full bg-zinc-300 dark:bg-zinc-600" />
+                ) : (
+                  <span className={`h-2 w-2 rounded-full ${Object.values(statusMap.sites).every(s => s.up) ? 'bg-emerald-500' : 'bg-amber-400'}`} />
+                )}
+                <span className="text-sm font-medium text-zinc-600 dark:text-zinc-300">
+                  {statusMap === null ? 'Checking…' : `${Object.values(statusMap.sites).filter(s => s.up).length}/${sites.length} up`}
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </header>
 
-      {statusMap !== null && (
-        <DailyBriefing statusMap={statusMap} />
-      )}
+      {/* ── Two-column body ── */}
+      <div className="flex flex-1 overflow-hidden">
 
-      {statusMap && Object.keys(statusMap.sites).length > 0 && (
-        <PortfolioBar statusMap={statusMap.sites} portfolioCoordinator={statusMap.portfolioCoordinator} />
-      )}
+        {/* Left sidebar — fixed width, always visible */}
+        <aside className="w-[300px] shrink-0 overflow-y-auto border-r border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+          {statusMap !== null && <DailyBriefing statusMap={statusMap} />}
+          <SidebarTasks />
+        </aside>
 
-      {statusMap && (
-        <AgentCommandCentre
-          portfolioCoordinator={statusMap.portfolioCoordinator}
-          dreaming={statusMap.dreaming}
-          sites={statusMap.sites}
-        />
-      )}
+        {/* Right main area — scrolls independently */}
+        <div className="flex flex-1 min-w-0 flex-col overflow-y-auto">
 
-      <main className="mx-auto max-w-6xl px-6 py-10">
-        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-          {sites.map((site) => (
-            <SiteCard
-              key={site.id}
-              site={site}
-              status={statusMap?.sites[site.id]}
-              reviewQueue={statusMap?.reviewQueue ?? []}
+          {statusMap && Object.keys(statusMap.sites).length > 0 && (
+            <PortfolioBar statusMap={statusMap.sites} portfolioCoordinator={statusMap.portfolioCoordinator} />
+          )}
+
+          {statusMap && (
+            <AgentCommandCentre
+              portfolioCoordinator={statusMap.portfolioCoordinator}
+              dreaming={statusMap.dreaming}
+              sites={statusMap.sites}
             />
-          ))}
-        </div>
-      </main>
+          )}
 
-      <footer className="mt-auto border-t border-zinc-200 bg-white py-6 dark:border-zinc-800 dark:bg-zinc-900">
-        <p className="text-center text-xs text-zinc-400 dark:text-zinc-600">
-          Tasks saved in repo · Status refreshes on load
-        </p>
-      </footer>
+          <main className="flex-1 px-6 py-8">
+            <div className="grid gap-6 sm:grid-cols-2">
+              {sites.map((site) => (
+                <SiteCard
+                  key={site.id}
+                  site={site}
+                  status={statusMap?.sites[site.id]}
+                  reviewQueue={statusMap?.reviewQueue ?? []}
+                />
+              ))}
+            </div>
+            <DiPipeline />
+          </main>
+
+          <footer className="shrink-0 border-t border-zinc-200 bg-white py-6 dark:border-zinc-800 dark:bg-zinc-900">
+            <p className="text-center text-xs text-zinc-400 dark:text-zinc-600">
+              Tasks saved in repo · Status refreshes on load
+            </p>
+          </footer>
+
+        </div>
+      </div>
     </div>
   );
 }
