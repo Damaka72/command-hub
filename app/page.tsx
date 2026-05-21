@@ -276,6 +276,12 @@ export default function Home() {
                 Weekly Plan
               </a>
               <a
+                href="/video-brief"
+                className="rounded-lg border border-violet-400 bg-violet-50 px-3 py-1.5 text-xs font-medium text-violet-700 transition-colors hover:bg-violet-100 dark:border-violet-600 dark:bg-violet-900/20 dark:text-violet-400 dark:hover:bg-violet-900/40"
+              >
+                Video Brief
+              </a>
+              <a
                 href="/guide"
                 className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-400 dark:hover:bg-zinc-800"
               >
