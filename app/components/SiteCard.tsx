@@ -148,10 +148,26 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export default function SiteCard({ site, status, reviewQueue = [] }: { site: Site; status?: SiteDetail; reviewQueue?: DraftItem[] }) {
-  const [showTech,      setShowTech]      = useState(false);
-  const [activeTab,     setActiveTab]     = useState(0);
-  const [showReadiness, setShowReadiness] = useState(false);
-  const [showRubric,    setShowRubric]    = useState(false);
+  const [showTech,         setShowTech]         = useState(false);
+  const [activeTab,        setActiveTab]        = useState(0);
+  const [showReadiness,    setShowReadiness]    = useState(false);
+  const [showRubric,       setShowRubric]       = useState(false);
+  const [breakingNewsOpen, setBreakingNewsOpen] = useState(false);
+  const [story,            setStory]            = useState("");
+  const [source,           setSource]           = useState("");
+  const [copied,           setCopied]           = useState(false);
+
+  function closeBreakingNews() {
+    setBreakingNewsOpen(false);
+    setStory("");
+    setSource("");
+    setCopied(false);
+  }
+
+  function generateBrief() {
+    const text = `BREAKING NEWS BRIEF Story: ${story} Source: ${source} Generate same-day content for LinkedIn, Facebook, and Instagram Story. Mark URGENT. I need to approve within the hour.`;
+    navigator.clipboard.writeText(text).catch(() => {}).finally(() => setCopied(true));
+  }
 
   const siteReviewQueue = reviewQueue.filter(item => item.siteId === site.id);
 
@@ -266,7 +282,17 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
             <BrandAvatar name={site.name} color={site.brandColor} initials={site.initials} />
           )}
           <div className="flex min-w-0 flex-col gap-1">
-            <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">{site.name}</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">{site.name}</h2>
+              {site.id === "oldoaktown" && (
+                <button
+                  onClick={() => setBreakingNewsOpen(true)}
+                  className="flex-shrink-0 rounded-md bg-red-600 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white transition-colors hover:bg-red-700"
+                >
+                  Breaking News
+                </button>
+              )}
+            </div>
             <p className="text-sm text-zinc-500 dark:text-zinc-400">{site.description}</p>
             {deploy?.commitMessage && (
               <p className="truncate text-xs text-zinc-400 dark:text-zinc-600" title={deploy.commitMessage}>
@@ -275,6 +301,66 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
             )}
           </div>
         </div>
+
+        {/* ── Breaking News modal (OOT only) ── */}
+        {site.id === "oldoaktown" && breakingNewsOpen && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+            onClick={e => { if (e.target === e.currentTarget) closeBreakingNews(); }}
+          >
+            <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-zinc-900">
+              <div className="mb-5 flex items-center justify-between">
+                <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
+                  Breaking News Brief
+                </h3>
+                <button
+                  onClick={closeBreakingNews}
+                  className="text-zinc-400 transition-colors hover:text-zinc-600 dark:hover:text-zinc-300"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    Paste the story headline and summary
+                  </label>
+                  <textarea
+                    value={story}
+                    onChange={e => setStory(e.target.value)}
+                    rows={4}
+                    placeholder="Story headline and summary…"
+                    className="w-full resize-none rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-700 placeholder-zinc-400 focus:border-zinc-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:placeholder-zinc-500"
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    Source URL
+                  </label>
+                  <input
+                    type="text"
+                    value={source}
+                    onChange={e => setSource(e.target.value)}
+                    placeholder="https://…"
+                    className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-700 placeholder-zinc-400 focus:border-zinc-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:placeholder-zinc-500"
+                  />
+                </div>
+                <button
+                  onClick={generateBrief}
+                  disabled={!story.trim()}
+                  className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Generate brief
+                </button>
+                {copied && (
+                  <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                    Brief copied to clipboard — paste into OOT Coordinator now.
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ── URL pill + Visit ── */}
         <div className="flex items-center gap-2 rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800">
