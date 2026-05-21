@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import SiteCard from "./components/SiteCard";
 import DailyBriefing from "./components/DailyBriefing";
 import AgentCommandCentre from "./components/AgentCommandCentre";
@@ -269,6 +270,12 @@ export default function Home() {
                 Sunday
               </button>
               <a
+                href="/plan"
+                className="rounded-lg border border-blue-400 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 transition-colors hover:bg-blue-100 dark:border-blue-600 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/40"
+              >
+                Weekly Plan
+              </a>
+              <a
                 href="/guide"
                 className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-400 dark:hover:bg-zinc-800"
               >
@@ -327,6 +334,31 @@ export default function Home() {
                       reviewQueue={statusMap?.reviewQueue ?? []}
                     />
                   ))}
+
+                  <Link
+                    href="/video-brief"
+                    className="group block rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 hover:border-zinc-400 dark:hover:border-zinc-600 transition-colors"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="flex gap-1">
+                          {['#185FA5','#1D9E75','#993C1D','#534AB7','#BA7517'].map(c => (
+                            <div key={c} className="w-2 h-2 rounded-full" style={{ background: c }} />
+                          ))}
+                        </div>
+                      </div>
+                      <span className="text-xs text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors">Open →</span>
+                    </div>
+                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 mb-1">Video Brief Generator</h3>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                      Build a Claude Code video production prompt — script, voiceover, visuals, render &amp; metadata, end-to-end.
+                    </p>
+                    <div className="flex gap-1.5 mt-4 flex-wrap">
+                      {['ElevenLabs', 'Higgsfield', 'FFmpeg'].map(tag => (
+                        <span key={tag} className="px-2 py-0.5 rounded-full text-xs border border-zinc-200 dark:border-zinc-700 text-zinc-400 dark:text-zinc-500">{tag}</span>
+                      ))}
+                    </div>
+                  </Link>
                 </div>
                 <DiPipeline />
               </main>
