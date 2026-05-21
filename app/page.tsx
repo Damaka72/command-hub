@@ -6,6 +6,7 @@ import DailyBriefing from "./components/DailyBriefing";
 import AgentCommandCentre from "./components/AgentCommandCentre";
 import SidebarTasks from "./components/SidebarTasks";
 import DiPipeline from "./components/DiPipeline";
+import SundayView from "./components/SundayView";
 import type { SiteDetail, AgentSummary, StatusResponse, PortfolioCoordinator } from "./api/status/route";
 
 const sites = [
@@ -231,7 +232,8 @@ function PortfolioBar({ statusMap, portfolioCoordinator }: { statusMap: StatusMa
 }
 
 export default function Home() {
-  const [statusMap, setStatusMap] = useState<StatusResponse | null>(null);
+  const [statusMap,   setStatusMap]   = useState<StatusResponse | null>(null);
+  const [showSunday,  setShowSunday]  = useState(false);
 
   useEffect(() => {
     fetch('/api/status')
@@ -256,6 +258,16 @@ export default function Home() {
               </p>
             </div>
             <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowSunday(s => !s)}
+                className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors ${
+                  showSunday
+                    ? "border-zinc-800 bg-zinc-800 text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
+                    : "border-zinc-300 text-zinc-600 hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-400 dark:hover:bg-zinc-800"
+                }`}
+              >
+                Sunday
+              </button>
               <a
                 href="/guide"
                 className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-400 dark:hover:bg-zinc-800"
@@ -289,37 +301,43 @@ export default function Home() {
         {/* Right main area — scrolls independently */}
         <div className="flex flex-1 min-w-0 flex-col overflow-y-auto">
 
-          {statusMap && Object.keys(statusMap.sites).length > 0 && (
-            <PortfolioBar statusMap={statusMap.sites} portfolioCoordinator={statusMap.portfolioCoordinator} />
-          )}
+          {showSunday ? (
+            <SundayView />
+          ) : (
+            <>
+              {statusMap && Object.keys(statusMap.sites).length > 0 && (
+                <PortfolioBar statusMap={statusMap.sites} portfolioCoordinator={statusMap.portfolioCoordinator} />
+              )}
 
-          {statusMap && (
-            <AgentCommandCentre
-              portfolioCoordinator={statusMap.portfolioCoordinator}
-              dreaming={statusMap.dreaming}
-              sites={statusMap.sites}
-            />
-          )}
-
-          <main className="flex-1 px-6 py-8">
-            <div className="grid gap-6 sm:grid-cols-2">
-              {sites.map((site) => (
-                <SiteCard
-                  key={site.id}
-                  site={site}
-                  status={statusMap?.sites[site.id]}
-                  reviewQueue={statusMap?.reviewQueue ?? []}
+              {statusMap && (
+                <AgentCommandCentre
+                  portfolioCoordinator={statusMap.portfolioCoordinator}
+                  dreaming={statusMap.dreaming}
+                  sites={statusMap.sites}
                 />
-              ))}
-            </div>
-            <DiPipeline />
-          </main>
+              )}
 
-          <footer className="shrink-0 border-t border-zinc-200 bg-white py-6 dark:border-zinc-800 dark:bg-zinc-900">
-            <p className="text-center text-xs text-zinc-400 dark:text-zinc-600">
-              Tasks saved in repo · Status refreshes on load
-            </p>
-          </footer>
+              <main className="flex-1 px-6 py-8">
+                <div className="grid gap-6 sm:grid-cols-2">
+                  {sites.map((site) => (
+                    <SiteCard
+                      key={site.id}
+                      site={site}
+                      status={statusMap?.sites[site.id]}
+                      reviewQueue={statusMap?.reviewQueue ?? []}
+                    />
+                  ))}
+                </div>
+                <DiPipeline />
+              </main>
+
+              <footer className="shrink-0 border-t border-zinc-200 bg-white py-6 dark:border-zinc-800 dark:bg-zinc-900">
+                <p className="text-center text-xs text-zinc-400 dark:text-zinc-600">
+                  Tasks saved in repo · Status refreshes on load
+                </p>
+              </footer>
+            </>
+          )}
 
         </div>
       </div>
