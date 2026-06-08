@@ -172,58 +172,60 @@ function PortfolioBar({ statusMap, portfolioCoordinator }: { statusMap: StatusMa
 
   const scheduled = statuses.reduce((sum, s) => sum + s.scheduledCount, 0);
 
+  const Divider = () => <span style={{ color: 'var(--hub-border-hi)' }}>|</span>;
+
   return (
-    <div className="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900/50">
+    <div style={{ borderBottom: '1px solid var(--hub-border)', background: 'var(--hub-surface-2)' }}>
       <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-4 px-6 py-3">
-        <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+        <span className="shrink-0 text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--hub-accent)', letterSpacing: '0.12em' }}>
           Portfolio
         </span>
 
         <span className="flex items-center gap-1.5 text-xs">
-          <span className="text-zinc-400 dark:text-zinc-500">Revenue</span>
-          <span className={`font-semibold ${totalRevenue !== null ? 'text-emerald-600 dark:text-emerald-400' : 'text-zinc-400'}`}>
+          <span style={{ color: 'var(--hub-text-3)' }}>Revenue</span>
+          <span className="font-semibold" style={{ color: totalRevenue !== null ? '#10b981' : 'var(--hub-text-3)' }}>
             {totalRevenue !== null ? `£${totalRevenue.toLocaleString()}/mo` : '—'}
           </span>
         </span>
 
-        <span className="text-zinc-200 dark:text-zinc-700">|</span>
+        <Divider />
 
         <span className="flex items-center gap-1.5 text-xs">
-          <span className="text-zinc-400 dark:text-zinc-500">Active agents</span>
-          <span className={`font-semibold ${activeAgents > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-zinc-400'}`}>
-            {activeAgents}
+          <span style={{ color: 'var(--hub-text-3)' }}>Agents</span>
+          <span className="font-semibold" style={{ color: activeAgents > 0 ? '#10b981' : 'var(--hub-text-3)' }}>
+            {activeAgents} active
           </span>
         </span>
 
-        <span className="text-zinc-200 dark:text-zinc-700">|</span>
+        <Divider />
 
         <span className="flex items-center gap-1.5 text-xs">
-          <span className="text-zinc-400 dark:text-zinc-500">Outstanding</span>
-          <span className={`font-semibold ${outstanding > 0 ? 'text-red-600 dark:text-red-400' : 'text-zinc-400'}`}>
+          <span style={{ color: 'var(--hub-text-3)' }}>Outstanding</span>
+          <span className="font-semibold" style={{ color: outstanding > 0 ? '#f87171' : 'var(--hub-text-3)' }}>
             {outstanding}{outstanding > 0 && ' ⚠'}
           </span>
         </span>
 
-        <span className="text-zinc-200 dark:text-zinc-700">|</span>
+        <Divider />
 
         <span className="flex items-center gap-1.5 text-xs">
-          <span className="text-zinc-400 dark:text-zinc-500">Scheduled</span>
-          <span className={`font-semibold ${scheduled > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-zinc-400'}`}>
+          <span style={{ color: 'var(--hub-text-3)' }}>Scheduled</span>
+          <span className="font-semibold" style={{ color: scheduled > 0 ? '#10b981' : 'var(--hub-text-3)' }}>
             {scheduled} posts
           </span>
         </span>
 
-        <span className="text-zinc-200 dark:text-zinc-700">|</span>
+        <Divider />
 
         <span className="flex items-center gap-1.5 text-xs">
-          <span className="text-zinc-400 dark:text-zinc-500">Batch</span>
-          <span className={`font-semibold ${
-            (portfolioCoordinator?.batchStatus.approved ?? 0) === 5
-              ? 'text-emerald-600 dark:text-emerald-400'
+          <span style={{ color: 'var(--hub-text-3)' }}>Batch</span>
+          <span className="font-semibold" style={{
+            color: (portfolioCoordinator?.batchStatus.approved ?? 0) === 5
+              ? '#10b981'
               : (portfolioCoordinator?.batchStatus.approved ?? 0) > 0
-                ? 'text-amber-600 dark:text-amber-400'
-                : 'text-zinc-400'
-          }`}>
+                ? '#f59e0b'
+                : 'var(--hub-text-3)',
+          }}>
             {portfolioCoordinator?.batchStatus.approved ?? 0}/5 approved
           </span>
         </span>
@@ -244,56 +246,85 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="flex h-screen flex-col bg-zinc-50 dark:bg-zinc-950">
+    <div className="flex h-screen flex-col" style={{ background: 'var(--hub-bg)' }}>
 
       {/* ── Header ── */}
-      <header className="shrink-0 border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
-        <div className="mx-auto max-w-6xl px-6 py-6">
+      <header
+        className="shrink-0"
+        style={{
+          background: 'linear-gradient(135deg, #0e1525 0%, #0a1020 60%, var(--hub-bg) 100%)',
+          borderBottom: '1px solid var(--hub-border-hi)',
+          boxShadow: '0 1px 20px rgba(99,102,241,0.08)',
+        }}
+      >
+        <div className="mx-auto max-w-6xl px-6 py-5">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+              <h1
+                className="text-2xl font-bold tracking-tight"
+                style={{
+                  background: 'linear-gradient(90deg, #e2e8f0 30%, #818cf8 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
+              >
                 Command Hub
               </h1>
-              <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-                Didi Anolue · {sites.length} sites
+              <p className="mt-0.5 text-xs" style={{ color: 'var(--hub-text-3)' }}>
+                Didi Anolue · {sites.length} sites active
               </p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
               <button
                 onClick={() => setShowSunday(s => !s)}
-                className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors ${
-                  showSunday
-                    ? "border-zinc-800 bg-zinc-800 text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
-                    : "border-zinc-300 text-zinc-600 hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-400 dark:hover:bg-zinc-800"
-                }`}
+                className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all"
+                style={showSunday
+                  ? { background: 'var(--hub-accent)', color: '#fff', border: '1px solid var(--hub-accent)' }
+                  : { background: 'var(--hub-surface-2)', color: 'var(--hub-text-2)', border: '1px solid var(--hub-border)' }
+                }
               >
                 Sunday
               </button>
               <a
                 href="/plan"
-                className="rounded-lg border border-blue-400 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 transition-colors hover:bg-blue-100 dark:border-blue-600 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/40"
+                className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:brightness-125"
+                style={{ background: 'rgba(34,211,238,0.1)', color: 'var(--hub-cyan)', border: '1px solid rgba(34,211,238,0.25)' }}
               >
                 Weekly Plan
               </a>
               <a
                 href="/video-brief"
-                className="rounded-lg border border-violet-400 bg-violet-50 px-3 py-1.5 text-xs font-medium text-violet-700 transition-colors hover:bg-violet-100 dark:border-violet-600 dark:bg-violet-900/20 dark:text-violet-400 dark:hover:bg-violet-900/40"
+                className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:brightness-125"
+                style={{ background: 'var(--hub-accent-dim)', color: '#a5b4fc', border: '1px solid var(--hub-border-hi)' }}
               >
                 Video Brief
               </a>
               <a
                 href="/guide"
-                className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-400 dark:hover:bg-zinc-800"
+                className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:brightness-125"
+                style={{ background: 'var(--hub-surface-2)', color: 'var(--hub-text-2)', border: '1px solid var(--hub-border)' }}
               >
-                Operations Guide
+                Ops Guide
               </a>
-              <div className="flex items-center gap-2 rounded-full bg-zinc-100 px-4 py-2 dark:bg-zinc-800">
+              <div
+                className="flex items-center gap-2 rounded-full px-4 py-2"
+                style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}
+              >
                 {statusMap === null ? (
-                  <span className="h-2 w-2 animate-pulse rounded-full bg-zinc-300 dark:bg-zinc-600" />
+                  <span className="h-2 w-2 animate-pulse rounded-full" style={{ background: 'var(--hub-text-3)' }} />
                 ) : (
-                  <span className={`h-2 w-2 rounded-full ${Object.values(statusMap.sites).every(s => s.up) ? 'bg-emerald-500' : 'bg-amber-400'}`} />
+                  <span
+                    className="h-2 w-2 rounded-full"
+                    style={{
+                      background: Object.values(statusMap.sites).every(s => s.up) ? '#10b981' : '#f59e0b',
+                      boxShadow: Object.values(statusMap.sites).every(s => s.up)
+                        ? '0 0 8px rgba(16,185,129,0.6)'
+                        : '0 0 8px rgba(245,158,11,0.6)',
+                    }}
+                  />
                 )}
-                <span className="text-sm font-medium text-zinc-600 dark:text-zinc-300">
+                <span className="text-xs font-medium" style={{ color: 'var(--hub-text-2)' }}>
                   {statusMap === null ? 'Checking…' : `${Object.values(statusMap.sites).filter(s => s.up).length}/${sites.length} up`}
                 </span>
               </div>
@@ -305,13 +336,16 @@ export default function Home() {
       {/* ── Two-column body ── */}
       <div className="flex flex-1 overflow-hidden">
 
-        {/* Left sidebar — fixed width, always visible */}
-        <aside className="w-[300px] shrink-0 overflow-y-auto border-r border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+        {/* Left sidebar */}
+        <aside
+          className="w-[300px] shrink-0 overflow-y-auto"
+          style={{ background: 'var(--hub-surface)', borderRight: '1px solid var(--hub-border)' }}
+        >
           {statusMap !== null && <DailyBriefing statusMap={statusMap} />}
           <SidebarTasks />
         </aside>
 
-        {/* Right main area — scrolls independently */}
+        {/* Right main area */}
         <div className="flex flex-1 min-w-0 flex-col overflow-y-auto">
 
           {showSunday ? (
@@ -331,7 +365,7 @@ export default function Home() {
               )}
 
               <main className="flex-1 px-6 py-8">
-                <div className="grid gap-6 sm:grid-cols-2">
+                <div className="grid gap-5 sm:grid-cols-2">
                   {sites.map((site) => (
                     <SiteCard
                       key={site.id}
@@ -343,25 +377,31 @@ export default function Home() {
 
                   <Link
                     href="/video-brief"
-                    className="group block rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 hover:border-zinc-400 dark:hover:border-zinc-600 transition-colors"
+                    className="group block rounded-2xl p-5 transition-all hover:brightness-110"
+                    style={{
+                      background: 'var(--hub-surface)',
+                      border: '1px solid var(--hub-border)',
+                    }}
                   >
                     <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-2.5">
-                        <div className="flex gap-1">
-                          {['#185FA5','#1D9E75','#993C1D','#534AB7','#BA7517'].map(c => (
-                            <div key={c} className="w-2 h-2 rounded-full" style={{ background: c }} />
-                          ))}
-                        </div>
+                      <div className="flex gap-1.5">
+                        {['#185FA5','#1D9E75','#993C1D','#534AB7','#BA7517'].map(c => (
+                          <div key={c} className="w-2.5 h-2.5 rounded-full" style={{ background: c, boxShadow: `0 0 6px ${c}80` }} />
+                        ))}
                       </div>
-                      <span className="text-xs text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors">Open →</span>
+                      <span className="text-xs transition-colors" style={{ color: 'var(--hub-text-3)' }}>Open →</span>
                     </div>
-                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 mb-1">Video Brief Generator</h3>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                    <h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--hub-text-1)' }}>Video Brief Generator</h3>
+                    <p className="text-xs leading-relaxed" style={{ color: 'var(--hub-text-2)' }}>
                       Build a Claude Code video production prompt — script, voiceover, visuals, render &amp; metadata, end-to-end.
                     </p>
                     <div className="flex gap-1.5 mt-4 flex-wrap">
                       {['ElevenLabs', 'Higgsfield', 'FFmpeg'].map(tag => (
-                        <span key={tag} className="px-2 py-0.5 rounded-full text-xs border border-zinc-200 dark:border-zinc-700 text-zinc-400 dark:text-zinc-500">{tag}</span>
+                        <span
+                          key={tag}
+                          className="px-2 py-0.5 rounded-full text-xs"
+                          style={{ border: '1px solid var(--hub-border)', color: 'var(--hub-text-3)' }}
+                        >{tag}</span>
                       ))}
                     </div>
                   </Link>
@@ -369,8 +409,11 @@ export default function Home() {
                 <DiPipeline />
               </main>
 
-              <footer className="shrink-0 border-t border-zinc-200 bg-white py-6 dark:border-zinc-800 dark:bg-zinc-900">
-                <p className="text-center text-xs text-zinc-400 dark:text-zinc-600">
+              <footer
+                className="shrink-0 py-5"
+                style={{ borderTop: '1px solid var(--hub-border)', background: 'var(--hub-surface)' }}
+              >
+                <p className="text-center text-xs" style={{ color: 'var(--hub-text-3)' }}>
                   Tasks saved in repo · Status refreshes on load
                 </p>
               </footer>

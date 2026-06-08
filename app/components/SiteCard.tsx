@@ -193,9 +193,23 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
         : 'text-red-500 dark:text-red-400';
 
   return (
-    <div className="flex flex-col rounded-2xl border border-zinc-200 bg-white shadow-sm transition-shadow hover:shadow-md dark:border-zinc-700 dark:bg-zinc-900">
+    <div
+      className="flex flex-col rounded-2xl transition-all hover:brightness-105"
+      style={{
+        background: 'var(--hub-surface)',
+        border: '1px solid var(--hub-border)',
+        boxShadow: '0 2px 16px rgba(0,0,0,0.3)',
+      }}
+    >
       {site.brandColor && (
-        <div style={{ backgroundColor: site.brandColor }} className="h-1.5 w-full flex-shrink-0 rounded-t-2xl" />
+        <div
+          style={{
+            background: `linear-gradient(90deg, ${site.brandColor}, ${site.brandColor}99)`,
+            height: '2px',
+            borderRadius: '16px 16px 0 0',
+            boxShadow: `0 0 12px ${site.brandColor}60`,
+          }}
+        />
       )}
       <div
         className="flex flex-col gap-4 p-6"
@@ -203,51 +217,56 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
       >
 
         {/* ── Status strip ── */}
-        <div className="flex items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400">
+        <div className="flex items-center gap-3 text-xs" style={{ color: 'var(--hub-text-3)' }}>
           <span className="flex items-center gap-1.5">
-            <span className={`h-2 w-2 rounded-full flex-shrink-0 ${status ? (status.up ? 'bg-emerald-400' : 'bg-red-400') : 'bg-zinc-300 dark:bg-zinc-600'}`} />
-            {status ? (status.up ? 'Up' : 'Down') : '—'}
+            <span
+              className="h-2 w-2 rounded-full flex-shrink-0"
+              style={{
+                background: status ? (status.up ? '#10b981' : '#f87171') : 'var(--hub-text-3)',
+                boxShadow: status?.up ? '0 0 6px rgba(16,185,129,0.5)' : undefined,
+              }}
+            />
+            <span style={{ color: status?.up ? '#34d399' : status ? '#f87171' : 'var(--hub-text-3)' }}>
+              {status ? (status.up ? 'Up' : 'Down') : '—'}
+            </span>
           </span>
-          <span className="text-zinc-300 dark:text-zinc-700">·</span>
+          <span style={{ color: 'var(--hub-border-hi)' }}>·</span>
           {deployStyle ? (
             <span className="flex items-center gap-1.5">
               <span className={`h-2 w-2 rounded-full flex-shrink-0 ${deployStyle.dot}`} />
               {deployStyle.label}
-              {deploy?.ago && <span className="text-zinc-400 dark:text-zinc-600">{deploy.ago}</span>}
+              {deploy?.ago && <span style={{ color: 'var(--hub-text-3)' }}>{deploy.ago}</span>}
             </span>
           ) : (
             <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full flex-shrink-0 bg-zinc-300 dark:bg-zinc-600" />
+              <span className="h-2 w-2 rounded-full flex-shrink-0" style={{ background: 'var(--hub-text-3)' }} />
               {status && !deploy ? 'No deploy' : '—'}
             </span>
           )}
-          <span className="text-zinc-300 dark:text-zinc-700">·</span>
+          <span style={{ color: 'var(--hub-border-hi)' }}>·</span>
           <span>
-            Agents: <span className={activeAgents > 0 ? 'text-zinc-600 dark:text-zinc-300' : 'text-zinc-400'}>{agentLabel ?? '—'}</span>
+            Agents: <span style={{ color: activeAgents > 0 ? 'var(--hub-text-1)' : 'var(--hub-text-3)' }}>{agentLabel ?? '—'}</span>
           </span>
         </div>
 
         {/* ── Info row ── */}
         {status && (
-          <div className="grid grid-cols-4 divide-x divide-zinc-100 rounded-lg bg-zinc-50 dark:divide-zinc-800 dark:bg-zinc-800">
+          <div
+            className="grid grid-cols-4 rounded-lg overflow-hidden"
+            style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}
+          >
+            {[
+              { label: 'Revenue', value: fmt(status.monthlyRevenue, '£'), color: '#34d399' },
+              { label: 'Agents',  value: agentLabel ?? '—', color: 'var(--hub-text-1)' },
+              { label: 'Sched.',  value: String(status.scheduledCount), color: status.scheduledCount > 0 ? '#34d399' : 'var(--hub-text-3)' },
+            ].map(({ label, value, color }, i) => (
+              <div key={label} className="flex flex-col gap-0.5 px-3 py-2" style={{ borderRight: '1px solid var(--hub-border)' }}>
+                <span className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--hub-text-3)' }}>{label}</span>
+                <span className="text-xs font-semibold" style={{ color }}>{value}</span>
+              </div>
+            ))}
             <div className="flex flex-col gap-0.5 px-3 py-2">
-              <span className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Revenue</span>
-              <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                {fmt(status.monthlyRevenue, '£')}
-              </span>
-            </div>
-            <div className="flex flex-col gap-0.5 px-3 py-2">
-              <span className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Agents</span>
-              <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">{agentLabel ?? '—'}</span>
-            </div>
-            <div className="flex flex-col gap-0.5 px-3 py-2">
-              <span className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Scheduled</span>
-              <span className={`text-xs font-semibold ${status.scheduledCount > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-zinc-400'}`}>
-                {status.scheduledCount}
-              </span>
-            </div>
-            <div className="flex flex-col gap-0.5 px-3 py-2">
-              <span className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Ready</span>
+              <span className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--hub-text-3)' }}>Ready</span>
               <button
                 onClick={() => setShowReadiness(s => !s)}
                 className={`text-left text-xs font-semibold ${readinessColor}`}
@@ -283,7 +302,7 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
           )}
           <div className="flex min-w-0 flex-col gap-1">
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">{site.name}</h2>
+              <h2 className="text-lg font-semibold" style={{ color: 'var(--hub-text-1)' }}>{site.name}</h2>
               {site.id === "oldoaktown" && (
                 <button
                   onClick={() => setBreakingNewsOpen(true)}
@@ -293,7 +312,7 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
                 </button>
               )}
             </div>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">{site.description}</p>
+            <p className="text-sm" style={{ color: 'var(--hub-text-2)' }}>{site.description}</p>
             {deploy?.commitMessage && (
               <p className="truncate text-xs text-zinc-400 dark:text-zinc-600" title={deploy.commitMessage}>
                 {deploy.commitMessage}
@@ -363,11 +382,19 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
         )}
 
         {/* ── URL pill + Visit ── */}
-        <div className="flex items-center gap-2 rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800">
-          <span className="text-xs font-medium text-zinc-400 dark:text-zinc-500">URL</span>
-          <span className="flex-1 font-mono text-sm text-zinc-600 dark:text-zinc-300">{site.url}</span>
-          <a href={`https://${site.url}`} target="_blank" rel="noopener noreferrer"
-            className="shrink-0 rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300">
+        <div
+          className="flex items-center gap-2 rounded-lg px-3 py-2"
+          style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}
+        >
+          <span className="text-xs font-medium" style={{ color: 'var(--hub-text-3)' }}>URL</span>
+          <span className="flex-1 font-mono text-sm" style={{ color: 'var(--hub-text-2)' }}>{site.url}</span>
+          <a
+            href={`https://${site.url}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:brightness-125"
+            style={{ background: 'var(--hub-accent-dim)', color: '#a5b4fc', border: '1px solid var(--hub-border-hi)' }}
+          >
             Visit →
           </a>
         </div>
@@ -377,52 +404,57 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
       </div>
 
       {/* ── Technical section ── */}
-      <div className="border-t border-zinc-100 dark:border-zinc-800">
+      <div style={{ borderTop: '1px solid var(--hub-border)' }}>
         <button
           onClick={() => setShowTech(t => !t)}
-          className="flex w-full items-center justify-between px-6 py-3 text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
+          className="flex w-full items-center justify-between px-6 py-3 text-xs font-medium transition-colors hover:brightness-125"
+          style={{ color: 'var(--hub-text-3)' }}
         >
           <span>Technical</span>
           <span>{showTech ? '↑' : '↓'}</span>
         </button>
 
         {showTech && (
-          <div className="border-t border-zinc-100 dark:border-zinc-800">
+          <div style={{ borderTop: '1px solid var(--hub-border)' }}>
 
             {/* Links */}
             <div className="flex flex-wrap gap-2 px-6 py-4">
-              <a href={site.github} target="_blank" rel="noopener noreferrer"
-                className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 transition-colors hover:border-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-600 dark:text-zinc-300 dark:hover:border-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100">
-                GitHub
-              </a>
-              {site.admin && (
-                <a href={site.admin} target="_blank" rel="noopener noreferrer"
-                  className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 transition-colors hover:border-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-600 dark:text-zinc-300 dark:hover:border-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100">
-                  Admin
+              {[
+                site.github && { href: site.github, label: 'GitHub' },
+                site.admin  && { href: site.admin,  label: 'Admin' },
+                site.socialAgent && { href: site.socialAgent, label: 'Legacy Agent', muted: true },
+              ].filter(Boolean).map((link: any) => (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:brightness-125"
+                  style={{
+                    border: '1px solid var(--hub-border)',
+                    color: link.muted ? 'var(--hub-text-3)' : 'var(--hub-text-2)',
+                    background: 'var(--hub-surface-2)',
+                  }}
+                >
+                  {link.label}
                 </a>
-              )}
-              {site.socialAgent && (
-                <a href={site.socialAgent} target="_blank" rel="noopener noreferrer"
-                  className="rounded-lg border border-zinc-100 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-500 dark:border-zinc-800 dark:text-zinc-600 dark:hover:border-zinc-700 dark:hover:bg-zinc-800/50 dark:hover:text-zinc-500">
-                  Legacy Social Agent
-                </a>
-              )}
+              ))}
             </div>
 
             {/* Detail tabs — only when status data is available */}
             {status && (
               <>
-          {/* Tab bar — flex-wrap so all 6 tabs always visible on narrow cards */}
-          <div className="flex flex-wrap border-b border-zinc-100 dark:border-zinc-800">
+          {/* Tab bar */}
+          <div className="flex flex-wrap" style={{ borderBottom: '1px solid var(--hub-border)' }}>
             {TABS.map((tab, i) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(i)}
-                className={`whitespace-nowrap px-3 py-2.5 text-xs font-medium transition-colors ${
-                  activeTab === i
-                    ? 'border-b-2 border-zinc-900 text-zinc-900 dark:border-zinc-100 dark:text-zinc-100'
-                    : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300'
-                }`}
+                className="whitespace-nowrap px-3 py-2.5 text-xs font-medium transition-all"
+                style={activeTab === i
+                  ? { borderBottom: '2px solid var(--hub-accent)', color: '#a5b4fc', marginBottom: '-1px' }
+                  : { color: 'var(--hub-text-3)' }
+                }
               >
                 {tab}
               </button>
@@ -436,7 +468,7 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
               <div className="flex flex-col gap-4">
                 <RevenueFlow siteId={site.id} />
                 {status.revenueConfig && (
-                  <div className="flex flex-col gap-0.5 rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800">
+                  <div className="flex flex-col gap-0.5 rounded-lg px-3 py-2" style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}>
                     <span className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Revenue Source</span>
                     <span className="text-xs font-medium text-zinc-600 dark:text-zinc-300">
                       {status.revenueConfig.label}
@@ -451,7 +483,7 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
                   </div>
                 )}
                 {revenue ? (
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800">
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 rounded-lg px-3 py-2" style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}>
                     {revenue.model === 'consulting' ? (
                       <>
                         <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
@@ -488,7 +520,7 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
                   <div className="flex flex-col gap-2">
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Pipeline Agents</p>
                     {status.subagentStatus && (
-                      <div className="flex items-center justify-between rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800">
+                      <div className="flex items-center justify-between rounded-lg px-3 py-2" style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}>
                         <p className="text-xs font-medium text-zinc-700 dark:text-zinc-300">Subagent</p>
                         <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${SUBAGENT_PILL[status.subagentStatus.status] ?? SUBAGENT_PILL.never_run}`}>
                           {status.subagentStatus.status.replace('_', ' ')}
@@ -496,7 +528,7 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
                       </div>
                     )}
                     {status.graderVerdict && (
-                      <div className="flex items-center justify-between rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800">
+                      <div className="flex items-center justify-between rounded-lg px-3 py-2" style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}>
                         <p className="text-xs font-medium text-zinc-700 dark:text-zinc-300">Grader</p>
                         <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
                           status.graderVerdict.verdict !== 'never_run'
@@ -516,7 +548,7 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
                   {agentSummaries.length === 0 ? (
                     <p className="text-xs text-zinc-400">No agent data available</p>
                   ) : agentSummaries.map(agent => (
-                    <div key={agent.name} className="flex items-center justify-between rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800">
+                    <div key={agent.name} className="flex items-center justify-between rounded-lg px-3 py-2" style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}>
                       <div>
                         <p className="text-xs font-medium text-zinc-700 dark:text-zinc-300">{agent.displayName}</p>
                         {agent.lastAction && (
@@ -547,7 +579,7 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
                         {status.subagentStatus.status.replace('_', ' ')}
                       </span>
                       {status.subagentStatus.briefGenerated && status.subagentStatus.briefSummary ? (
-                        <div className="rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800">
+                        <div className="rounded-lg px-3 py-2" style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}>
                           <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Brief this week</p>
                           <p className="text-xs text-zinc-600 dark:text-zinc-300">{status.subagentStatus.briefSummary}</p>
                         </div>
@@ -623,13 +655,13 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
             {activeTab === 3 && (
               <div id="review-queue" className="flex flex-col gap-3">
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="rounded-lg bg-zinc-50 px-3 py-3 dark:bg-zinc-800">
+                  <div className="rounded-lg px-3 py-3" style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}>
                     <p className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Overdue Follow-ups</p>
                     <p className={`mt-1 text-2xl font-bold ${(status.outstanding.overdueFollowUps ?? 0) > 0 ? 'text-red-500' : 'text-zinc-400'}`}>
                       {status.outstanding.overdueFollowUps}
                     </p>
                   </div>
-                  <div className="rounded-lg bg-zinc-50 px-3 py-3 dark:bg-zinc-800">
+                  <div className="rounded-lg px-3 py-3" style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}>
                     <p className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Awaiting Approval</p>
                     <p className={`mt-1 text-2xl font-bold ${(status.outstanding.awaitingApproval ?? 0) > 0 ? 'text-amber-500' : 'text-zinc-400'}`}>
                       {status.outstanding.awaitingApproval}
@@ -668,7 +700,7 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
                         </div>
                       )}
                       {item.contentSnippet && (
-                        <div className="rounded-md bg-zinc-50 px-2 py-1.5 dark:bg-zinc-800">
+                        <div className="rounded-md px-2 py-1.5" style={{ background: 'var(--hub-surface-2)' }}>
                           <p className="text-xs text-zinc-600 dark:text-zinc-400">
                             <span className="font-medium">Preview: </span>
                             &ldquo;{item.contentSnippet.slice(0, 80)}{item.contentSnippet.length > 80 ? '…' : ''}&rdquo;
@@ -688,17 +720,17 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
                 {coordinator ? (
                   <>
                     {coordinator.weekCommencing && (
-                      <div className="flex flex-col gap-0.5 rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800">
+                      <div className="flex flex-col gap-0.5 rounded-lg px-3 py-2" style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}>
                         <span className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Week Commencing</span>
                         <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300">{coordinator.weekCommencing}</span>
                       </div>
                     )}
-                    <div className="flex flex-col gap-0.5 rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800">
+                    <div className="flex flex-col gap-0.5 rounded-lg px-3 py-2" style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}>
                       <span className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Weekly Theme</span>
                       <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{coordinator.weeklyTheme}</span>
                     </div>
                     {coordinator.campaignObjective && (
-                      <div className="flex flex-col gap-0.5 rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800">
+                      <div className="flex flex-col gap-0.5 rounded-lg px-3 py-2" style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}>
                         <span className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Campaign Objective</span>
                         <span className="text-xs text-zinc-600 dark:text-zinc-300">{coordinator.campaignObjective}</span>
                       </div>
@@ -709,7 +741,7 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
                     No coordinator data — run the Social Agent to set the weekly theme
                   </p>
                 )}
-                <div className="flex items-center justify-between rounded-lg bg-zinc-50 px-3 py-2 dark:bg-zinc-800">
+                <div className="flex items-center justify-between rounded-lg px-3 py-2" style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}>
                   <span className="text-xs text-zinc-500 dark:text-zinc-400">Content scheduled this week</span>
                   <span className={`text-sm font-bold ${status.scheduledCount > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-zinc-400'}`}>
                     {status.scheduledCount}
@@ -724,7 +756,7 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
                     </span>
 
                     {/* Blotato */}
-                    <div className="flex flex-col gap-2 rounded-lg border border-zinc-100 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-800/60">
+                    <div className="flex flex-col gap-2 rounded-lg p-3" style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}>
                       <div className="flex items-center justify-between gap-2">
                         <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-200">Blotato (Social Media)</span>
                         <MarketingStatusPill status={site.marketingPlan.blotato.status} label={site.marketingPlan.blotato.statusLabel} />
@@ -762,7 +794,7 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
                     </div>
 
                     {/* Beehiiv */}
-                    <div className="flex flex-col gap-2 rounded-lg border border-zinc-100 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-800/60">
+                    <div className="flex flex-col gap-2 rounded-lg p-3" style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}>
                       <div className="flex items-center justify-between gap-2">
                         <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-200">Beehiiv (Email Marketing)</span>
                         <MarketingStatusPill status={site.marketingPlan.beehiiv.status} label={site.marketingPlan.beehiiv.statusLabel} />

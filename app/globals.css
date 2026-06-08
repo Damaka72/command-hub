@@ -1,33 +1,64 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Command Hub palette */
+  --hub-bg:         #070c18;
+  --hub-surface:    #0d1424;
+  --hub-surface-2:  #12192e;
+  --hub-surface-3:  #1a2440;
+  --hub-border:     rgba(99, 102, 241, 0.14);
+  --hub-border-hi:  rgba(99, 102, 241, 0.35);
+  --hub-accent:     #6366f1;
+  --hub-accent-dim: rgba(99, 102, 241, 0.18);
+  --hub-cyan:       #22d3ee;
+  --hub-gold:       #f59e0b;
+  --hub-text-1:     #e2e8f0;
+  --hub-text-2:     #94a3b8;
+  --hub-text-3:     #475569;
+
+  --background: var(--hub-bg);
+  --foreground: var(--hub-text-1);
 }
 
 @theme inline {
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-foreground:  var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--hub-bg);
+  color: var(--hub-text-1);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
 
+/* Scrollbars */
 @utility scrollbar-none {
   scrollbar-width: none;
-  &::-webkit-scrollbar {
-    display: none;
-  }
+  &::-webkit-scrollbar { display: none; }
+}
+
+/* Thin accent scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.25); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.5); }
+
+/* Glow utilities */
+@utility glow-indigo {
+  box-shadow: 0 0 24px rgba(99, 102, 241, 0.18), 0 1px 4px rgba(0,0,0,0.5);
+}
+
+@utility glow-emerald {
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.35);
+}
+
+/* Live pulse — for running agents */
+@keyframes hub-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 6px rgba(99,102,241,0.6); }
+  50%       { opacity: 0.65; box-shadow: 0 0 14px rgba(99,102,241,0.9); }
+}
+@utility animate-hub-pulse {
+  animation: hub-pulse 2s ease-in-out infinite;
 }
