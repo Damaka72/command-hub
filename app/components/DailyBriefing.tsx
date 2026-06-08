@@ -26,10 +26,10 @@ interface FocusItem {
   tag: string;
 }
 
-const DOT: Record<FocusItem["dot"], string> = {
-  red:   "bg-red-400",
-  amber: "bg-amber-400",
-  grey:  "bg-zinc-400 dark:bg-zinc-500",
+const DOT_STYLE: Record<FocusItem["dot"], { bg: string; glow?: string }> = {
+  red:   { bg: '#f87171', glow: '0 0 6px rgba(248,113,113,0.6)' },
+  amber: { bg: '#fbbf24', glow: '0 0 6px rgba(251,191,36,0.6)' },
+  grey:  { bg: '#475569' },
 };
 
 const COORDINATOR_SITES: { key: keyof CoordinatorStatusData["sites"]; label: string; newsletter: string }[] = [
@@ -229,8 +229,15 @@ export default function DailyBriefing({ statusMap }: { statusMap: StatusResponse
     }
   }
 
+  const inputCls = "w-full rounded px-1.5 py-1 text-xs outline-none focus:ring-1";
+  const inputStyle = {
+    background: 'var(--hub-bg)',
+    border: '1px solid var(--hub-border)',
+    color: 'var(--hub-text-1)',
+  };
+
   return (
-    <div className="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900/50">
+    <div style={{ borderBottom: '1px solid var(--hub-border)' }}>
       <div className="px-4 py-3">
 
         {/* Toggle header */}
@@ -239,37 +246,40 @@ export default function DailyBriefing({ statusMap }: { statusMap: StatusResponse
           className="flex w-full items-center justify-between gap-3 text-left"
         >
           <div className="flex items-center gap-2.5">
-            <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--hub-accent)', letterSpacing: '0.1em' }}>
               Today&apos;s Focus
             </span>
-            <span className="text-xs text-zinc-400 dark:text-zinc-500">{today}</span>
+            <span className="text-[10px]" style={{ color: 'var(--hub-text-3)' }}>{today}</span>
             {!open && urgentCount > 0 && (
-              <span className="inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700 dark:bg-red-900/30 dark:text-red-400">
+              <span
+                className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium"
+                style={{ background: 'rgba(248,113,113,0.15)', color: '#f87171', border: '1px solid rgba(248,113,113,0.25)' }}
+              >
                 {urgentCount} urgent
               </span>
             )}
           </div>
-          <span className="text-xs text-zinc-400 dark:text-zinc-500">{open ? "▲" : "▼"}</span>
+          <span className="text-[10px]" style={{ color: 'var(--hub-text-3)' }}>{open ? "▲" : "▼"}</span>
         </button>
 
-        {/* ── Section 1 — Content status strip (always visible) ── */}
-        <div className="mt-2 rounded-lg bg-zinc-100 px-2.5 py-2 dark:bg-zinc-800">
+        {/* ── Content status strip ── */}
+        <div className="mt-2 rounded-lg px-2.5 py-2" style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}>
           {coordData ? (
             <div className="flex flex-col gap-0.5">
               {COORDINATOR_SITES.map(({ key, label, newsletter }) => {
                 const s = coordData.sites[key];
                 const allClear = isAllClear(s);
                 return (
-                  <p key={key} className="text-[10px] leading-relaxed text-zinc-500 dark:text-zinc-400">
+                  <p key={key} className="text-[10px] leading-relaxed" style={{ color: 'var(--hub-text-3)' }}>
                     {allClear ? (
                       <>
-                        <span className="text-emerald-600 dark:text-emerald-400">✓</span>{" "}
-                        <span className="font-medium text-zinc-600 dark:text-zinc-300">{label}</span>
+                        <span style={{ color: '#34d399' }}>✓</span>{" "}
+                        <span className="font-medium" style={{ color: 'var(--hub-text-2)' }}>{label}</span>
                         {" — All clear"}
                       </>
                     ) : (
                       <>
-                        <span className="font-medium text-zinc-600 dark:text-zinc-300">{label}</span>
+                        <span className="font-medium" style={{ color: 'var(--hub-text-2)' }}>{label}</span>
                         {` — ${s.postsPending} pending · ${newsletter}: ${s.newsletterStatus}`}
                       </>
                     )}
@@ -278,116 +288,87 @@ export default function DailyBriefing({ statusMap }: { statusMap: StatusResponse
               })}
             </div>
           ) : (
-            <p className="text-[10px] text-zinc-400 dark:text-zinc-500">Loading content status…</p>
+            <p className="text-[10px]" style={{ color: 'var(--hub-text-3)' }}>Loading content status…</p>
           )}
 
-          {/* Update panel toggle */}
           <button
             onClick={() => setUpdateOpen(u => !u)}
-            className="mt-2 text-[10px] font-medium text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
+            className="mt-2 text-[10px] font-medium transition-colors hover:brightness-125"
+            style={{ color: 'var(--hub-text-3)' }}
           >
             {updateOpen ? "▲ Hide update panel" : "▼ Update content status"}
           </button>
 
-          {/* ── Update panel (collapsed by default) ── */}
           {updateOpen && formSites && (
-            <div className="mt-2 flex flex-col gap-3 border-t border-zinc-200 pt-2 dark:border-zinc-700">
+            <div className="mt-2 flex flex-col gap-3 pt-2" style={{ borderTop: '1px solid var(--hub-border)' }}>
               {COORDINATOR_SITES.map(({ key, label }) => (
                 <div key={key} className="flex flex-col gap-1.5">
-                  <span className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                  <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--hub-accent)' }}>
                     {label}
                   </span>
                   <div className="grid grid-cols-2 gap-1.5">
-                    <div className="flex flex-col gap-0.5">
-                      <label className="text-[9px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
-                        Approved
-                      </label>
-                      <input
-                        type="number"
-                        min={0}
-                        value={formSites[key].postsApproved}
-                        onChange={e => updateFormSite(key, "postsApproved", Math.max(0, parseInt(e.target.value) || 0))}
-                        className="w-full rounded border border-zinc-200 bg-white px-1.5 py-1 text-xs text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-0.5">
-                      <label className="text-[9px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
-                        Pending
-                      </label>
-                      <input
-                        type="number"
-                        min={0}
-                        value={formSites[key].postsPending}
-                        onChange={e => updateFormSite(key, "postsPending", Math.max(0, parseInt(e.target.value) || 0))}
-                        className="w-full rounded border border-zinc-200 bg-white px-1.5 py-1 text-xs text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300"
-                      />
-                    </div>
+                    {[
+                      { lbl: 'Approved', field: 'postsApproved' as const, val: formSites[key].postsApproved },
+                      { lbl: 'Pending',  field: 'postsPending'  as const, val: formSites[key].postsPending  },
+                    ].map(({ lbl, field, val }) => (
+                      <div key={field} className="flex flex-col gap-0.5">
+                        <label className="text-[9px] uppercase tracking-wide" style={{ color: 'var(--hub-text-3)' }}>{lbl}</label>
+                        <input
+                          type="number" min={0} value={val}
+                          onChange={e => updateFormSite(key, field, Math.max(0, parseInt(e.target.value) || 0))}
+                          className={inputCls} style={inputStyle}
+                        />
+                      </div>
+                    ))}
                   </div>
                   <div className="flex flex-col gap-0.5">
-                    <label className="text-[9px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
-                      Newsletter status
-                    </label>
+                    <label className="text-[9px] uppercase tracking-wide" style={{ color: 'var(--hub-text-3)' }}>Newsletter status</label>
                     <select
                       value={formSites[key].newsletterStatus}
                       onChange={e => updateFormSite(key, "newsletterStatus", e.target.value)}
-                      className="w-full rounded border border-zinc-200 bg-white px-1.5 py-1 text-xs text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300"
+                      className={inputCls} style={inputStyle}
                     >
-                      {NEWSLETTER_STATUSES.map(s => (
-                        <option key={s} value={s}>{s}</option>
-                      ))}
+                      {NEWSLETTER_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
                   </div>
                   <div className="grid grid-cols-2 gap-1.5">
-                    <div className="flex flex-col gap-0.5">
-                      <label className="text-[9px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
-                        Last briefed
-                      </label>
-                      <input
-                        type="text"
-                        value={formSites[key].lastBriefed}
-                        onChange={e => updateFormSite(key, "lastBriefed", e.target.value)}
-                        placeholder="e.g. 2026-05-18"
-                        className="w-full rounded border border-zinc-200 bg-white px-1.5 py-1 text-xs text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-0.5">
-                      <label className="text-[9px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
-                        Next send
-                      </label>
-                      <input
-                        type="text"
-                        value={formSites[key].nextSend}
-                        onChange={e => updateFormSite(key, "nextSend", e.target.value)}
-                        placeholder="e.g. friday"
-                        className="w-full rounded border border-zinc-200 bg-white px-1.5 py-1 text-xs text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300"
-                      />
-                    </div>
+                    {[
+                      { lbl: 'Last briefed', field: 'lastBriefed' as const, ph: 'e.g. 2026-05-18', val: formSites[key].lastBriefed },
+                      { lbl: 'Next send',    field: 'nextSend'    as const, ph: 'e.g. friday',     val: formSites[key].nextSend    },
+                    ].map(({ lbl, field, ph, val }) => (
+                      <div key={field} className="flex flex-col gap-0.5">
+                        <label className="text-[9px] uppercase tracking-wide" style={{ color: 'var(--hub-text-3)' }}>{lbl}</label>
+                        <input
+                          type="text" value={val} placeholder={ph}
+                          onChange={e => updateFormSite(key, field, e.target.value)}
+                          className={inputCls} style={inputStyle}
+                        />
+                      </div>
+                    ))}
                   </div>
                   <div className="flex flex-col gap-0.5">
-                    <label className="text-[9px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
-                      Week theme
-                    </label>
+                    <label className="text-[9px] uppercase tracking-wide" style={{ color: 'var(--hub-text-3)' }}>Week theme</label>
                     <input
-                      type="text"
-                      value={formSites[key].weekTheme}
+                      type="text" value={formSites[key].weekTheme}
                       onChange={e => updateFormSite(key, "weekTheme", e.target.value)}
                       placeholder="This week's theme"
-                      className="w-full rounded border border-zinc-200 bg-white px-1.5 py-1 text-xs text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300"
+                      className={inputCls} style={inputStyle}
                     />
                   </div>
                 </div>
               ))}
 
-              <div className="flex items-center gap-2 border-t border-zinc-200 pt-2 dark:border-zinc-700">
+              <div className="flex items-center gap-2 pt-2" style={{ borderTop: '1px solid var(--hub-border)' }}>
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  className="rounded-lg bg-zinc-800 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-50 dark:bg-zinc-200 dark:text-zinc-900 dark:hover:bg-zinc-300"
+                  className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:brightness-125 disabled:opacity-50"
+                  style={{ background: 'var(--hub-accent)', color: '#fff' }}
                 >
                   {saving ? "Saving…" : "Save all"}
                 </button>
                 {saveMsg && (
-                  <span className={`text-xs ${saveMsg === "Saved" ? "text-emerald-500" : "text-red-500"}`}>
+                  <span className="text-xs" style={{ color: saveMsg === "Saved" ? '#34d399' : '#f87171' }}>
                     {saveMsg}
                   </span>
                 )}
@@ -396,28 +377,40 @@ export default function DailyBriefing({ statusMap }: { statusMap: StatusResponse
           )}
         </div>
 
-        {/* ── Section 2 — Tasks (collapsible) ── */}
+        {/* ── Tasks (collapsible) ── */}
         {open && (
           <div className="mt-3 flex flex-col gap-0.5">
             {allItems.length === 0 ? (
-              <p className="text-xs text-zinc-400 dark:text-zinc-500">
+              <p className="text-xs" style={{ color: 'var(--hub-text-3)' }}>
                 No tasks outstanding — great work!
               </p>
             ) : (
-              allItems.map(item => (
-                <div
-                  key={item.id}
-                  className="flex items-start gap-2.5 rounded-lg px-2.5 py-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800/60"
-                >
-                  <span className={`mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full ${DOT[item.dot]}`} />
-                  <span className="min-w-0 flex-1 text-xs font-medium leading-snug text-zinc-700 dark:text-zinc-300">
-                    {item.text}
-                  </span>
-                  <span className="ml-2 flex-shrink-0 rounded bg-zinc-200 px-1.5 py-0.5 text-[10px] font-medium text-zinc-500 dark:bg-zinc-700 dark:text-zinc-400">
-                    {item.tag}
-                  </span>
-                </div>
-              ))
+              allItems.map(item => {
+                const dot = DOT_STYLE[item.dot];
+                return (
+                  <div
+                    key={item.id}
+                    className="flex items-start gap-2.5 rounded-lg px-2.5 py-1.5 transition-colors"
+                    style={{ ['--hover-bg' as string]: 'var(--hub-surface-2)' }}
+                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--hub-surface-2)')}
+                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                  >
+                    <span
+                      className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full"
+                      style={{ background: dot.bg, boxShadow: dot.glow }}
+                    />
+                    <span className="min-w-0 flex-1 text-xs font-medium leading-snug" style={{ color: 'var(--hub-text-1)' }}>
+                      {item.text}
+                    </span>
+                    <span
+                      className="ml-2 flex-shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium"
+                      style={{ background: 'var(--hub-accent-dim)', color: '#a5b4fc' }}
+                    >
+                      {item.tag}
+                    </span>
+                  </div>
+                );
+              })
             )}
           </div>
         )}
