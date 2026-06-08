@@ -1,20 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-
-  if (pathname.startsWith('/login') || pathname.startsWith('/api/auth') || pathname.startsWith('/api/telegram')) {
-    return NextResponse.next();
-  }
-
-  const cookie = request.cookies.get('hub_auth');
-  if (cookie?.value === 'true') {
-    return NextResponse.next();
-  }
-
-  const loginUrl = request.nextUrl.clone();
-  loginUrl.pathname = '/login';
-  return NextResponse.redirect(loginUrl);
+export function proxy(_request: NextRequest) {
+  return NextResponse.next();
 }
 
 export const config = {
