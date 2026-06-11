@@ -287,6 +287,12 @@ export default function Home() {
                 Sunday
               </button>
               <a
+                href="/content-cycle"
+                className="rounded-lg border border-emerald-400 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-100 dark:border-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/40"
+              >
+                Content Cycle
+              </a>
+              <a
                 href="/plan"
                 className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:brightness-125"
                 style={{ background: 'rgba(34,211,238,0.1)', color: 'var(--hub-cyan)', border: '1px solid rgba(34,211,238,0.25)' }}

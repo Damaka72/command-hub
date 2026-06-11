@@ -1,0 +1,166 @@
+{
+  "didianolue": [
+    {
+      "id": "contract-lifecycle",
+      "name": "Contract lifecycle management",
+      "description": "Governance, visibility, and performance across the full lifecycle — from award through mobilisation, delivery, and exit"
+    },
+    {
+      "id": "procurement-strategy",
+      "name": "Procurement strategy",
+      "description": "Category management, market engagement, value-driven sourcing — moving procurement from transactional to strategic"
+    },
+    {
+      "id": "supplier-performance",
+      "name": "Supplier performance & relationships",
+      "description": "Managing suppliers as strategic assets, not admin — SLAs, governance, relationship frameworks, and performance improvement"
+    },
+    {
+      "id": "commercial-risk",
+      "name": "Commercial risk & compliance",
+      "description": "Frameworks, regulations, public sector compliance, IR35 adjacency, audit readiness, and commercial exposure management"
+    },
+    {
+      "id": "outsourcing-transformation",
+      "name": "Outsourcing & transformation",
+      "description": "Major IT programmes, interim commercial leadership, outsourcing strategy, and commercial deep dives"
+    },
+    {
+      "id": "thought-leadership",
+      "name": "Insights & thought leadership",
+      "description": "AI in procurement, Procurement Act 2023, G-Cloud frameworks, sector trends — forward-looking perspective"
+    }
+  ],
+
+  "masteryourcareerpath": [
+    {
+      "id": "cv-brand",
+      "name": "CV, LinkedIn & personal brand",
+      "description": "Standing out on paper and online in an AI-screened world — profile optimisation, keyword strategy, first impressions"
+    },
+    {
+      "id": "job-search",
+      "name": "Job search strategy",
+      "description": "Targeted search, research, networking — not just applying everywhere. Finding the right roles and getting in front of the right people"
+    },
+    {
+      "id": "interview-performance",
+      "name": "Interview confidence & performance",
+      "description": "Mindset, preparation, reading the room — performing at your best when it counts"
+    },
+    {
+      "id": "salary-negotiation",
+      "name": "Salary negotiation & money",
+      "description": "Knowing your worth, understanding offers, negotiating without apology — practical tools for every career stage"
+    },
+    {
+      "id": "career-navigation",
+      "name": "Career navigation & pivots",
+      "description": "Changing direction, levelling up, long-term career thinking — using PRIME and OPERATE to navigate with intention"
+    },
+    {
+      "id": "ai-job-market",
+      "name": "AI & the changing job market",
+      "description": "How AI is reshaping hiring, screening, and careers — and what professionals need to do about it now"
+    }
+  ],
+
+  "theconcurrentcontractor": [
+    {
+      "id": "multiple-contracts",
+      "name": "Running multiple contracts",
+      "description": "The OPERATE framework, scheduling, managing two clients without chaos — the mechanics of concurrent contracting"
+    },
+    {
+      "id": "single-contract-optimisation",
+      "name": "Single contract optimisation",
+      "description": "The CHAOS assessment, billable hours, reclaiming wasted capacity — getting more from the contract you already have"
+    },
+    {
+      "id": "income-strategy",
+      "name": "Contractor income strategy",
+      "description": "Rate setting, hidden opportunity cost, true hourly rate — understanding what you actually earn and how to improve it"
+    },
+    {
+      "id": "client-management",
+      "name": "Client management & communication",
+      "description": "Expectation setting, proactive reporting, protecting your reputation — running client relationships like a business"
+    },
+    {
+      "id": "contractor-mindset",
+      "name": "Contractor mindset & resilience",
+      "description": "Burnout, boundaries, operating like a business — the mental and operational side of sustainable contracting"
+    },
+    {
+      "id": "ir35-essentials",
+      "name": "IR35 & contractor essentials",
+      "description": "Compliance, structure, staying protected — the non-negotiable fundamentals every serious contractor needs to understand"
+    }
+  ],
+
+  "oldoaktown": [
+    {
+      "id": "hs2-station",
+      "name": "HS2 & station development",
+      "description": "Construction progress, milestones, what the new station means for Old Oak Common and the surrounding area"
+    },
+    {
+      "id": "housing-property",
+      "name": "Housing & property",
+      "description": "New developments, affordable homes, planning approvals, what's coming — the residential picture for the area"
+    },
+    {
+      "id": "local-business",
+      "name": "Local business & employment",
+      "description": "Business spotlights, new jobs, commercial opportunities — the economic life of Old Oak Common and Park Royal"
+    },
+    {
+      "id": "community-residents",
+      "name": "Community & residents",
+      "description": "Events, local services, voices from the neighbourhood — the human side of the regeneration"
+    },
+    {
+      "id": "transport-connectivity",
+      "name": "Transport & connectivity",
+      "description": "Elizabeth Line, new bus routes, TfL updates, getting around — how the area's connections are changing"
+    },
+    {
+      "id": "regeneration-investment",
+      "name": "Regeneration & investment",
+      "description": "The bigger picture — OPDC decisions, what £1.7bn buys the area, the long-term vision"
+    }
+  ],
+
+  "aiviralvideoprompts": [
+    {
+      "id": "prompt-craft",
+      "name": "Prompt craft & technique",
+      "description": "How to write prompts that produce cinematic, scroll-stopping results — structure, specificity, style direction"
+    },
+    {
+      "id": "platform-strategy",
+      "name": "Platform strategy",
+      "description": "What works on TikTok vs Instagram vs YouTube — format differences, native behaviours, content that fits the feed"
+    },
+    {
+      "id": "niche-collections",
+      "name": "Niche content collections",
+      "description": "Showcasing prompts by category — business, lifestyle, education, fashion, food — built for specific creator niches"
+    },
+    {
+      "id": "ai-tools-workflow",
+      "name": "AI video tools & workflow",
+      "description": "The tools creators are actually using, how to combine prompts with production — practical workflow from idea to upload"
+    },
+    {
+      "id": "virality-engagement",
+      "name": "Virality & engagement",
+      "description": "What makes content travel — hooks, pacing, emotional triggers, the mechanics of the algorithm"
+    },
+    {
+      "id": "creator-monetisation",
+      "name": "Creator monetisation",
+      "description": "Turning content into revenue — affiliate, licensing, brand deals, prompt pack sales"
+    }
+  ]
+}

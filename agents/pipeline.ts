@@ -3,6 +3,7 @@
 // Run with: npm run pipeline
 // Run for one site: npm run pipeline -- --site masteryourcareerpath
 //
+<<<<<<< Updated upstream
 // What this does:
 //   1. Reads content-coordinator.json for this week's theme
 //   2. Lead coordinator generates site-specific briefs
@@ -11,12 +12,31 @@
 //   5. Passing drafts scheduled in Blotato 48h from now for your approval
 //   6. All results pushed to Supabase for the dashboard
 //   7. Pipeline session saved for dreaming to review on Sunday
+=======
+// WHEN TO RUN: Saturday or Sunday — so you can review all posts before Monday.
+//
+// What this does:
+//   1. Reads content-coordinator.json for this week's per-site themes
+//   2. Lead coordinator generates 5 daily briefs per site (Mon–Fri) — 25 total
+//   3. 25 subagents draft content in parallel
+//   4. 25 graders score each draft (with auto-retry on fail)
+//   5. Approved drafts written to review-queue.json per site (all 5 days)
+//   6. Approved LinkedIn/Facebook posts pushed to Blotato, scheduled Mon–Fri
+//   7. Pipeline session saved for dreaming to review on Sunday
+//
+// After this runs: review posts in Blotato and the dashboard, edit if needed.
+// Set up next week's themes: npm run dev → /plan (do this on Saturday)
+>>>>>>> Stashed changes
 
 import { ReviewQueueFile, ReviewItem, PipelineSession } from './types.js';
 import { runCoordinator } from './coordinator.js';
 import { runSubagents } from './subagents.js';
 import { runGraders } from './grader.js';
+<<<<<<< Updated upstream
 import { scheduleApprovedDrafts } from './blotato-poster.js';
+=======
+import { pushApprovedToBlotato } from './blotato.js';
+>>>>>>> Stashed changes
 import { writeJson, readJson, sitePath, sessionPath, log, logStep, logOk, logError, now, pushSiteDataToSupabase } from './utils.js';
 import { SITE_CONFIGS } from './site-configs.js';
 
@@ -36,6 +56,7 @@ async function run(): Promise<void> {
   log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
   // ── Step 1: Lead coordinator ─────────────────────────────────────────────────
+<<<<<<< Updated upstream
   const sites      = targetSites ?? SITE_CONFIGS.map(s => s.id);
   const siteCount  = sites.length;
   const draftCount = (targetSites ?? SITE_CONFIGS)
@@ -45,9 +66,18 @@ async function run(): Promise<void> {
     }, 0);
 
   logStep('▶', `Lead coordinator generating ${siteCount} site brief${siteCount === 1 ? '' : 's'}…`);
+=======
+  logStep('▶', `Lead coordinator generating ${siteCount * 5} briefs (${siteCount} site${siteCount === 1 ? '' : 's'} × 5 days)…`);
+>>>>>>> Stashed changes
   const { coordinator, briefs } = await runCoordinator(targetSites);
-  log(`\n  Theme: "${coordinator.weeklyTheme}"`);
+  log(`\n  Week commencing: ${coordinator.weekCommencing}`);
+  for (const [siteId, plan] of Object.entries(coordinator.sites)) {
+    if (!targetSites || targetSites.includes(siteId)) {
+      log(`  ${siteId}: ${plan.theme.split('—')[0].trim()}`);
+    }
+  }
 
+<<<<<<< Updated upstream
   // ── Step 2: Subagents (one draft per platform per site) ──────────────────────
   logStep('▶', `Running subagents — ${draftCount} draft${draftCount === 1 ? '' : 's'} across ${siteCount} site${siteCount === 1 ? '' : 's'}…`);
   const drafts = await runSubagents(briefs);
@@ -110,11 +140,86 @@ async function run(): Promise<void> {
     graderResults,
     approved:    approved.length,
     failed:      failed.length,
+=======
+  // ── Step 2: Subagents (parallel) ────────────────────────────────────────────
+  logStep('▶', `Running ${briefs.length} subagents in parallel…`);
+  const drafts = await runSubagents(briefs);
+
+  // ── Step 3: Graders ──────────────────────────────────────────────────────────
+  logStep('▶', `Running graders (${drafts.length} drafts)…`);
+  const graderResults = await runGraders(drafts, briefs);
+
+  // ── Step 4: Write review queues (one file per site, all 5 days) ──────────────
+  logStep('▶', 'Writing outputs…');
+
+  const approved = graderResults.filter(r => r.verdict === 'pass');
+  const failed   = graderResults.filter(r => r.verdict === 'fail');
+
+  // Group results by site
+  const bySite = new Map<string, typeof graderResults>();
+  for (const result of graderResults) {
+    if (!bySite.has(result.siteId)) bySite.set(result.siteId, []);
+    bySite.get(result.siteId)!.push(result);
+  }
+
+  for (const [siteId, siteResults] of bySite) {
+    const items: ReviewItem[] = siteResults.map(result => ({
+      siteId:          result.siteId,
+      dayName:         result.dayName,
+      platform:        result.draft.platform,
+      graderVerdict:   result.verdict === 'pass' ? 'pass' : 'fail',
+      retryCount:      result.retryCount,
+      failedCriterion: result.failedCriterion,
+      contentSnippet:  result.draft.content.slice(0, 100),
+      fullContent:     result.draft.content,
+      generatedAt:     result.draft.generatedAt,
+    }));
+
+    const queue: ReviewQueueFile = {
+      generatedAt: now(),
+      drafts: items,
+    };
+
+    writeJson(sitePath(siteId, 'review-queue.json'), queue);
+
+    // Push to Supabase
+    let subagentStatus = null;
+    let graderVerdict  = null;
+    try { subagentStatus = readJson(sitePath(siteId, 'subagent-status.json')); } catch { /* not written yet */ }
+    try { graderVerdict  = readJson(sitePath(siteId, 'grader-verdict.json'));  } catch { /* not written yet */ }
+    await pushSiteDataToSupabase(siteId, subagentStatus, graderVerdict, queue);
+
+    const sitePass = siteResults.filter(r => r.verdict === 'pass').length;
+    logOk(`${siteId} — review-queue.json written (${sitePass}/5 days approved)`);
+  }
+
+  // ── Step 5: Push approved drafts to Blotato ─────────────────────────────────
+  logStep('▶', `Pushing ${approved.length} approved drafts to Blotato (Mon–Fri)…`);
+  const blotatoResults = await pushApprovedToBlotato(approved);
+  const blotatoQueued  = blotatoResults.filter(r => r.status === 'queued').length;
+  const blotatoSkipped = blotatoResults.filter(r => r.status === 'skipped').length;
+  const blotatoFailed  = blotatoResults.filter(r => r.status === 'failed').length;
+  if (blotatoQueued  > 0) logOk(`${blotatoQueued} post${blotatoQueued === 1 ? '' : 's'} queued in Blotato`);
+  if (blotatoSkipped > 0) logOk(`${blotatoSkipped} skipped (need media — add in Blotato manually)`);
+  if (blotatoFailed  > 0) logError(`${blotatoFailed} failed to push — check BLOTATO_API_KEY in .env.local`);
+
+  // ── Step 6: Save session for dreaming ────────────────────────────────────────
+  const session: PipelineSession = {
+    runAt:          now(),
+    weekCommencing: coordinator.weekCommencing,
+    briefs,
+    drafts,
+    graderResults,
+    approved:       approved.length,
+    failed:         failed.length,
+>>>>>>> Stashed changes
   };
   writeJson(sessionPath(runId), session);
 
   // ── Summary ──────────────────────────────────────────────────────────────────
+  const totalPosts = siteCount * 5;
   log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+<<<<<<< Updated upstream
   log(`  Batch complete — ${approved.length}/${drafts.length} approved · ${failed.length} failed`);
   log(`  ${automatedResults.length} scheduled in Blotato (48h window)`);
   log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
@@ -130,6 +235,30 @@ async function run(): Promise<void> {
   }
 
   log('\n  Next: open Blotato, add media to Instagram/TikTok posts, approve to publish.\n');
+=======
+  log(`  Batch complete — ${approved.length}/${totalPosts} approved · ${failed.length} failed`);
+  log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+
+  if (approved.length > 0) {
+    log('  ✓  Approved drafts:');
+    for (const r of approved) {
+      log(`     ${r.siteId} — ${r.dayName} (${r.draft.platform})`);
+    }
+  }
+
+  if (failed.length > 0) {
+    log('\n  ✗  Failed drafts (need manual review):');
+    for (const r of failed) {
+      log(`     ${r.siteId} — ${r.dayName}: "${r.failedCriterion}"`);
+    }
+  }
+
+  log('\n  Next steps:');
+  log('  1. Review all posts in Blotato — edit timing or content as needed');
+  log('  2. Add images/video to Instagram and TikTok posts manually');
+  log('  3. Push to git: git add -A && git commit -m "pipeline run ' + runId + '" && git push');
+  log('  Run on Saturday or Sunday so everything is ready before Monday.\n');
+>>>>>>> Stashed changes
 }
 
 run().catch(err => {

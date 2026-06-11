@@ -1,6 +1,13 @@
+<<<<<<< Updated upstream
 // ── Site Subagents ────────────────────────────────────────────────────────────────────────────
 // For automated sites: one draft per platform in blotatoPlatforms.
 // For manual sites (didianolue): one draft for the primary platform only.
+=======
+// ── Site Subagents ────────────────────────────────────────────────────────────
+// Subagents run in parallel — up to 25 per full week run (5 sites × 5 days).
+// Each receives its site brief for a specific weekday and drafts content for
+// that site's primary platform. Returns an array of Draft objects.
+>>>>>>> Stashed changes
 
 import { SiteBrief, Draft, SubagentStatusFile } from './types.js';
 import { getSiteConfig } from './site-configs.js';
@@ -25,7 +32,7 @@ function platformGuideline(platform: string): string {
 }
 
 const SUBAGENT_USER_TEMPLATE = (brief: SiteBrief, platform: string): string => `
-Content brief for this week:
+Content brief for ${brief.dayName}:
 Angle: ${brief.angle}
 Key points:
 ${brief.keyPoints.map((p, i) => `${i + 1}. ${p}`).join('\n')}
@@ -56,9 +63,16 @@ async function draftForPlatform(brief: SiteBrief, platform: string): Promise<Dra
 
   const parsed = parseJson<{ platform: string; content: string }>(raw);
 
+<<<<<<< Updated upstream
   return {
     siteId:      brief.siteId,
     platform:    parsed.platform ?? platform,
+=======
+  const draft: Draft = {
+    siteId:      brief.siteId,
+    dayName:     brief.dayName,
+    platform:    parsed.platform ?? site.primaryPlatform,
+>>>>>>> Stashed changes
     content:     parsed.content,
     generatedAt: now(),
   };
@@ -108,9 +122,14 @@ export async function runSubagents(briefs: SiteBrief[]): Promise<Draft[]> {
     const siteId = briefs[i].siteId;
 
     if (result.status === 'fulfilled') {
+<<<<<<< Updated upstream
       allDrafts.push(...result.value);
+=======
+      drafts.push(result.value);
+      logOk(`${siteId} (${briefs[i].dayName}) — draft complete (${result.value.platform})`);
+>>>>>>> Stashed changes
     } else {
-      logError(`${siteId} — subagent failed: ${result.reason}`);
+      logError(`${siteId} (${briefs[i].dayName}) — subagent failed: ${result.reason}`);
 
       const errorStatus: SubagentStatusFile = {
         lastRun:        now(),

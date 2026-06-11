@@ -1,6 +1,27 @@
 {
-  "weeklyTheme": "Delivering value in complex procurement",
-  "weekCommencing": "2026-05-16",
-  "campaignObjective": "Optional — describe any active campaign or promotion this week",
-  "setAt": "2026-05-16T08:00:00.000Z"
+  "weekCommencing": "2026-05-18",
+  "campaignObjective": null,
+  "setAt": "2026-05-17T20:00:00.000Z",
+  "sites": {
+    "didianolue": {
+      "pillarId": "contract-lifecycle",
+      "theme": "Contract lifecycle management — governance, visibility, and performance across the full lifecycle"
+    },
+    "masteryourcareerpath": {
+      "pillarId": "cv-brand",
+      "theme": "CV, LinkedIn & personal brand — standing out in an AI-screened world"
+    },
+    "theconcurrentcontractor": {
+      "pillarId": "multiple-contracts",
+      "theme": "Running multiple contracts — the OPERATE framework, scheduling, managing two clients without chaos"
+    },
+    "oldoaktown": {
+      "pillarId": "hs2-station",
+      "theme": "HS2 & station development — what the new Old Oak Common station means for the area"
+    },
+    "aiviralvideoprompts": {
+      "pillarId": "prompt-craft",
+      "theme": "Prompt craft & technique — writing prompts that produce cinematic, scroll-stopping results"
+    }
+  }
 }

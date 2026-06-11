@@ -120,9 +120,10 @@ async function rewriteDraft(
   const parsed = parseJson<{ platform: string; content: string }>(raw);
 
   return {
-    siteId: draft.siteId,
-    platform: parsed.platform ?? draft.platform,
-    content: parsed.content,
+    siteId:      draft.siteId,
+    dayName:     draft.dayName,
+    platform:    parsed.platform ?? draft.platform,
+    content:     parsed.content,
     generatedAt: now(),
   };
 }
@@ -149,12 +150,13 @@ async function gradeWithRetry(
       writeJson(sitePath(draft.siteId, 'grader-verdict.json'), verdictFile);
 
       return {
-        siteId: draft.siteId,
-        rubricName: site.rubricName,
-        verdict: 'pass',
+        siteId:          draft.siteId,
+        dayName:         draft.dayName,
+        rubricName:      site.rubricName,
+        verdict:         'pass',
         retryCount,
         failedCriterion: null,
-        draft: current,
+        draft:           current,
       };
     }
 
@@ -175,12 +177,13 @@ async function gradeWithRetry(
       writeJson(sitePath(draft.siteId, 'grader-verdict.json'), verdictFile);
 
       return {
-        siteId: draft.siteId,
-        rubricName: site.rubricName,
-        verdict: 'fail',
+        siteId:          draft.siteId,
+        dayName:         draft.dayName,
+        rubricName:      site.rubricName,
+        verdict:         'fail',
         retryCount,
         failedCriterion,
-        draft: current,
+        draft:           current,
       };
     }
   }
@@ -197,7 +200,7 @@ export async function runGraders(
 
   // Grade sequentially to avoid rate limits
   for (const draft of drafts) {
-    const brief = briefs.find(b => b.siteId === draft.siteId);
+    const brief = briefs.find(b => b.siteId === draft.siteId && b.dayName === draft.dayName);
     if (!brief) {
       logError(`${draft.siteId} — no brief found, skipping grader`);
       continue;
@@ -207,10 +210,11 @@ export async function runGraders(
       const result = await gradeWithRetry(draft, brief);
       results.push(result);
 
+      const tag = `${draft.siteId} (${draft.dayName})`;
       if (result.verdict === 'pass') {
-        logOk(`${draft.siteId} — PASS (${result.rubricName})${result.retryCount > 0 ? ` after ${result.retryCount} retr${result.retryCount === 1 ? 'y' : 'ies'}` : ''}`);
+        logOk(`${tag} — PASS (${result.rubricName})${result.retryCount > 0 ? ` after ${result.retryCount} retr${result.retryCount === 1 ? 'y' : 'ies'}` : ''}`);
       } else {
-        logError(`${draft.siteId} — FAIL after ${result.retryCount} retries: "${result.failedCriterion}"`);
+        logError(`${tag} — FAIL after ${result.retryCount} retries: "${result.failedCriterion}"`);
       }
     } catch (err) {
       logError(`${draft.siteId} — grader threw: ${err instanceof Error ? err.message : String(err)}`);

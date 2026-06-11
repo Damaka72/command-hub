@@ -1,81 +1,99 @@
 // ── Shared types for the multiagent pipeline ─────────────────────────────────
 
+export interface SiteWeeklyPlan {
+  pillarId:  string;
+  theme:     string;
+  notes?:    string;
+}
+
 export interface CoordinatorData {
-  weeklyTheme: string;
-  weekCommencing: string;
+  weekCommencing:    string;
   campaignObjective?: string;
-  setAt: string;
+  setAt:             string;
+  sites:             Record<string, SiteWeeklyPlan>;
 }
 
 export interface SiteBrief {
-  siteId: string;
-  angle: string;
+  siteId:   string;
+  dayName:  string; // 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday'
+  angle:    string;
   keyPoints: string[];
-  cta: string;
+  cta:      string;
   platformNotes: string;
 }
 
 export interface Draft {
-  siteId: string;
-  platform: string;
-  content: string;
+  siteId:      string;
+  dayName:     string;
+  platform:    string;
+  content:     string;
   generatedAt: string;
 }
 
 export interface GraderResult {
-  siteId: string;
-  rubricName: string;
-  verdict: 'pass' | 'fail';
-  retryCount: number;
+  siteId:          string;
+  dayName:         string;
+  rubricName:      string;
+  verdict:         'pass' | 'fail';
+  retryCount:      number;
   failedCriterion: string | null;
-  draft: Draft;
+  draft:           Draft;
 }
 
 export interface SubagentStatusFile {
-  lastRun: string;
-  status: 'complete' | 'error' | 'idle';
+  lastRun:        string;
+  status:         'complete' | 'error' | 'idle';
   briefGenerated: boolean;
-  briefSummary: string | null;
+  briefSummary:   string | null;
 }
 
 export interface GraderVerdictFile {
-  rubricName: string;
-  verdict: 'pass' | 'fail' | 'retry' | 'never_run';
-  retryCount: number;
+  rubricName:      string;
+  verdict:         'pass' | 'fail' | 'retry' | 'never_run';
+  retryCount:      number;
   failedCriterion: string | null;
-  lastRun: string | null;
+  lastRun:         string | null;
 }
 
 export interface ReviewItem {
-  siteId: string;
-  platform: string;
-  graderVerdict: 'pass' | 'fail' | 'retry';
-  retryCount: number;
+  siteId:          string;
+  dayName:         string;
+  platform:        string;
+  graderVerdict:   'pass' | 'fail' | 'retry';
+  retryCount:      number;
   failedCriterion: string | null;
-  contentSnippet: string | null;
-  fullContent: string;
-  generatedAt: string;
+  contentSnippet:  string | null;
+  fullContent:     string;
+  generatedAt:     string;
 }
 
 export interface ReviewQueueFile {
   generatedAt: string;
-  drafts: ReviewItem[];
+  drafts:      ReviewItem[];
 }
 
 export interface DreamingStatusFile {
-  lastRun: string | null;
-  nextRun: string | null;
-  mode: 'auto-update' | 'review-before-landing' | null;
-  memoryUpdates: number;
+  lastRun:           string | null;
+  nextRun:           string | null;
+  mode:              'auto-update' | 'review-before-landing' | null;
+  memoryUpdates:     number;
   patternsExtracted: string[];
 }
 
 export interface PipelineSession {
-  runAt: string;
-  weeklyTheme: string;
-  briefs: SiteBrief[];
-  drafts: Draft[];
+  runAt:         string;
+  weekCommencing: string;
+  briefs:        SiteBrief[];
+  drafts:        Draft[];
   graderResults: GraderResult[];
-  approved: number;
-  failed: number;
+  approved:      number;
+  failed:        number;
 }
+
+export interface ContentPillar {
+  id:          string;
+  name:        string;
+  description: string;
+}
+
+export type ContentPillarsFile = Record<string, ContentPillar[]>;
