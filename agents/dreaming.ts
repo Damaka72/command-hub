@@ -23,7 +23,7 @@ Return only valid JSON with no markdown fences.`;
 function buildDreamingPrompt(sessions: PipelineSession[]): string {
   const sessionSummaries = sessions.map(s => ({
     runAt:       s.runAt,
-    theme:       s.weeklyTheme,
+    theme:       s.weekCommencing,
     approved:    s.approved,
     failed:      s.failed,
     results:     s.graderResults.map(r => ({
