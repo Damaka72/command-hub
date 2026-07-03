@@ -46,7 +46,7 @@ const docs: Doc[] = [
 ];
 
 // ── Actions ─────────────────────────────────────────────────────────────────
-type Owner = "Didi" | "Cowork";
+type Owner = "Didi" | "Cowork" | "Cowork + Didi";
 
 type Action = {
   id: string;
