@@ -25,13 +25,9 @@ export const SITE_CONFIGS: SiteConfig[] = [
     url: 'didianolue.co.uk',
     platforms: ['LinkedIn', 'X (Twitter)'],
     primaryPlatform: 'LinkedIn',
-<<<<<<< Updated upstream
     automateBlotato: false,
     blotatoPlatforms: [],
-    audience: 'Senior commercial leaders, procurement directors, public-sector decision-makers',
-=======
     audience: 'Procurement directors, heads of commercial, programme leads — primarily in public sector, energy, tech, and media',
->>>>>>> Stashed changes
     tone: 'Authoritative, warm, expert — never generic',
     rubricName: 'Authority rubric',
     passChecks: [
@@ -63,13 +59,9 @@ UK English throughout. No Americanisms.`,
     url: 'masteryourcareerpath.com',
     platforms: ['LinkedIn', 'Instagram', 'TikTok'],
     primaryPlatform: 'LinkedIn',
-<<<<<<< Updated upstream
     automateBlotato: true,
     blotatoPlatforms: ['LinkedIn', 'Instagram', 'TikTok', 'Facebook'],
-    audience: 'Professionals seeking career transformation — particularly those moving into contracting, consultancy, or senior roles',
-=======
     audience: 'Four segments: graduates entering the job market; early to mid-career professionals levelling up or negotiating better; career changers pivoting industries or roles; contractors and freelancers managing their own trajectory. Primarily in professional services. Common thread: action-oriented people who want to take control of their career.',
->>>>>>> Stashed changes
     tone: 'Encouraging, practical, aspirational — not motivational fluff',
     rubricName: 'Career transformation rubric',
     passChecks: [
@@ -116,13 +108,9 @@ Reference PRIME or OPERATE by name when relevant to the pillar. Every post shoul
     url: 'theconcurrentcontractor.com',
     platforms: ['LinkedIn', 'Instagram'],
     primaryPlatform: 'LinkedIn',
-<<<<<<< Updated upstream
     automateBlotato: true,
     blotatoPlatforms: ['LinkedIn', 'Instagram', 'Facebook'],
-    audience: 'Practising UK IT contractors — people already contracting, not people considering it',
-=======
     audience: 'UK contractors with 5+ years\' experience who are managing multiple contracts or want to optimise their current one',
->>>>>>> Stashed changes
     tone: 'Straight-talking, knowledgeable, peer-to-peer — never advisory or preachy',
     rubricName: 'Contractor lens rubric',
     passChecks: [
@@ -154,13 +142,9 @@ Never write generic career content. Never sound like a recruiter or financial ad
     url: 'oldoaktown.co.uk',
     platforms: ['Facebook', 'Instagram'],
     primaryPlatform: 'Instagram',
-<<<<<<< Updated upstream
     automateBlotato: true,
     blotatoPlatforms: ['Instagram', 'Facebook', 'LinkedIn'],
-    audience: 'Residents, businesses, and stakeholders in the Old Oak Common and Park Royal regeneration area in West London',
-=======
     audience: 'Current and future residents, local businesses, property investors, and community stakeholders in the Old Oak Common and Park Royal area of West London',
->>>>>>> Stashed changes
     tone: 'Community-first, factual, local — never corporate',
     rubricName: 'No-fabrication rubric',
     passChecks: [
@@ -205,13 +189,9 @@ When the brief's theme does not map to a specific verifiable local story, write 
     url: 'aiviralvideoprompts.com',
     platforms: ['TikTok', 'Instagram'],
     primaryPlatform: 'TikTok',
-<<<<<<< Updated upstream
     automateBlotato: true,
     blotatoPlatforms: ['TikTok', 'Instagram', 'Facebook', 'LinkedIn'],
-    audience: 'Content creators, social media managers, and entrepreneurs who want to produce high-performing video content using AI tools',
-=======
     audience: 'Content creators, social media marketers, and small business owners who want to produce high-performing AI video content',
->>>>>>> Stashed changes
     tone: 'Energetic, creative, results-focused — show don\'t tell',
     rubricName: 'Conversion rubric',
     passChecks: [
