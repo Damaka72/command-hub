@@ -53,6 +53,7 @@ interface Site {
   brandColor?: string;
   initials?: string;
   marketingPlan?: MarketingPlan;
+  driveFolders?: { label: string; url: string }[];
 }
 
 const DEPLOY_STYLES: Record<string, { dot: string; label: string }> = {
@@ -437,6 +438,22 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
                   }}
                 >
                   {link.label}
+                </a>
+              ))}
+              {site.driveFolders?.map(d => (
+                <a
+                  key={d.label}
+                  href={d.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:brightness-125"
+                  style={{
+                    border: '1px solid var(--hub-border)',
+                    color: 'var(--hub-text-2)',
+                    background: 'var(--hub-surface-2)',
+                  }}
+                >
+                  📁 {d.label}
                 </a>
               ))}
             </div>
