@@ -75,6 +75,11 @@ const sites = [
     socialAgent: "https://masteryourcareerpath.com/social-agent",
     brandColor: "#F5A623",
     initials: "MY",
+    driveFolders: [
+      { label: "Drive: MYCP Root", url: "https://drive.google.com/drive/folders/1-MQvh4R896EVtO5NucFDvtctppSOaiqd" },
+      { label: "Drive: PRIME", url: "https://drive.google.com/drive/folders/1D-LF8VMQIBO5Ri53aks5_C8lpyOCYoUH" },
+      { label: "Drive: OPERATE", url: "https://drive.google.com/drive/folders/1VWuK0HAlpg4YvaUugjNPTux6BkhQeP0s" },
+    ],
     marketingPlan: {
       blotato: {
         status: 'active' as const,
