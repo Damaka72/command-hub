@@ -11,7 +11,7 @@
 //   3. 20 subagents draft content in parallel
 //   4. 20 graders score each draft (with auto-retry on fail)
 //   5. Approved drafts written to review-queue.json per site (all 5 days)
-//   6. Pipeline session saved for dreaming to review on Sunday
+//   6. Pipeline session saved as a run-history record
 //
 // This pipeline NEVER creates or schedules posts. It ends at the review queues and
 // the content library — approved drafts are reviewed in the dashboard. (Pushing to
@@ -108,7 +108,7 @@ async function run(): Promise<void> {
     logOk(`${siteId} — review-queue.json written (${sitePass}/5 days approved)`);
   }
 
-  // ── Step 5: Save session for dreaming ────────────────────────────────────────
+  // ── Step 5: Save session as a run-history record ─────────────────────────────
   const session: PipelineSession = {
     runAt:          now(),
     weekCommencing: coordinator.weekCommencing,

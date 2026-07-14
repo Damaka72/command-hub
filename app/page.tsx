@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
 import SiteCard from "./components/SiteCard";
 import DailyBriefing from "./components/DailyBriefing";
 import AgentCommandCentre from "./components/AgentCommandCentre";
@@ -262,7 +261,7 @@ export default function Home() {
     fetch('/api/status')
       .then(r => r.json())
       .then((d: StatusResponse) => { setStatusMap(d); setLastUpdated(new Date()); })
-      .catch(() => setStatusMap(prev => prev ?? { sites: {}, portfolioCoordinator: null, dreaming: null, reviewQueue: [] }))
+      .catch(() => setStatusMap(prev => prev ?? { sites: {}, portfolioCoordinator: null, reviewQueue: [] }))
       .finally(() => setRefreshing(false));
   }, []);
 
@@ -321,26 +320,11 @@ export default function Home() {
                 Sunday
               </button>
               <a
-                href="/content-cycle"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded-lg border border-emerald-400 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-100 dark:border-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/40"
-              >
-                Content Cycle
-              </a>
-              <a
                 href="/plan"
                 className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:brightness-125"
                 style={{ background: 'rgba(34,211,238,0.1)', color: 'var(--hub-cyan)', border: '1px solid rgba(34,211,238,0.25)' }}
               >
                 Weekly Plan
-              </a>
-              <a
-                href="/video-brief"
-                className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:brightness-125"
-                style={{ background: 'var(--hub-accent-dim)', color: '#a5b4fc', border: '1px solid var(--hub-border-hi)' }}
-              >
-                Video Brief
               </a>
               <a
                 href="/guide"
@@ -413,7 +397,6 @@ export default function Home() {
               {statusMap && (
                 <AgentCommandCentre
                   portfolioCoordinator={statusMap.portfolioCoordinator}
-                  dreaming={statusMap.dreaming}
                   sites={statusMap.sites}
                 />
               )}
@@ -434,37 +417,6 @@ export default function Home() {
                       reviewQueue={statusMap?.reviewQueue ?? []}
                     />
                   ))}
-
-                  <Link
-                    href="/video-brief"
-                    className="group block rounded-2xl p-5 transition-all hover:brightness-110"
-                    style={{
-                      background: 'var(--hub-surface)',
-                      border: '1px solid var(--hub-border)',
-                    }}
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex gap-1.5">
-                        {['#185FA5','#1D9E75','#993C1D','#534AB7','#BA7517'].map(c => (
-                          <div key={c} className="w-2.5 h-2.5 rounded-full" style={{ background: c, boxShadow: `0 0 6px ${c}80` }} />
-                        ))}
-                      </div>
-                      <span className="text-xs transition-colors" style={{ color: 'var(--hub-text-3)' }}>Open →</span>
-                    </div>
-                    <h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--hub-text-1)' }}>Video Brief Generator</h3>
-                    <p className="text-xs leading-relaxed" style={{ color: 'var(--hub-text-2)' }}>
-                      Build a Claude Code video production prompt — script, voiceover, visuals, render &amp; metadata, end-to-end.
-                    </p>
-                    <div className="flex gap-1.5 mt-4 flex-wrap">
-                      {['ElevenLabs', 'Higgsfield', 'FFmpeg'].map(tag => (
-                        <span
-                          key={tag}
-                          className="px-2 py-0.5 rounded-full text-xs"
-                          style={{ border: '1px solid var(--hub-border)', color: 'var(--hub-text-3)' }}
-                        >{tag}</span>
-                      ))}
-                    </div>
-                  </Link>
                 </div>
                 <DiPipeline />
               </main>

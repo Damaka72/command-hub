@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import type { PortfolioCoordinator, DreamingStatus, SiteDetail } from "../api/status/route";
+import type { PortfolioCoordinator, SiteDetail } from "../api/status/route";
 import { SITE_SHORT } from "../lib/siteConstants";
 
 const SITE_ORDER = [
@@ -38,13 +37,10 @@ const GRADER_PILL: Record<string, { bg: string; color: string }> = {
 
 interface Props {
   portfolioCoordinator: PortfolioCoordinator | null;
-  dreaming: DreamingStatus | null;
   sites: Record<string, SiteDetail>;
 }
 
-export default function AgentCommandCentre({ portfolioCoordinator, dreaming, sites }: Props) {
-  const [dreamingOpen, setDreamingOpen] = useState(false);
-
+export default function AgentCommandCentre({ portfolioCoordinator, sites }: Props) {
   return (
     <div style={{ borderBottom: '1px solid var(--hub-border)', background: 'var(--hub-surface)' }}>
       <div className="mx-auto max-w-6xl px-6 py-4">
@@ -168,49 +164,6 @@ export default function AgentCommandCentre({ portfolioCoordinator, dreaming, sit
             )}
           </div>
 
-        </div>
-
-        {/* Dreaming — collapsible */}
-        <div className="mt-3 pt-2" style={{ borderTop: '1px solid var(--hub-border)' }}>
-          <button
-            onClick={() => setDreamingOpen(o => !o)}
-            className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider transition-colors hover:brightness-125"
-            style={{ color: 'var(--hub-text-3)' }}
-          >
-            Dreaming {dreamingOpen ? '▲' : '▼'}
-          </button>
-
-          {dreamingOpen && (
-            <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1.5 text-xs">
-              {[
-                ['Last run', dreaming?.lastRun ? relativeTime(dreaming.lastRun) : 'Never run'],
-                ['Next run', dreaming?.nextRun ? relativeTime(dreaming.nextRun) : 'Sunday night'],
-                ['Mode', dreaming?.mode ?? '—'],
-                ['Memory updates', String(dreaming?.memoryUpdates ?? 0)],
-              ].map(([label, val]) => (
-                <div key={label}>
-                  <span style={{ color: 'var(--hub-text-3)' }}>{label} </span>
-                  <span className="font-medium" style={{ color: 'var(--hub-text-1)' }}>{val}</span>
-                </div>
-              ))}
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span style={{ color: 'var(--hub-text-3)' }}>Patterns </span>
-                {(dreaming?.patternsExtracted?.length ?? 0) > 0 ? (
-                  dreaming!.patternsExtracted.map((p, i) => (
-                    <span
-                      key={i}
-                      className="rounded-full px-2 py-0.5 text-[10px]"
-                      style={{ background: 'var(--hub-accent-dim)', color: '#a5b4fc' }}
-                    >
-                      {p}
-                    </span>
-                  ))
-                ) : (
-                  <span style={{ color: 'var(--hub-text-3)' }}>None recorded</span>
-                )}
-              </div>
-            </div>
-          )}
         </div>
 
       </div>

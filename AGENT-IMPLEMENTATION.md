@@ -150,28 +150,6 @@ async function fetchReviewQueue(): Promise<DraftItem[]> {
 }
 ```
 
-### Step 2f — Replace fetchDreamingStatus
-
-Replace the existing `fetchDreamingStatus` function:
-
-```typescript
-async function fetchDreamingStatus(): Promise<DreamingStatus | null> {
-  // Try local first
-  const local = readLocalJson<DreamingStatus>('data/dreaming-status.json');
-  if (local) return local;
-  // Fall back to network
-  const data = await safeFetch('https://didianolue.co.uk/data/dreaming-status.json');
-  if (!data) return null;
-  return {
-    lastRun:           (data.lastRun           as string)   ?? null,
-    nextRun:           (data.nextRun           as string)   ?? null,
-    mode:              (data.mode              as DreamingStatus['mode']) ?? null,
-    memoryUpdates:     typeof data.memoryUpdates === 'number' ? data.memoryUpdates : 0,
-    patternsExtracted: Array.isArray(data.patternsExtracted) ? data.patternsExtracted as string[] : [],
-  };
-}
-```
-
 ### Done condition for Task 2
 
 `npm run build` passes with zero TypeScript errors.

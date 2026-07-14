@@ -13,7 +13,7 @@ function FlowRow({
   isLast = false,
 }: {
   actor: string;
-  actorType: "didi" | "auto" | "dreaming";
+  actorType: "didi" | "auto";
   children: React.ReactNode;
   isFirst?: boolean;
   isLast?: boolean;
@@ -21,19 +21,16 @@ function FlowRow({
   const actorColour = {
     didi:     "text-indigo-600 dark:text-indigo-400",
     auto:     "text-emerald-700 dark:text-emerald-400",
-    dreaming: "text-fuchsia-700 dark:text-fuchsia-400",
   }[actorType];
 
   const dotColour = {
     didi:     "bg-indigo-500",
     auto:     "bg-emerald-500",
-    dreaming: "bg-fuchsia-500",
   }[actorType];
 
   const lineColour = {
     didi:     "bg-indigo-200 dark:bg-indigo-800",
     auto:     "bg-emerald-200 dark:bg-emerald-800",
-    dreaming: "bg-fuchsia-200 dark:bg-fuchsia-800",
   }[actorType];
 
   return (
@@ -76,10 +73,6 @@ function SystemMap() {
         <span className="flex items-center gap-1.5">
           <span className="h-2 w-2 rounded-full bg-emerald-500" />
           <span className="text-zinc-500 dark:text-zinc-400">Runs automatically</span>
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-fuchsia-500" />
-          <span className="text-zinc-500 dark:text-zinc-400">Weekly (Sunday night)</span>
         </span>
       </div>
 
@@ -171,7 +164,7 @@ function SystemMap() {
         Step 4 — Publishing
       </p>
 
-      <FlowRow actor="Didi" actorType="didi">
+      <FlowRow actor="Didi" actorType="didi" isLast>
         <div className="rounded-xl border border-purple-200 bg-purple-50 px-4 py-3 dark:border-purple-900 dark:bg-purple-950/40">
           <p className="text-sm font-semibold text-purple-900 dark:text-purple-300">Blotato — schedule and publish</p>
           <p className="text-xs text-purple-700 dark:text-purple-400 mt-0.5">
@@ -180,25 +173,6 @@ function SystemMap() {
           <p className="text-xs text-purple-500 dark:text-purple-500 mt-1 italic">
             Dashboard shows scheduled post count per site in real time via the Blotato API
           </p>
-        </div>
-      </FlowRow>
-
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-600 mb-2 pl-32 mt-4">
-        Every Sunday night
-      </p>
-
-      <FlowRow actor="Dreaming" actorType="dreaming" isLast>
-        <div className="flex flex-wrap gap-3">
-          <div className="rounded-xl border border-fuchsia-200 bg-fuchsia-50 px-4 py-3 flex-1 min-w-48 dark:border-fuchsia-900 dark:bg-fuchsia-950/40">
-            <p className="text-sm font-semibold text-fuchsia-900 dark:text-fuchsia-300">Reviews all five agent sessions</p>
-            <p className="text-xs text-fuchsia-700 dark:text-fuchsia-400 mt-0.5">
-              Extracts what worked · updates each agent's memory · improvements feed back to lead coordinator for Monday
-            </p>
-          </div>
-          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs dark:border-amber-900 dark:bg-amber-950/40">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-500 mb-1">Dashboard shows</p>
-            <p className="text-amber-800 dark:text-amber-400">Last run · Memory updates · Patterns extracted</p>
-          </div>
         </div>
       </FlowRow>
     </div>
@@ -430,13 +404,6 @@ export default function GuidePage() {
                 action: "Note performance",
                 detail: "Review what performed well and feed notes back. This can be informal — just note what resonated so next week's theme reflects it.",
               },
-              {
-                day: "Sunday night",
-                who: "Automatic",
-                colour: "fuchsia",
-                action: "Dreaming runs",
-                detail: "The dreaming process reviews all five agent sessions from the week, extracts patterns from what worked and what did not, and updates each agent's memory so the next cycle is sharper.",
-              },
             ].map(row => {
               const bg   = row.colour === "indigo" ? "bg-indigo-50 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-900"
                          : row.colour === "fuchsia" ? "bg-fuchsia-50 dark:bg-fuchsia-950/40 border-fuchsia-200 dark:border-fuchsia-900"
@@ -490,7 +457,6 @@ export default function GuidePage() {
                   "Each grader scores the draft against its rubric",
                   "Failed drafts are retried automatically",
                   "Webhook fires when the batch is ready for review",
-                  "Dreaming reviews sessions and updates agent memory (Sunday)",
                   "Dashboard pulls Blotato and Vercel status live",
                 ].map(item => (
                   <li key={item} className="flex items-start gap-2 text-xs text-emerald-800 dark:text-emerald-300">
@@ -554,8 +520,8 @@ export default function GuidePage() {
             {[
               {
                 source: "JSON files on your sites",
-                detail: "Each site hosts a set of JSON files in its public data directory. Your agents write to these files when they run. The dashboard reads them to show subagent status, grader verdicts, review queue items, coordinator data, and dreaming status.",
-                files: ["content-coordinator.json", "subagent-status.json", "grader-verdict.json", "review-queue.json", "dreaming-status.json"],
+                detail: "Each site hosts a set of JSON files in its public data directory. Your agents write to these files when they run. The dashboard reads them to show subagent status, grader verdicts, review queue items, and coordinator data.",
+                files: ["content-coordinator.json", "subagent-status.json", "grader-verdict.json", "review-queue.json"],
               },
               {
                 source: "Blotato API",
@@ -566,11 +532,6 @@ export default function GuidePage() {
                 source: "Vercel API",
                 detail: "The dashboard checks Vercel for the latest deployment state of each site — whether it built successfully, when the last deploy happened, and what the commit message was.",
                 files: [],
-              },
-              {
-                source: "Dreaming status (didianolue.co.uk)",
-                detail: "The dreaming process is portfolio-wide. After its Sunday run it writes a single status file to the lead site. The Agent Command Centre reads this to show when dreaming last ran and what it found.",
-                files: ["dreaming-status.json"],
               },
             ].map(item => (
               <div key={item.source} className="rounded-xl border border-zinc-200 bg-white px-4 py-4 dark:border-zinc-800 dark:bg-zinc-900">
@@ -645,7 +606,6 @@ export default function GuidePage() {
                   "Review Queue in Outstanding tab",
                   "Blotato live post counts",
                   "Vercel deploy status per site",
-                  "Dreaming panel",
                   "Today's Focus with agent-aware logic",
                 ].map(item => (
                   <li key={item} className="text-xs text-emerald-800 dark:text-emerald-300 flex items-start gap-1.5">
@@ -660,7 +620,6 @@ export default function GuidePage() {
                 {[
                   "The actual Claude agents (lead coordinator, 5 subagents, 5 graders)",
                   "Agent code to write JSON files to each site",
-                  "Dreaming process configured and scheduled (Sunday)",
                   "Webhook set up to notify you when a batch is ready",
                   "content-coordinator.json deployed to didianolue.co.uk",
                 ].map(item => (
@@ -715,10 +674,6 @@ export default function GuidePage() {
               {
                 problem: "'Batch ready' banner is not appearing",
                 solution: "Either the agents haven't finished running yet, or the webhook hasn't been configured. Check the Agent Command Centre for the batch status counts.",
-              },
-              {
-                problem: "Dreaming shows 'Never run'",
-                solution: "Dreaming hasn't been configured or scheduled yet — it's on the 'still needed' list. Once set up, it runs automatically every Sunday and the dashboard will reflect it.",
               },
               {
                 problem: "Blotato shows 0 scheduled posts for a site",

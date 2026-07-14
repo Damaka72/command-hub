@@ -78,14 +78,6 @@ export interface GraderVerdict {
   lastRun: string | null;
 }
 
-export interface DreamingStatus {
-  lastRun: string | null;
-  nextRun: string | null;
-  mode: 'auto-update' | 'review-before-landing' | null;
-  memoryUpdates: number;
-  patternsExtracted: string[];
-}
-
 export interface PortfolioCoordinator {
   lastRun: string | null;
   sourceFile: string;
@@ -137,7 +129,6 @@ export interface SiteDetail {
 export interface StatusResponse {
   sites: Record<string, SiteDetail>;
   portfolioCoordinator: PortfolioCoordinator | null;
-  dreaming: DreamingStatus | null;
   reviewQueue: DraftItem[];
 }
 
@@ -463,22 +454,6 @@ async function fetchGraderVerdict(siteUrl: string, siteId: string): Promise<Grad
   };
 }
 
-async function fetchDreamingStatus(): Promise<DreamingStatus | null> {
-  // 1. Local file
-  const local = readLocalJson<DreamingStatus>('data/dreaming-status.json');
-  if (local) return local;
-  // 2. Network fetch
-  const data = await safeFetch('https://didianolue.co.uk/data/dreaming-status.json');
-  if (!data) return null;
-  return {
-    lastRun:           (data.lastRun           as string)   ?? null,
-    nextRun:           (data.nextRun           as string)   ?? null,
-    mode:              (data.mode              as DreamingStatus['mode']) ?? null,
-    memoryUpdates:     typeof data.memoryUpdates === 'number' ? data.memoryUpdates : 0,
-    patternsExtracted: Array.isArray(data.patternsExtracted) ? data.patternsExtracted as string[] : [],
-  };
-}
-
 async function fetchPortfolioCoordinator(): Promise<PortfolioCoordinator | null> {
   // Read from local file first, then fall back to the live site
   const local = readLocalJson<{ weeklyTheme?: string; weekCommencing?: string; campaignObjective?: string; setAt?: string }>('data/content-coordinator.json');
@@ -620,10 +595,9 @@ async function fetchRevenueMetrics(
 // ─── Main handler ─────────────────────────────────────────────────────────────
 
 export async function GET() {
-  const [blotatoCounts, portfolioCoordinator, dreaming, reviewQueue] = await Promise.all([
+  const [blotatoCounts, portfolioCoordinator, reviewQueue] = await Promise.all([
     fetchBlotatoScheduledCounts(),
     fetchPortfolioCoordinator(),
-    fetchDreamingStatus(),
     fetchReviewQueue(),
   ]);
 
@@ -693,7 +667,6 @@ export async function GET() {
   const response: StatusResponse = {
     sites: Object.fromEntries(results),
     portfolioCoordinator,
-    dreaming,
     reviewQueue,
   };
   return NextResponse.json(response, {

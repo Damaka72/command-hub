@@ -72,14 +72,6 @@ export interface ReviewQueueFile {
   drafts:      ReviewItem[];
 }
 
-export interface DreamingStatusFile {
-  lastRun:           string | null;
-  nextRun:           string | null;
-  mode:              'auto-update' | 'review-before-landing' | null;
-  memoryUpdates:     number;
-  patternsExtracted: string[];
-}
-
 export interface PipelineSession {
   runAt:         string;
   weekCommencing: string;

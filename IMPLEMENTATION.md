@@ -59,14 +59,6 @@ export interface GraderVerdict {
   lastRun: string | null;
 }
 
-export interface DreamingStatus {
-  lastRun: string | null;
-  nextRun: string | null;       // ISO timestamp of next scheduled run
-  mode: 'auto-update' | 'review-before-landing' | null;
-  memoryUpdates: number;        // count of memory entries updated in last run
-  patternsExtracted: string[];  // short labels, e.g. ["Hook-first posts +38% reach"]
-}
-
 export interface PortfolioCoordinator {
   lastRun: string | null;
   sourceFile: string;            // always "content-coordinator.json"
@@ -108,7 +100,6 @@ The current GET handler returns `Record<string, SiteDetail>`. Wrap this in a new
 export interface StatusResponse {
   sites: Record<string, SiteDetail>;
   portfolioCoordinator: PortfolioCoordinator | null;
-  dreaming: DreamingStatus | null;
   reviewQueue: DraftItem[];     // drafts awaiting Didi's review before publish
 }
 ```
@@ -118,7 +109,7 @@ previously the entire response. This is a breaking change — update all consume
 
 - `app/page.tsx` — change `statusMap` type from `Record<string, SiteDetail>` to `StatusResponse`,
   update all `statusMap[site.id]` references to `statusMap.sites[site.id]`, and thread
-  `portfolioCoordinator`, `dreaming`, and `reviewQueue` through as props where needed.
+  `portfolioCoordinator` and `reviewQueue` through as props where needed.
 - `app/components/DailyBriefing.tsx` — update the `statusMap` prop type to
   `Record<string, SiteDetail>` (pass `statusResponse.sites` from the parent, not the full response).
 
@@ -157,19 +148,6 @@ async function fetchGraderVerdict(siteUrl: string, siteId: string): Promise<Grad
     retryCount:      typeof data.retryCount === 'number' ? data.retryCount : 0,
     failedCriterion: (data.failedCriterion as string) ?? null,
     lastRun:         (data.lastRun         as string) ?? null,
-  };
-}
-
-async function fetchDreamingStatus(): Promise<DreamingStatus | null> {
-  // Dreaming is a portfolio-wide process — read from the lead site
-  const data = await safeFetch('https://didianolue.co.uk/data/dreaming-status.json');
-  if (!data) return null;
-  return {
-    lastRun:           (data.lastRun           as string)   ?? null,
-    nextRun:           (data.nextRun           as string)   ?? null,
-    mode:              (data.mode              as DreamingStatus['mode']) ?? null,
-    memoryUpdates:     typeof data.memoryUpdates === 'number' ? data.memoryUpdates : 0,
-    patternsExtracted: Array.isArray(data.patternsExtracted) ? data.patternsExtracted as string[] : [],
   };
 }
 
@@ -215,7 +193,7 @@ async function fetchReviewQueue(): Promise<DraftItem[]> {
 
 In the existing `GET()` function:
 
-1. Add `fetchPortfolioCoordinator`, `fetchDreamingStatus`, and `fetchReviewQueue` to the parallel
+1. Add `fetchPortfolioCoordinator` and `fetchReviewQueue` to the parallel
    fetch block at the top of the handler (alongside `fetchBlotatoScheduledCounts`).
 2. Inside each site's `Promise.all`, add `fetchSubagentStatus(site.url)` and
    `fetchGraderVerdict(site.url, site.id)`.
@@ -225,7 +203,7 @@ In the existing `GET()` function:
 ### Done condition for Task 0
 
 `npm run build` passes with no TypeScript errors. The `/api/status` endpoint returns the new shape
-with `sites`, `portfolioCoordinator`, `dreaming`, and `reviewQueue` at the top level. All new
+with `sites`, `portfolioCoordinator`, and `reviewQueue` at the top level. All new
 fields default to `null` / empty array when the JSON files do not yet exist on the sites.
 
 ---
@@ -242,7 +220,6 @@ A full-width panel inserted in `page.tsx` between the `<PortfolioBar>` and the `
 Layout:
 ```
 [ Lead Coordinator ]   [ Subagent + Grader status — 5 columns ]   [ Batch status ]
-[ Dreaming status  ]
 ```
 
 ### Lead Coordinator block (left, ~25% width)
@@ -275,17 +252,6 @@ respectively, bold numbers.
 If `portfolioCoordinator.batchStatus.readyForReview` is true, show a prominent amber banner below
 the counters: `⚑ Batch ready — review before publishing` with a link to `#review-queue` on the
 page (this will be the anchor for the Outstanding tab upgrade in Task 3).
-
-### Dreaming status block (below the above, full width, collapsible)
-
-Trigger: a small `DREAMING ▼` toggle label.
-
-Expanded content:
-- Last run: relative timestamp or `Never run`
-- Next scheduled run: relative timestamp or `Sunday night`
-- Mode: `auto-update` or `review-before-landing` or `—`
-- Memory updates: count
-- Patterns extracted: rendered as small zinc-200 pills, or `None recorded` if empty
 
 ### Done condition for Task 1
 
@@ -437,7 +403,7 @@ From `STATIC_ITEMS`, remove:
 ### Step 4c — Update the prop to accept StatusResponse
 
 Update `DailyBriefing` to receive the full `StatusResponse` rather than just `Record<string,
-SiteDetail>`. Extract `sites`, `portfolioCoordinator`, `dreaming`, and `reviewQueue` from it.
+SiteDetail>`. Extract `sites`, `portfolioCoordinator`, and `reviewQueue` from it.
 
 Update the call site in `page.tsx` accordingly.
 
@@ -481,23 +447,6 @@ if (!portfolioCoordinator?.weeklyTheme) {
     title: 'No weekly theme set — lead coordinator has not run',
     detail: 'Set the theme in content-coordinator.json to trigger the pipeline',
   });
-}
-
-// Dreaming overdue (hasn't run this week)
-if (dreaming) {
-  const lastRunDate = dreaming.lastRun ? new Date(dreaming.lastRun) : null;
-  const daysSince = lastRunDate
-    ? Math.floor((Date.now() - lastRunDate.getTime()) / 86400000)
-    : Infinity;
-  if (daysSince > 7) {
-    items.push({
-      id: 'dreaming-overdue',
-      priority: 'low',
-      category: 'Dreaming',
-      title: 'Dreaming has not run this week',
-      detail: `Last run: ${lastRunDate ? lastRunDate.toLocaleDateString('en-GB') : 'never'}`,
-    });
-  }
 }
 ```
 
@@ -589,7 +538,7 @@ After all tasks are complete:
 
 - [ ] `npm run build` — zero errors, zero warnings
 - [ ] `/api/status` returns the new `StatusResponse` shape with `sites`, `portfolioCoordinator`,
-      `dreaming`, `reviewQueue`
+      `reviewQueue`
 - [ ] Agent Command Centre renders between portfolio bar and site grid
 - [ ] Pipeline tab appears in every SiteCard expanded panel with correct rubric criteria per site
 - [ ] Review queue section appears in Outstanding tab (empty state renders cleanly)
