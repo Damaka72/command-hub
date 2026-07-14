@@ -2,6 +2,21 @@
 // Each site has: its audience, its tone, its platforms, its subagent system
 // prompt, and its grader rubric. Edit these to tune agent behaviour.
 
+import { ContentPillarsFile } from './types.js';
+import contentPillarsData from '../data/content-pillars.json';
+
+// data/content-pillars.json is the single source of truth for pillars. Prompts
+// below interpolate the pillar list from here rather than restating it inline.
+const CONTENT_PILLARS = contentPillarsData as ContentPillarsFile;
+
+export function getSitePillars(siteId: string) {
+  return CONTENT_PILLARS[siteId] ?? [];
+}
+
+function pillarBlock(siteId: string): string {
+  return getSitePillars(siteId).map(p => `- ${p.name} — ${p.description}`).join('\n');
+}
+
 export interface SiteConfig {
   id: string;
   name: string;
@@ -50,12 +65,7 @@ The audience has four distinct segments — each post should speak clearly to at
 Common thread: action-oriented people who want to take control of their career rather than leave it to chance.
 
 Content pillars:
-- CV, LinkedIn & personal brand — standing out in an AI-screened world
-- Job search strategy — targeted, not scattergun
-- Interview confidence & performance — mindset and preparation
-- Salary negotiation & money — knowing your worth
-- Career navigation & pivots — changing direction with intention
-- AI & the changing job market — what professionals need to do now
+${pillarBlock('masteryourcareerpath')}
 
 Confirmed products (only reference these — do not invent free resources or other products):
 - Skool community: £47/month
@@ -92,12 +102,7 @@ The audience are contractors with 5+ years of experience who are either already 
 The platform is built around the OPERATE framework — a structured approach to running multiple contracts without chaos. Reference OPERATE by name where relevant to the content pillar.
 
 Content pillars:
-- Running multiple contracts — the OPERATE framework, scheduling, managing two clients
-- Single contract optimisation — the CHAOS assessment, billable hours, reclaiming wasted capacity
-- Contractor income strategy — rate setting, true hourly rate, hidden opportunity cost
-- Client management & communication — expectation setting, proactive reporting, protecting reputation
-- Contractor mindset & resilience — burnout, boundaries, operating like a business
-- IR35 & contractor essentials — compliance, structure, staying protected
+${pillarBlock('theconcurrentcontractor')}
 
 Never write generic career content. Never sound like a recruiter or financial advisor. Never be preachy. UK English throughout. Peer-to-peer tone always.`,
   },
@@ -137,12 +142,7 @@ VERIFIED FACTS YOU CAN ALWAYS USE:
 - Residents and businesses can engage with OPDC via opdc.london.gov.uk
 
 Content pillars:
-- HS2 & station development — construction progress, milestones, what it means for the area
-- Housing & property — new developments, affordable homes, planning approvals
-- Local business & employment — business spotlights, new jobs, commercial opportunities
-- Community & residents — events, local services, neighbourhood voices
-- Transport & connectivity — Elizabeth Line, bus routes, TfL updates
-- Regeneration & investment — OPDC decisions, the bigger picture, what £1.7bn buys
+${pillarBlock('oldoaktown')}
 
 TONE: Community-first. Write as a local voice for residents and businesses — not developers or investors. Never write like a press release. UK English throughout.
 
@@ -171,12 +171,7 @@ When the brief's theme does not map to a specific verifiable local story, write 
 The audience: content creators, social media marketers, and small business owners who want results — more views, more engagement, more growth from AI-generated video content.
 
 Content pillars:
-- Prompt craft & technique — how to write prompts that produce cinematic, scroll-stopping results
-- Platform strategy — what works on TikTok vs Instagram vs YouTube, format differences
-- Niche content collections — prompts by category (business, lifestyle, education, fashion, food)
-- AI video tools & workflow — tools creators use, how to combine prompts with production
-- Virality & engagement — hooks, pacing, emotional triggers, the mechanics of the algorithm
-- Creator monetisation — turning content into revenue: affiliate, licensing, brand deals
+${pillarBlock('aiviralvideoprompts')}
 
 REQUIRED in every post:
 1. Hook in the very first line — no warm-up, no "hey guys", no context-setting

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import fs from 'fs';
 import path from 'path';
+import { BLOTATO_SITE_ACCOUNTS } from '@/agents/accounts';
 
 let _supabase: ReturnType<typeof createClient> | null = null;
 function getSupabase() {
@@ -14,16 +15,6 @@ function getSupabase() {
 const VERCEL_TOKEN   = process.env.VERCEL_TOKEN;
 const VERCEL_TEAM_ID = 'team_2fG7WKNEcvEFVhRPxREhEgs8';
 const BLOTATO_API_KEY = process.env.BLOTATO_API_KEY;
-
-// Site-specific account IDs only (Instagram/TikTok/Pinterest/YouTube are 1:1 per site;
-// Facebook/LinkedIn share a parent account ID across sites so are excluded here)
-const BLOTATO_SITE_ACCOUNTS: Record<string, string[]> = {
-  oldoaktown:              ['46484'],
-  theconcurrentcontractor: ['46494', '36388'],
-  masteryourcareerpath:    ['46492', '36387'],
-  aiviralvideoprompts:     ['46493', '41948', '6423', '36389'],
-  didianolue:              ['46490', '18212', '36391'],
-};
 
 // ─── Exported types ──────────────────────────────────────────────────────────
 

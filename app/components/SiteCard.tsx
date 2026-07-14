@@ -5,6 +5,7 @@ import TaskList from "./TaskList";
 import RevenueFlow from "./RevenueFlow";
 import SocialFeed from "./SocialFeed";
 import type { SiteDetail, DraftItem } from "../api/status/route";
+import { getSitePillars } from "@/agents/site-configs";
 
 function getBrandTextOnColor(hex: string): string {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -32,7 +33,6 @@ interface MarketingChannel {
   platform?: string;
   schedule?: string;
   cadence?: string;
-  contentPillars?: string[];
   subscribers?: string;
   nextAction: string;
 }
@@ -733,13 +733,13 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
                           </div>
                         )}
                       </div>
-                      {site.marketingPlan.blotato.contentPillars && (
+                      {getSitePillars(site.id).length > 0 && (
                         <div className="flex flex-col gap-1">
                           <span className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Content Pillars</span>
                           <div className="flex flex-wrap gap-1">
-                            {site.marketingPlan.blotato.contentPillars.map((pillar, i) => (
-                              <span key={i} className="rounded-md bg-zinc-200 px-2 py-0.5 text-[10px] font-medium text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">
-                                {pillar}
+                            {getSitePillars(site.id).map(pillar => (
+                              <span key={pillar.id} className="rounded-md bg-zinc-200 px-2 py-0.5 text-[10px] font-medium text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">
+                                {pillar.name}
                               </span>
                             ))}
                           </div>

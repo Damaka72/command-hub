@@ -13,6 +13,7 @@
 // API docs: https://help.blotato.com/api/publish-post.md
 
 import { GraderResult } from './types.js';
+import { ACCOUNT_MAP } from './accounts.js';
 import { logOk, logWarn, logError } from './utils.js';
 import dotenv from 'dotenv';
 import path from 'path';
@@ -21,68 +22,6 @@ dotenv.config({ path: path.join(process.cwd(), '.env.local') });
 
 const BLOTATO_API_KEY = process.env.BLOTATO_API_KEY;
 const BLOTATO_URL     = 'https://backend.blotato.com/v2/posts';
-
-// ── Account map ───────────────────────────────────────────────────────────────
-// Verified from blotato_list_accounts. Each entry maps to the correct
-// accountId and the platform-specific fields that go inside `target`.
-
-interface AccountTarget {
-  accountId: string;
-  platform:  string;          // value for content.platform + target.targetType
-  target:    Record<string, unknown>; // platform-specific fields inside target{}
-}
-
-const ACCOUNT_MAP: Record<string, Record<string, AccountTarget | null>> = {
-  didianolue: {
-    'LinkedIn':    {
-      accountId: '21073',
-      platform:  'linkedin',
-      target:    {}, // personal profile — no pageId needed
-    },
-    'X (Twitter)': {
-      accountId: '18212',
-      platform:  'twitter',
-      target:    {},
-    },
-    'Instagram':   null, // needs media — add manually in Blotato
-  },
-
-  masteryourcareerpath: {
-    'LinkedIn':    {
-      accountId: '21073',
-      platform:  'linkedin',
-      target:    { pageId: '105476735' }, // Master Your Career Path company page
-    },
-    'Instagram':   null, // needs media
-    'TikTok':      null, // TikTok requires video — add in Blotato manually
-  },
-
-  oldoaktown: {
-    'Facebook':    {
-      accountId: '31336',
-      platform:  'facebook',
-      target:    { pageId: '897799196752213' }, // Old Oak Town Facebook page
-    },
-    'Instagram':   null, // needs media
-    'X (Twitter)': null, // not connected
-  },
-
-  theconcurrentcontractor: {
-    'LinkedIn':    {
-      accountId: '21073',
-      platform:  'linkedin',
-      target:    { pageId: '108040401' }, // The Concurrent Contractor company page
-    },
-    'Instagram':   null, // needs media
-    'X (Twitter)': null, // not connected
-  },
-
-  aiviralvideoprompts: {
-    'TikTok':      null, // TikTok requires video — add in Blotato manually
-    'Instagram':   null, // needs media
-    'X (Twitter)': null, // not connected
-  },
-};
 
 // ── Scheduling ────────────────────────────────────────────────────────────────
 // Each post is scheduled for its named weekday at 09:00 UTC in the coming week.

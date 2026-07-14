@@ -29,7 +29,6 @@ const sites = [
         statusLabel: 'Active',
         platform: 'Instagram',
         schedule: '1 post/day',
-        contentPillars: ['Local news', 'Business spotlights', 'Regeneration updates', 'Community events', 'Planning & development'],
         nextAction: 'Continue weekly scheduling in Blotato',
       },
       beehiiv: {
@@ -56,7 +55,6 @@ const sites = [
         statusLabel: 'Active',
         platform: 'Instagram + YouTube',
         schedule: '1 post/day',
-        contentPillars: ['IR35 guidance', 'Contracting tips', 'Community wins', 'TCC Command Centre', 'Career transitions'],
         nextAction: 'Continue weekly scheduling in Blotato',
       },
       beehiiv: {
@@ -88,7 +86,6 @@ const sites = [
         statusLabel: 'Active',
         platform: 'Instagram',
         schedule: '1 post/day',
-        contentPillars: ['Career strategy', 'IR35 & contracting', 'PRIME framework', 'Community wins', 'LinkedIn growth'],
         nextAction: 'Continue weekly scheduling in Blotato',
       },
       beehiiv: {
@@ -115,7 +112,6 @@ const sites = [
         statusLabel: 'Active',
         platform: 'Instagram + TikTok + Pinterest + YouTube',
         schedule: '1 post/day',
-        contentPillars: ['Prompt demos', 'Before/after results', 'Quick tutorials', 'Gumroad product spotlights', 'Creator tips'],
         nextAction: 'Continue weekly scheduling in Blotato',
       },
       beehiiv: {
@@ -142,7 +138,6 @@ const sites = [
         statusLabel: 'Active',
         platform: 'Instagram + Twitter/X + YouTube',
         schedule: '3x/week',
-        contentPillars: ['Procurement insights', 'Contract wins', 'Commercial leadership', 'IR35 & consulting', 'Behind the brand'],
         nextAction: 'Continue weekly scheduling in Blotato',
       },
       beehiiv: {
