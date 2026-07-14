@@ -9,7 +9,7 @@ import DiPipeline from "./components/DiPipeline";
 import SundayView from "./components/SundayView";
 import PipelineRunner from "./components/PipelineRunner";
 import ActivityFeed from "./components/ActivityFeed";
-import type { SiteDetail, AgentSummary, StatusResponse, PortfolioCoordinator } from "./api/status/route";
+import type { SiteDetail, StatusResponse, PortfolioCoordinator, DraftItem } from "./api/status/route";
 import { PIPELINE_SITE_COUNT } from "@/agents/site-configs";
 
 const sites = [
@@ -165,11 +165,7 @@ function updatedAgoLabel(d: Date | null): string {
   return `${Math.floor(s / 60)}m ago`;
 }
 
-function countActiveAgents(summaries: AgentSummary[]): number {
-  return summaries.filter(a => a.status !== 'never_run').length;
-}
-
-function PortfolioBar({ statusMap, portfolioCoordinator }: { statusMap: StatusMap; portfolioCoordinator: PortfolioCoordinator | null }) {
+function PortfolioBar({ statusMap, portfolioCoordinator, reviewQueue }: { statusMap: StatusMap; portfolioCoordinator: PortfolioCoordinator | null; reviewQueue: DraftItem[] }) {
   const statuses = Object.values(statusMap);
 
   const allRevenueNull = statuses.every(s => s.monthlyRevenue === null);
@@ -177,9 +173,8 @@ function PortfolioBar({ statusMap, portfolioCoordinator }: { statusMap: StatusMa
     ? null
     : statuses.reduce((sum, s) => sum + (s.monthlyRevenue ?? 0), 0);
 
-  const activeAgents = statuses.reduce(
-    (sum, s) => sum + countActiveAgents(s.agentSummaries), 0
-  );
+  // Pipeline activity: how many of the pipeline sites have drafts in this week's review queue.
+  const pipelineSites = new Set(reviewQueue.map(d => d.siteId)).size;
 
   const outstanding = statuses.reduce(
     (sum, s) => sum + s.outstanding.overdueFollowUps + s.outstanding.awaitingApproval, 0
@@ -206,9 +201,15 @@ function PortfolioBar({ statusMap, portfolioCoordinator }: { statusMap: StatusMa
         <Divider />
 
         <span className="flex items-center gap-1.5 text-xs">
-          <span style={{ color: 'var(--hub-text-3)' }}>Agents</span>
-          <span className="font-semibold" style={{ color: activeAgents > 0 ? '#10b981' : 'var(--hub-text-3)' }}>
-            {activeAgents} active
+          <span style={{ color: 'var(--hub-text-3)' }}>Pipeline</span>
+          <span className="font-semibold" style={{
+            color: pipelineSites === PIPELINE_SITE_COUNT
+              ? '#10b981'
+              : pipelineSites > 0
+                ? '#f59e0b'
+                : 'var(--hub-text-3)',
+          }}>
+            {pipelineSites}/{PIPELINE_SITE_COUNT} sites
           </span>
         </span>
 
@@ -391,7 +392,7 @@ export default function Home() {
           ) : (
             <>
               {statusMap && Object.keys(statusMap.sites).length > 0 && (
-                <PortfolioBar statusMap={statusMap.sites} portfolioCoordinator={statusMap.portfolioCoordinator} />
+                <PortfolioBar statusMap={statusMap.sites} portfolioCoordinator={statusMap.portfolioCoordinator} reviewQueue={statusMap.reviewQueue} />
               )}
 
               {statusMap && (

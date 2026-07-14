@@ -29,25 +29,7 @@ const BLOTATO_SITE_ACCOUNTS: Record<string, string[]> = {
 
 export interface RevenueMetrics {
   model: string;
-  // consulting (didianolue)
-  pipelineValue?: number;
-  activeEnquiries?: number;
-  highPriority?: number;
-  overdueFollowUps?: number;
-  meetingsBooked?: number;
-  agentsActive?: number;
-  agentsTotal?: number;
-  // all sites
   contentActive?: boolean;
-  monthlyRevenue?: number;
-}
-
-export interface AgentSummary {
-  name: string;
-  displayName: string;
-  status: string;
-  ago: string | null;
-  lastAction: string | null;
 }
 
 export interface ReadinessItem {
@@ -112,13 +94,10 @@ export interface RevenueConfig {
 export interface SiteDetail {
   up: boolean;
   deploy: { state: string; ago: string; commitMessage: string } | null;
-  agent: { status: string; ago: string | null } | null;
   revenue: RevenueMetrics | null;
-  agentSummaries: AgentSummary[];
   coordinator: CoordinatorData | null;
   readiness: ReadinessItem[];
   monthlyRevenue: number | null;
-  lastActivity: string | null;
   scheduledCount: number;
   outstanding: { overdueFollowUps: number; awaitingApproval: number; };
   revenueConfig: RevenueConfig | null;
@@ -139,7 +118,6 @@ interface SiteConfig {
   url: string;
   vercelProjectId: string;
   revenueModel: string;
-  revenueAgents?: string[];
   newsletterProvider: string | null;
   newsletterConnected: boolean;
   revenueProvider: string | null;
@@ -202,51 +180,8 @@ const SITES: SiteConfig[] = [
     revenueProvider: null,
     revenueConnected: false,
     servesMostData: true,
-    revenueAgents: [
-      'https://didianolue.co.uk/data/agent-summaries/scout.json',
-      'https://didianolue.co.uk/data/agent-summaries/outreach.json',
-      'https://didianolue.co.uk/data/agent-summaries/enquiry.json',
-      'https://didianolue.co.uk/data/agent-summaries/cv-tailor.json',
-      'https://didianolue.co.uk/data/agent-summaries/packages.json',
-      'https://didianolue.co.uk/data/agent-summaries/curator.json',
-      'https://didianolue.co.uk/data/agent-summaries/seo.json',
-      'https://didianolue.co.uk/data/agent-summaries/health.json',
-    ],
   },
 ];
-
-// Legacy per-site agents — still active, shown in the Agents tab.
-// The new multiagent pipeline (subagent, grader) is handled separately
-// via fetchSubagentStatus() and fetchGraderVerdict().
-const SITE_AGENT_NAMES: Record<string, string[]> = {
-  oldoaktown:              ['curator', 'newsletter', 'health', 'seo'],
-  theconcurrentcontractor: ['curator', 'newsletter', 'health', 'seo', 'insight'],
-  masteryourcareerpath:    ['curator', 'newsletter', 'health', 'seo', 'lead-nurture', 'product'],
-  aiviralvideoprompts:     ['curator', 'newsletter', 'health', 'seo', 'prompt-pack'],
-  didianolue:              ['curator', 'newsletter', 'health', 'seo', 'scout', 'outreach', 'cv-tailor', 'packages', 'enquiry'],
-};
-
-const AGENT_DISPLAY_NAMES: Record<string, string> = {
-  curator:       'Content Curator',
-  newsletter:    'Newsletter',
-  health:        'Site Health',
-  seo:           'SEO Gaps',
-  repurpose:     'Repurpose',
-  insight:       'Contract Insight',
-  'lead-nurture':'Lead Nurture',
-  product:       'Products',
-  'prompt-pack': 'Prompt Pack',
-  scout:         'Opportunity Scout',
-  outreach:      'Outreach',
-  'cv-tailor':        'CV Tailor',
-  packages:           'Applications',
-  social:             'Social',
-  enquiry:            'Enquiries',
-  'marketing-assets': 'Marketing Assets',
-};
-
-// Didianolue total (newsletter + 8 revenue agents; repurpose + social retired)
-const DIDIANOLUE_AGENT_TOTAL = 9;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -302,30 +237,6 @@ async function checkVercel(projectId: string): Promise<{ state: string; ago: str
       commitMessage: (d.meta?.githubCommitMessage ?? '').split('\n')[0].slice(0, 60),
     };
   } catch { return null; }
-}
-
-async function fetchAllAgentSummaries(siteUrl: string, siteId: string): Promise<AgentSummary[]> {
-  const agentNames = SITE_AGENT_NAMES[siteId] ?? [];
-  return Promise.all(
-    agentNames.map(async (name): Promise<AgentSummary> => {
-      const data = await safeFetch(`${siteUrl}/data/agent-summaries/${name}.json`);
-      const status = data === null ? 'never_run' : ((data.status as string) ?? 'unknown');
-      const ago = data?.generatedAt ? timeAgo(data.generatedAt as string) : null;
-      // Derive a brief last-action label from known fields
-      let lastAction: string | null = null;
-      if (data && status !== 'never_run') {
-        if (name === 'scout'    && typeof data.count    === 'number') lastAction = `${data.count} opportunities`;
-        if (name === 'outreach' && typeof data.total    === 'number') lastAction = `${data.total} contacts, ${data.overdue ?? 0} overdue`;
-        if (name === 'enquiry'  && typeof data.total    === 'number') lastAction = `${data.total} enquiries, ${data.unread ?? 0} unread`;
-        if (name === 'curator'  && typeof data.stats    === 'object') lastAction = `${(data.topPicks as unknown[])?.length ?? 0} picks`;
-        if (name === 'newsletter' && data.latestDate)                 lastAction = `Latest ${data.latestDate}`;
-        if (name === 'health'   && typeof data.pagesOk  === 'number') lastAction = `${data.pagesOk} pages OK`;
-        if (name === 'seo'      && typeof data.totalPublished === 'number') lastAction = `${data.gaps ?? 0} gaps`;
-        if (name === 'social'   && typeof data.scheduled === 'number') lastAction = `${data.scheduled} scheduled`;
-      }
-      return { name, displayName: AGENT_DISPLAY_NAMES[name] ?? name, status, ago, lastAction };
-    })
-  );
 }
 
 async function fetchCoordinator(siteUrl: string, site: SiteConfig): Promise<CoordinatorData | null> {
@@ -399,15 +310,7 @@ async function fetchBlotatoScheduledCounts(): Promise<Record<string, number>> {
   } catch { return {}; }
 }
 
-const SITE_RUBRIC_NAMES: Record<string, string> = {
-  didianolue:              'Authority rubric',
-  masteryourcareerpath:    'PRIME/OPERATE rubric',
-  theconcurrentcontractor: 'Contractor lens rubric',
-  oldoaktown:              'No-fabrication rubric',
-  aiviralvideoprompts:     'Conversion rubric',
-};
-
-async function fetchSubagentStatus(siteUrl: string, siteId: string): Promise<SubagentStatus | null> {
+async function fetchSubagentStatus(siteId: string): Promise<SubagentStatus | null> {
   // 1. Local file (written by npm run pipeline on this machine)
   const local = readLocalJson<SubagentStatus>(`data/sites/${siteId}/subagent-status.json`);
   if (local) return local;
@@ -419,18 +322,10 @@ async function fetchSubagentStatus(siteUrl: string, siteId: string): Promise<Sub
     .single();
   const row0 = rawRow0 as unknown as { subagent_status: unknown } | null;
   if (row0?.subagent_status) return row0.subagent_status as SubagentStatus;
-  // 3. Network fetch (legacy fallback)
-  const data = await safeFetch(`${siteUrl}/data/agent-summaries/subagent-status.json`);
-  if (!data) return null;
-  return {
-    lastRun:        (data.lastRun        as string)  ?? null,
-    status:         (data.status         as SubagentStatus['status']) ?? 'never_run',
-    briefGenerated: !!(data.briefGenerated),
-    briefSummary:   (data.briefSummary   as string)  ?? null,
-  };
+  return null;
 }
 
-async function fetchGraderVerdict(siteUrl: string, siteId: string): Promise<GraderVerdict | null> {
+async function fetchGraderVerdict(siteId: string): Promise<GraderVerdict | null> {
   // 1. Local file
   const local = readLocalJson<GraderVerdict>(`data/sites/${siteId}/grader-verdict.json`);
   if (local) return local;
@@ -442,16 +337,7 @@ async function fetchGraderVerdict(siteUrl: string, siteId: string): Promise<Grad
     .single();
   const row1 = rawRow1 as unknown as { grader_verdict: unknown } | null;
   if (row1?.grader_verdict) return row1.grader_verdict as GraderVerdict;
-  // 3. Network fetch
-  const data = await safeFetch(`${siteUrl}/data/agent-summaries/grader-verdict.json`);
-  if (!data) return null;
-  return {
-    rubricName:      SITE_RUBRIC_NAMES[siteId] ?? 'Outcomes rubric',
-    verdict:         (data.verdict         as GraderVerdict['verdict']) ?? 'never_run',
-    retryCount:      typeof data.retryCount === 'number' ? data.retryCount : 0,
-    failedCriterion: (data.failedCriterion as string) ?? null,
-    lastRun:         (data.lastRun         as string) ?? null,
-  };
+  return null;
 }
 
 async function fetchPortfolioCoordinator(): Promise<PortfolioCoordinator | null> {
@@ -491,32 +377,23 @@ async function fetchReviewQueue(): Promise<DraftItem[]> {
       const q = row2.review_queue as { drafts?: DraftItem[] };
       if (q.drafts?.length) { allItems.push(...q.drafts); continue; }
     }
-    // 3. Network fetch (legacy)
-    const site = SITES.find(s => s.id === siteId);
-    if (!site) continue;
-    const data = await safeFetch(`${site.url}/data/agent-summaries/review-queue.json`);
-    if (!data || !Array.isArray(data.drafts)) continue;
-    allItems.push(...(data.drafts as DraftItem[]));
   }
 
   return allItems;
 }
 
 function computeReadiness(
-  agentSummaries: AgentSummary[],
   coordinator: CoordinatorData | null,
   site: SiteConfig,
   contentActive: boolean,
 ): ReadinessItem[] {
-  const anyActive = agentSummaries.some(a => a.status !== 'never_run');
-  const curator   = agentSummaries.find(a => a.name === 'curator');
-  const themeSet  = !!(coordinator?.weeklyTheme);
+  const themeSet = !!(coordinator?.weeklyTheme);
 
   return [
     {
       label:  'Content scheduled in Blotato',
       ok:     contentActive,
-      reason: contentActive ? 'Connected' : 'Run the Social Agent and schedule posts in Blotato',
+      reason: contentActive ? 'Connected' : 'Schedule posts in Blotato',
     },
     {
       label:  `Newsletter → ${site.newsletterProvider ?? 'email provider'}`,
@@ -539,57 +416,9 @@ function computeReadiness(
     {
       label:  'Weekly theme set',
       ok:     themeSet,
-      reason: themeSet ? `"${coordinator!.weeklyTheme}"` : 'Run the Social Agent with a weekly theme',
-    },
-    {
-      label:  'Content curator active',
-      ok:     !!(curator && curator.status !== 'never_run'),
-      reason: (curator && curator.status !== 'never_run') ? 'Running' : 'Curator agent not yet run',
-    },
-    {
-      label:  'Agent data flowing',
-      ok:     anyActive,
-      reason: anyActive ? 'Agents active' : 'No agents have run yet',
+      reason: themeSet ? `"${coordinator!.weeklyTheme}"` : 'Set this week\'s theme in the weekly plan',
     },
   ];
-}
-
-async function fetchRevenueMetrics(
-  site: SiteConfig,
-  newsletterData: Record<string, unknown> | null,
-  agentSummaries: AgentSummary[],
-): Promise<RevenueMetrics> {
-  const base: RevenueMetrics = {
-    model: site.revenueModel,
-    contentActive: !!(newsletterData && newsletterData.status !== 'never_run'),
-  };
-
-  if (site.revenueModel !== 'consulting' || !site.revenueAgents) return base;
-
-  const [scout, outreach, enquiry, ...rest] = await Promise.all(
-    site.revenueAgents.map(url => safeFetch(url))
-  );
-
-  const opportunityCount = typeof scout?.count === 'number' ? scout.count : 0;
-  const pipelineValue    = opportunityCount > 0 ? opportunityCount * 900 : undefined;
-  const overdueFollowUps = typeof outreach?.overdue   === 'number' ? outreach.overdue   : undefined;
-  const meetingsBooked   = typeof outreach?.meetings  === 'number' ? outreach.meetings  : undefined;
-  const activeEnquiries  = typeof enquiry?.unread     === 'number' ? enquiry.unread     : undefined;
-  const highPriority     = typeof enquiry?.highPriority === 'number' ? enquiry.highPriority : undefined;
-
-  const allAgentData = [newsletterData, scout, outreach, enquiry, ...rest];
-  const agentsActive = allAgentData.filter(d => d && d.status !== 'never_run').length;
-
-  return {
-    ...base,
-    pipelineValue,
-    activeEnquiries,
-    highPriority,
-    overdueFollowUps,
-    meetingsBooked,
-    agentsActive,
-    agentsTotal: DIDIANOLUE_AGENT_TOTAL,
-  };
 }
 
 // ─── Main handler ─────────────────────────────────────────────────────────────
@@ -603,60 +432,36 @@ export async function GET() {
 
   const results = await Promise.all(
     SITES.map(async (site): Promise<[string, SiteDetail]> => {
-      // Parallel: uptime + Vercel deploy + newsletter agent + all agent summaries + coordinator
-      const [up, deploy, newsletterData, agentSummaries, coordinator, revenueConfig, subagentStatus, graderVerdict] = await Promise.all([
+      // Parallel: uptime + Vercel deploy + coordinator + revenue config + pipeline status
+      const [up, deploy, coordinator, revenueConfig, subagentStatus, graderVerdict] = await Promise.all([
         checkUptime(site.url),
         checkVercel(site.vercelProjectId),
-        safeFetch(`${site.url}/data/agent-summaries/newsletter.json`),
-        fetchAllAgentSummaries(site.url, site.id),
         fetchCoordinator(site.url, site),
         fetchRevenueConfig(site.url),
-        fetchSubagentStatus(site.url, site.id),
-        fetchGraderVerdict(site.url, site.id),
+        fetchSubagentStatus(site.id),
+        fetchGraderVerdict(site.id),
       ]);
 
-      // Legacy agent field (backwards compat with existing page.tsx consumer)
-      const agent = newsletterData
-        ? newsletterData.status === 'never_run'
-          ? { status: 'never_run', ago: null }
-          : { status: (newsletterData.status as string) ?? 'ok', ago: newsletterData.generatedAt ? timeAgo(newsletterData.generatedAt as string) : null }
-        : null;
-
-      const [revenue, monthlyRevenue] = await Promise.all([
-        fetchRevenueMetrics(site, newsletterData, agentSummaries),
+      const monthlyRevenue = await (
         site.id === 'aiviralvideoprompts' && process.env.GUMROAD_ACCESS
           ? fetchGumroadMonthlyRevenue(process.env.GUMROAD_ACCESS)
-          : resolveMonthlyRevenue(revenueConfig),
-      ]);
-      const readiness = computeReadiness(agentSummaries, coordinator, site, !!(revenue.contentActive));
-
-      // Last activity: most recent generatedAt across all agents
-      const timestamps = agentSummaries
-        .map(a => a.ago)
-        .filter((a): a is string => a !== null);
-      const lastActivity = timestamps.length > 0 ? timestamps[0] : null;
+          : resolveMonthlyRevenue(revenueConfig)
+      );
 
       const scheduledCount = blotatoCounts[site.id] ?? 0;
-
-      // Outstanding
-      const outreachSummary = agentSummaries.find(a => a.name === 'outreach');
-      const curatorSummary  = agentSummaries.find(a => a.name === 'curator');
-      const overdueFollowUps  = typeof revenue.overdueFollowUps === 'number' ? revenue.overdueFollowUps : 0;
-      const awaitingApproval  = curatorSummary?.lastAction?.match(/(\d+) picks/)?.[1]
-        ? parseInt(curatorSummary.lastAction) : 0;
+      const contentActive  = scheduledCount > 0;
+      const revenue: RevenueMetrics = { model: site.revenueModel, contentActive };
+      const readiness      = computeReadiness(coordinator, site, contentActive);
 
       return [site.id, {
         up,
         deploy,
-        agent,
         revenue,
-        agentSummaries,
         coordinator,
         readiness,
         monthlyRevenue,
-        lastActivity,
         scheduledCount,
-        outstanding: { overdueFollowUps, awaitingApproval },
+        outstanding: { overdueFollowUps: 0, awaitingApproval: 0 },
         revenueConfig,
         subagentStatus,
         graderVerdict,
