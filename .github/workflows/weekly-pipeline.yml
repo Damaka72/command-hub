@@ -1,9 +1,11 @@
-name: Daily Content Pipeline
+name: Weekly Content Pipeline
 
 on:
   schedule:
-    # Runs at 07:00 UTC every day (8am BST / 7am GMT)
-    - cron: '0 7 * * *'
+    # Runs at 07:00 UTC every Sunday (8am BST / 7am GMT).
+    # One run generates the whole week's briefs (5 sites x 5 days),
+    # so there is no need to run it daily.
+    - cron: '0 7 * * 0'
   workflow_dispatch:
     inputs:
       site:
