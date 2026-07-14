@@ -28,6 +28,40 @@ export async function pushSiteDataToSupabase(
   }, { onConflict: 'site_id' });
 }
 
+// Append this run's drafts to the permanent, append-only content library — one
+// row per site/week/day/platform. Unlike pipeline_site_data (which holds only
+// the latest run per site), this accumulates every week for repurposing.
+// Re-running the same week upserts in place rather than duplicating.
+export async function appendToContentLibrary(
+  siteId: string,
+  weekCommencing: string,
+  items: {
+    dayName: string;
+    platform: string;
+    graderVerdict: string;
+    retryCount?: number;
+    fullContent: string;
+    generatedAt: string;
+  }[],
+): Promise<void> {
+  if (items.length === 0) return;
+
+  const rows = items.map(it => ({
+    site_id:         siteId,
+    week_commencing: weekCommencing,
+    day_name:        it.dayName,
+    platform:        it.platform,
+    grader_verdict:  it.graderVerdict,
+    retry_count:     it.retryCount ?? 0,
+    content:         it.fullContent,
+    generated_at:    it.generatedAt,
+  }));
+
+  await supabase
+    .from('content_library')
+    .upsert(rows, { onConflict: 'site_id,week_commencing,day_name,platform' });
+}
+
 // ── Claude client ─────────────────────────────────────────────────────────────
 
 export const claude = new Anthropic({

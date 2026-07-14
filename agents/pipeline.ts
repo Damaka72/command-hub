@@ -22,7 +22,7 @@ import { runCoordinator } from './coordinator.js';
 import { runSubagents } from './subagents.js';
 import { runGraders } from './grader.js';
 import { pushApprovedToBlotato } from './blotato.js';
-import { writeJson, readJson, sitePath, sessionPath, log, logStep, logOk, logError, now, pushSiteDataToSupabase } from './utils.js';
+import { writeJson, readJson, sitePath, sessionPath, log, logStep, logOk, logError, now, pushSiteDataToSupabase, appendToContentLibrary } from './utils.js';
 import { SITE_CONFIGS } from './site-configs.js';
 
 async function run(): Promise<void> {
@@ -100,6 +100,9 @@ async function run(): Promise<void> {
     try { subagentStatus = readJson(sitePath(siteId, 'subagent-status.json')); } catch { /* not written yet */ }
     try { graderVerdict  = readJson(sitePath(siteId, 'grader-verdict.json'));  } catch { /* not written yet */ }
     await pushSiteDataToSupabase(siteId, subagentStatus, graderVerdict, queue);
+
+    // Append to the permanent content library (accumulates every week for repurposing)
+    await appendToContentLibrary(siteId, coordinator.weekCommencing, items);
 
     const sitePass = siteResults.filter(r => r.verdict === 'pass').length;
     logOk(`${siteId} — review-queue.json written (${sitePass}/5 days approved)`);
