@@ -1,27 +1,27 @@
 {
-  "weekCommencing": "2026-05-18",
+  "weekCommencing": "2026-07-20",
   "campaignObjective": null,
-  "setAt": "2026-05-17T20:00:00.000Z",
+  "setAt": "2026-07-14T00:00:00.000Z",
   "sites": {
     "didianolue": {
-      "pillarId": "contract-lifecycle",
-      "theme": "Contract lifecycle management — governance, visibility, and performance across the full lifecycle"
+      "pillarId": "thought-leadership",
+      "theme": "Insights & thought leadership — AI in procurement, Procurement Act 2023, G-Cloud frameworks, sector trends and a forward-looking perspective"
     },
     "masteryourcareerpath": {
-      "pillarId": "cv-brand",
-      "theme": "CV, LinkedIn & personal brand — standing out in an AI-screened world"
+      "pillarId": "ai-job-market",
+      "theme": "AI & the changing job market — how AI is reshaping hiring, screening and careers, and what professionals need to do about it now"
     },
     "theconcurrentcontractor": {
-      "pillarId": "multiple-contracts",
-      "theme": "Running multiple contracts — the OPERATE framework, scheduling, managing two clients without chaos"
+      "pillarId": "ir35-essentials",
+      "theme": "IR35 & contractor essentials — compliance, structure and staying protected: the non-negotiable fundamentals every serious contractor needs to understand"
     },
     "oldoaktown": {
-      "pillarId": "hs2-station",
-      "theme": "HS2 & station development — what the new Old Oak Common station means for the area"
+      "pillarId": "regeneration-investment",
+      "theme": "Regeneration & investment — the bigger picture: OPDC decisions, what £1.7bn buys the area, and the long-term vision for Old Oak Common"
     },
     "aiviralvideoprompts": {
-      "pillarId": "prompt-craft",
-      "theme": "Prompt craft & technique — writing prompts that produce cinematic, scroll-stopping results"
+      "pillarId": "virality-engagement",
+      "theme": "Virality & engagement — what makes content travel: hooks, pacing, emotional triggers and the mechanics of the algorithm"
     }
   }
 }
