@@ -11,6 +11,7 @@ import SundayView from "./components/SundayView";
 import PipelineRunner from "./components/PipelineRunner";
 import ActivityFeed from "./components/ActivityFeed";
 import type { SiteDetail, AgentSummary, StatusResponse, PortfolioCoordinator } from "./api/status/route";
+import { PIPELINE_SITE_COUNT } from "@/agents/site-configs";
 
 const sites = [
   {
@@ -235,13 +236,13 @@ function PortfolioBar({ statusMap, portfolioCoordinator }: { statusMap: StatusMa
         <span className="flex items-center gap-1.5 text-xs">
           <span style={{ color: 'var(--hub-text-3)' }}>Batch</span>
           <span className="font-semibold" style={{
-            color: (portfolioCoordinator?.batchStatus.approved ?? 0) === 5
+            color: (portfolioCoordinator?.batchStatus.approved ?? 0) === PIPELINE_SITE_COUNT
               ? '#10b981'
               : (portfolioCoordinator?.batchStatus.approved ?? 0) > 0
                 ? '#f59e0b'
                 : 'var(--hub-text-3)',
           }}>
-            {portfolioCoordinator?.batchStatus.approved ?? 0}/5 approved
+            {portfolioCoordinator?.batchStatus.approved ?? 0}/{PIPELINE_SITE_COUNT} approved
           </span>
         </span>
       </div>

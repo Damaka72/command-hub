@@ -498,7 +498,7 @@ async function fetchPortfolioCoordinator(): Promise<PortfolioCoordinator | null>
 }
 
 async function fetchReviewQueue(): Promise<DraftItem[]> {
-  const siteIds = ['didianolue', 'masteryourcareerpath', 'theconcurrentcontractor', 'oldoaktown', 'aiviralvideoprompts'];
+  const siteIds = ['masteryourcareerpath', 'theconcurrentcontractor', 'oldoaktown', 'aiviralvideoprompts'];
   const allItems: DraftItem[] = [];
 
   for (const siteId of siteIds) {

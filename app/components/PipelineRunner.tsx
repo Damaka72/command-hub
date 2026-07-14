@@ -105,7 +105,7 @@ export default function PipelineRunner() {
         <div className="min-w-0">
           <h2 className="text-sm font-semibold" style={{ color: 'var(--hub-text-1)' }}>Content Pipeline</h2>
           <p className="text-[11px]" style={{ color: 'var(--hub-text-3)' }}>
-            What&rsquo;s happening now — generate this week&rsquo;s posts across all 5 sites
+            What&rsquo;s happening now — generate this week&rsquo;s posts across all 4 sites
           </p>
         </div>
 

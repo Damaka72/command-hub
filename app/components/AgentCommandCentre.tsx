@@ -5,7 +5,6 @@ import type { PortfolioCoordinator, DreamingStatus, SiteDetail } from "../api/st
 import { SITE_SHORT } from "../lib/siteConstants";
 
 const SITE_ORDER = [
-  'didianolue',
   'masteryourcareerpath',
   'theconcurrentcontractor',
   'oldoaktown',

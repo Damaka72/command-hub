@@ -1,3 +1,5 @@
+// NOT CALLED — approval flow will invoke this in Phase 2. Never call from the pipeline.
+//
 // ── Blotato Push ─────────────────────────────────────────────────────────────
 // Takes approved drafts from the pipeline and pushes them to Blotato for
 // scheduling via the v2 REST API.

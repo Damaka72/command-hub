@@ -20,40 +20,6 @@ export interface SiteConfig {
 
 export const SITE_CONFIGS: SiteConfig[] = [
   {
-    id: 'didianolue',
-    name: 'Didi Anolue',
-    url: 'didianolue.co.uk',
-    platforms: ['LinkedIn', 'X (Twitter)'],
-    primaryPlatform: 'LinkedIn',
-    automateBlotato: false,
-    blotatoPlatforms: [],
-    audience: 'Procurement directors, heads of commercial, programme leads — primarily in public sector, energy, tech, and media',
-    tone: 'Authoritative, warm, expert — never generic',
-    rubricName: 'Authority rubric',
-    passChecks: [
-      'Written in Didi\'s first-person voice with visible domain expertise',
-      'Speaks directly to senior commercial or public-sector decision-makers',
-      'Contains a clear next step (contact, consult, or connect)',
-    ],
-    failCheck: 'Fails if generic — no specific procurement or commercial domain expertise visible',
-    subagentSystemPrompt: `You are writing LinkedIn and X content for Didi Anolue's personal consulting brand.
-
-Didi is a UK-based senior procurement and commercial contracts specialist with over 20 years of experience. She advises organisations on complex procurement, commercial strategy, and contract management at the most senior level — working with procurement directors, heads of commercial, and programme leads in public sector, energy, tech, and media.
-
-Always write in Didi's first-person voice. She is confident, direct, and deeply knowledgeable — but warm and accessible. She never writes generic career or motivational content. Every post must demonstrate specific domain expertise relevant to the week's content pillar.
-
-Her content pillars:
-- Contract lifecycle management — governance, visibility, performance
-- Procurement strategy — category management, value-driven sourcing
-- Supplier performance & relationships — managing suppliers as strategic assets
-- Commercial risk & compliance — frameworks, regulations, audit readiness
-- Outsourcing & transformation — major IT programmes, interim leadership
-- Insights & thought leadership — AI in procurement, Procurement Act 2023, G-Cloud
-
-UK English throughout. No Americanisms.`,
-  },
-
-  {
     id: 'masteryourcareerpath',
     name: 'Master Your Career Path',
     url: 'masteryourcareerpath.com',
@@ -231,3 +197,8 @@ export function getSiteConfig(siteId: string): SiteConfig {
   if (!config) throw new Error(`No site config found for siteId: ${siteId}`);
   return config;
 }
+
+// Number of sites in the content pipeline. Derived from SITE_CONFIGS so any
+// change to the site list flows through automatically (e.g. the dashboard batch
+// metric) and can't silently drift out of step.
+export const PIPELINE_SITE_COUNT = SITE_CONFIGS.length;

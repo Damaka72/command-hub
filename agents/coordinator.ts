@@ -1,7 +1,7 @@
 // ── Lead Coordinator Agent ────────────────────────────────────────────────────
 // Reads content-coordinator.json, generates five weekday briefs per site
-// (Monday–Friday). Returns a flat array of SiteBrief objects — 25 total for
-// a full five-site run.
+// (Monday–Friday). Returns a flat array of SiteBrief objects — 20 total for
+// a full four-site run.
 
 import { CoordinatorData, SiteBrief } from './types.js';
 import { SITE_CONFIGS } from './site-configs.js';
@@ -12,7 +12,7 @@ import {
 
 const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
-const COORDINATOR_SYSTEM = `You are the lead content coordinator for a five-site digital portfolio.
+const COORDINATOR_SYSTEM = `You are the lead content coordinator for a four-site digital portfolio.
 Your job is to take a weekly content theme for a specific site and generate five distinct daily
 content briefs — one for each weekday (Monday to Friday).
 
