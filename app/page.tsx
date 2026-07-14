@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import SiteCard from "./components/SiteCard";
 import DailyBriefing from "./components/DailyBriefing";
@@ -8,6 +8,8 @@ import AgentCommandCentre from "./components/AgentCommandCentre";
 import SidebarTasks from "./components/SidebarTasks";
 import DiPipeline from "./components/DiPipeline";
 import SundayView from "./components/SundayView";
+import PipelineRunner from "./components/PipelineRunner";
+import ActivityFeed from "./components/ActivityFeed";
 import type { SiteDetail, AgentSummary, StatusResponse, PortfolioCoordinator } from "./api/status/route";
 
 const sites = [
@@ -155,6 +157,14 @@ const sites = [
 
 type StatusMap = Record<string, SiteDetail>;
 
+function updatedAgoLabel(d: Date | null): string {
+  if (!d) return '—';
+  const s = Math.floor((Date.now() - d.getTime()) / 1000);
+  if (s < 5)  return 'just now';
+  if (s < 60) return `${s}s ago`;
+  return `${Math.floor(s / 60)}m ago`;
+}
+
 function countActiveAgents(summaries: AgentSummary[]): number {
   return summaries.filter(a => a.status !== 'never_run').length;
 }
@@ -242,12 +252,30 @@ function PortfolioBar({ statusMap, portfolioCoordinator }: { statusMap: StatusMa
 export default function Home() {
   const [statusMap,   setStatusMap]   = useState<StatusResponse | null>(null);
   const [showSunday,  setShowSunday]  = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [refreshing,  setRefreshing]  = useState(false);
+  const [, setTick]   = useState(0);
 
-  useEffect(() => {
+  const loadStatus = useCallback(() => {
+    setRefreshing(true);
     fetch('/api/status')
       .then(r => r.json())
-      .then(setStatusMap)
-      .catch(() => setStatusMap({ sites: {}, portfolioCoordinator: null, dreaming: null, reviewQueue: [] }));
+      .then((d: StatusResponse) => { setStatusMap(d); setLastUpdated(new Date()); })
+      .catch(() => setStatusMap(prev => prev ?? { sites: {}, portfolioCoordinator: null, dreaming: null, reviewQueue: [] }))
+      .finally(() => setRefreshing(false));
+  }, []);
+
+  // Poll for fresh status every 30s so the board stays live without a reload.
+  useEffect(() => {
+    loadStatus();
+    const id = setInterval(loadStatus, 30_000);
+    return () => clearInterval(id);
+  }, [loadStatus]);
+
+  // Re-render every 5s so the "updated Ns ago" label keeps ticking between polls.
+  useEffect(() => {
+    const id = setInterval(() => setTick(t => t + 1), 5_000);
+    return () => clearInterval(id);
   }, []);
 
   return (
@@ -320,6 +348,18 @@ export default function Home() {
               >
                 Ops Guide
               </a>
+              <button
+                onClick={loadStatus}
+                title="Refresh now"
+                className="flex items-center gap-2 rounded-full px-3.5 py-2 text-xs font-medium transition-all hover:brightness-125"
+                style={{ background: 'var(--hub-surface-2)', color: 'var(--hub-text-2)', border: '1px solid var(--hub-border)' }}
+              >
+                <span
+                  className={`h-2 w-2 rounded-full ${refreshing ? 'animate-hub-pulse' : ''}`}
+                  style={{ background: '#34d399', boxShadow: '0 0 8px rgba(52,211,153,0.6)' }}
+                />
+                {refreshing ? 'Updating…' : `Live · ${updatedAgoLabel(lastUpdated)}`}
+              </button>
               <div
                 className="flex items-center gap-2 rounded-full px-4 py-2"
                 style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}
@@ -378,6 +418,12 @@ export default function Home() {
               )}
 
               <main className="flex-1 px-6 py-8">
+                {/* Live control + history: what's happening now / what has happened */}
+                <div className="mb-6 grid gap-5 lg:grid-cols-2">
+                  <PipelineRunner />
+                  <ActivityFeed />
+                </div>
+
                 <div className="grid gap-5 sm:grid-cols-2">
                   {sites.map((site) => (
                     <SiteCard
@@ -427,7 +473,7 @@ export default function Home() {
                 style={{ borderTop: '1px solid var(--hub-border)', background: 'var(--hub-surface)' }}
               >
                 <p className="text-center text-xs" style={{ color: 'var(--hub-text-3)' }}>
-                  Tasks saved in repo · Status refreshes on load
+                  Tasks saved in repo · Live · auto-refreshes every 30s
                 </p>
               </footer>
             </>
