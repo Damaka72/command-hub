@@ -133,7 +133,7 @@ const SITES: SiteConfig[] = [
     url: 'https://www.theconcurrentcontractor.com',
     vercelProjectId: 'prj_6a52DLbKMQSpKfcGFe0KpqfpNKie',
     revenueModel: 'leadgen',
-    newsletterProvider: 'Constant Contact',
+    newsletterProvider: 'Beehiiv',
     newsletterConnected: false,
     revenueProvider: null,
     revenueConnected: false,
