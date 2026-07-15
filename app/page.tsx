@@ -337,6 +337,20 @@ export default function Home() {
                 Newsletters
               </a>
               <a
+                href="/friday"
+                className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:brightness-125"
+                style={{ background: 'rgba(16,185,129,0.1)', color: '#34d399', border: '1px solid rgba(16,185,129,0.25)' }}
+              >
+                Friday
+              </a>
+              <a
+                href="/library"
+                className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:brightness-125"
+                style={{ background: 'rgba(168,85,247,0.1)', color: '#c4b5fd', border: '1px solid rgba(168,85,247,0.25)' }}
+              >
+                Library
+              </a>
+              <a
                 href="/guide"
                 className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:brightness-125"
                 style={{ background: 'var(--hub-surface-2)', color: 'var(--hub-text-2)', border: '1px solid var(--hub-border)' }}
