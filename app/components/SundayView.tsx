@@ -21,6 +21,14 @@ const CHECKLIST_ITEMS = [
   "Review queue cleared — approved posts pushed to Blotato",
 ] as const;
 
+// Direct link to the matching newsletter tab, shown next to each newsletter
+// checklist item (keyed by its index in CHECKLIST_ITEMS above).
+const NEWSLETTER_LINKS: Record<number, string> = {
+  5: "the-prompt-ly",
+  6: "the-pathway",
+  7: "the-oak",
+};
+
 // The exact paste text used every Sunday to brief Cowork.
 // To update, edit this constant directly.
 const COWORK_BRIEF = `I need you to post this week's approved media posts (Instagram, TikTok, Pinterest, YouTube) to Blotato. Text posts (LinkedIn, Facebook, Twitter/X) are pushed from the dashboard Review queue — this brief covers media posts only.
@@ -227,24 +235,34 @@ export default function SundayView() {
           {/* Items */}
           <div className="flex flex-col gap-0.5">
             {CHECKLIST_ITEMS.map((item, i) => (
-              <label
+              <div
                 key={i}
-                className="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-zinc-50 dark:hover:bg-zinc-800/60"
+                className="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-zinc-50 dark:hover:bg-zinc-800/60"
               >
-                <input
-                  type="checkbox"
-                  checked={checked[i] ?? false}
-                  onChange={() => toggleCheck(i)}
-                  className="h-4 w-4 flex-shrink-0 rounded border-zinc-300 accent-emerald-500 dark:border-zinc-600"
-                />
-                <span className={`text-sm ${
-                  checked[i]
-                    ? "text-zinc-400 line-through dark:text-zinc-500"
-                    : "text-zinc-700 dark:text-zinc-300"
-                }`}>
-                  {item}
-                </span>
-              </label>
+                <label className="flex flex-1 cursor-pointer items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={checked[i] ?? false}
+                    onChange={() => toggleCheck(i)}
+                    className="h-4 w-4 flex-shrink-0 rounded border-zinc-300 accent-emerald-500 dark:border-zinc-600"
+                  />
+                  <span className={`text-sm ${
+                    checked[i]
+                      ? "text-zinc-400 line-through dark:text-zinc-500"
+                      : "text-zinc-700 dark:text-zinc-300"
+                  }`}>
+                    {item}
+                  </span>
+                </label>
+                {NEWSLETTER_LINKS[i] && (
+                  <a
+                    href={`/newsletters?pub=${NEWSLETTER_LINKS[i]}`}
+                    className="flex-shrink-0 rounded-lg border border-zinc-300 bg-white px-2.5 py-1 text-xs font-medium text-zinc-700 transition-colors hover:border-zinc-500 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-400 dark:hover:bg-zinc-800"
+                  >
+                    Open →
+                  </a>
+                )}
+              </div>
             ))}
           </div>
 
