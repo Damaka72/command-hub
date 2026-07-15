@@ -6,7 +6,7 @@
 import { CoordinatorData, SiteBrief } from './types.js';
 import { SITE_CONFIGS } from './site-configs.js';
 import {
-  ask, parseJson, getWeeklyPlan,
+  ask, parseJson, getWeeklyPlan, getResearchBriefs,
   MODEL_GENERATION, logOk, logError,
 } from './utils.js';
 
@@ -31,6 +31,7 @@ Be specific. Generic briefs produce generic content. Return only valid JSON — 
 async function generateWeeklyBriefs(
   coordinator: CoordinatorData,
   siteId: string,
+  researchBrief?: string,
 ): Promise<SiteBrief[]> {
   const site = SITE_CONFIGS.find(s => s.id === siteId);
   if (!site) throw new Error(`Unknown site: ${siteId}`);
@@ -48,6 +49,7 @@ Primary platform: ${site.primaryPlatform}
 
 This week's content pillar: ${sitePlan.theme}
 ${sitePlan.notes ? `Additional notes: ${sitePlan.notes}` : ''}
+${researchBrief ? `\nThis week's research brief: ${researchBrief}` : ''}
 
 Generate five weekday content briefs (Monday to Friday) for this site. Each should be a distinct
 angle on the pillar — no repeated angles, no repeated key points across days.
@@ -98,6 +100,9 @@ export async function runCoordinator(siteIds?: string[]): Promise<{
     throw new Error(`No matching site configs for: ${siteIds.join(', ')}`);
   }
 
+  // Research briefs for this week (optional), seeded into each site's prompt.
+  const researchBriefs = await getResearchBriefs(coordinator.weekCommencing);
+
   const allBriefs: SiteBrief[] = [];
 
   for (const site of sites) {
@@ -106,7 +111,7 @@ export async function runCoordinator(siteIds?: string[]): Promise<{
       continue;
     }
     try {
-      const briefs = await generateWeeklyBriefs(coordinator, site.id);
+      const briefs = await generateWeeklyBriefs(coordinator, site.id, researchBriefs[site.id]);
       allBriefs.push(...briefs);
       logOk(`${site.name} — 5 briefs generated (Mon–Fri: ${site.primaryPlatform})`);
     } catch (err) {
