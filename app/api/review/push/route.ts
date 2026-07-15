@@ -106,10 +106,9 @@ async function callBlotato(
 }
 
 export async function POST(request: NextRequest) {
-  // ── Auth: same gate as the rest of the Hub (httpOnly hub_auth cookie) ───────
-  if (request.cookies.get('hub_auth')?.value !== 'true') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  // Auth is enforced app-wide by the root `proxy.ts` (the httpOnly hub_auth
+  // cookie gate). Do NOT re-add a per-route check here — it would drift out of
+  // sync with the single auth boundary.
 
   const apiKey = process.env.BLOTATO_API_KEY;
   if (!apiKey) {
