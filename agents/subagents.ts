@@ -1,6 +1,6 @@
 // ── Site Subagents ────────────────────────────────────────────────────────────────────────────
 // For automated sites: one draft per platform in blotatoPlatforms.
-// For manual sites (didianolue): one draft for the primary platform only.
+// For manual sites (automateBlotato = false): one draft for the primary platform only.
 
 import { SiteBrief, Draft, SubagentStatusFile } from './types.js';
 import { getSiteConfig } from './site-configs.js';

@@ -15,10 +15,9 @@ const CHECKLIST_ITEMS = [
   "Brief TCC Coordinator and read output",
   "Brief OOT Coordinator and read output",
   "Add voice to all NEEDS YOUR VOICE sections",
-  "Beehiiv — The Prompt-ly draft ready",
-  "Beehiiv — The Pathway draft ready",
-  "Beehiiv — The Consultant draft ready",
-  "Beehiiv — The Oak draft ready",
+  "Beehiiv — The Prompt-ly draft ready (Wednesday send)",
+  "Beehiiv — The Pathway draft ready (Tuesday send)",
+  "Beehiiv — The Oak draft ready (Thursday send)",
   "Cowork posting session complete — all posts in Blotato calendar",
 ] as const;
 

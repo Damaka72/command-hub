@@ -5,6 +5,7 @@ import TaskList from "./TaskList";
 import RevenueFlow from "./RevenueFlow";
 import SocialFeed from "./SocialFeed";
 import type { SiteDetail, DraftItem } from "../api/status/route";
+import { getSitePillars } from "@/agents/site-configs";
 
 function getBrandTextOnColor(hex: string): string {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -32,7 +33,6 @@ interface MarketingChannel {
   platform?: string;
   schedule?: string;
   cadence?: string;
-  contentPillars?: string[];
   subscribers?: string;
   nextAction: string;
 }
@@ -142,12 +142,6 @@ function MarketingStatusPill({ status, label }: { status: keyof typeof MARKETING
   );
 }
 
-function StatusBadge({ status }: { status: string }) {
-  if (status === 'never_run') return <span className="text-xs text-zinc-400">Never run</span>;
-  if (status === 'error')     return <span className="text-xs font-medium text-red-500">Error</span>;
-  return <span className="text-xs font-medium text-emerald-500">Active</span>;
-}
-
 export default function SiteCard({ site, status, reviewQueue = [] }: { site: Site; status?: SiteDetail; reviewQueue?: DraftItem[] }) {
   const [showTech,         setShowTech]         = useState(false);
   const [activeTab,        setActiveTab]        = useState(0);
@@ -174,14 +168,9 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
 
   const deploy         = status?.deploy ?? null;
   const deployStyle    = deploy ? (DEPLOY_STYLES[deploy.state] ?? { dot: 'bg-zinc-400', label: deploy.state }) : null;
-  const revenue        = status?.revenue ?? null;
-  const agentSummaries = status?.agentSummaries ?? [];
   const readiness      = status?.readiness ?? [];
   const coordinator    = status?.coordinator ?? null;
 
-  const activeAgents  = agentSummaries.filter(a => a.status !== 'never_run').length;
-  const totalAgents   = agentSummaries.length;
-  const agentLabel    = totalAgents > 0 ? `${activeAgents}/${totalAgents}` : null;
   const readinessOk   = readiness.filter(r => r.ok).length;
   const readinessTot  = readiness.length;
 
@@ -244,21 +233,16 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
               {status && !deploy ? 'No deploy' : '—'}
             </span>
           )}
-          <span style={{ color: 'var(--hub-border-hi)' }}>·</span>
-          <span>
-            Agents: <span style={{ color: activeAgents > 0 ? 'var(--hub-text-1)' : 'var(--hub-text-3)' }}>{agentLabel ?? '—'}</span>
-          </span>
         </div>
 
         {/* ── Info row ── */}
         {status && (
           <div
-            className="grid grid-cols-4 rounded-lg overflow-hidden"
+            className="grid grid-cols-3 rounded-lg overflow-hidden"
             style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}
           >
             {[
               { label: 'Revenue', value: fmt(status.monthlyRevenue, '£'), color: '#34d399' },
-              { label: 'Agents',  value: agentLabel ?? '—', color: 'var(--hub-text-1)' },
               { label: 'Sched.',  value: String(status.scheduledCount), color: status.scheduledCount > 0 ? '#34d399' : 'var(--hub-text-3)' },
             ].map(({ label, value, color }, i) => (
               <div key={label} className="flex flex-col gap-0.5 px-3 py-2" style={{ borderRight: '1px solid var(--hub-border)' }}>
@@ -499,32 +483,6 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
                     )}
                   </div>
                 )}
-                {revenue ? (
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 rounded-lg px-3 py-2" style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}>
-                    {revenue.model === 'consulting' ? (
-                      <>
-                        <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                          {revenue.pipelineValue !== undefined ? `£${revenue.pipelineValue.toLocaleString()} pipeline` : 'Pipeline: —'}
-                        </span>
-                        <span className={`text-xs ${(revenue.activeEnquiries ?? 0) > 0 ? 'text-amber-600 dark:text-amber-400 font-medium' : 'text-zinc-500 dark:text-zinc-400'}`}>
-                          {fmt(revenue.activeEnquiries)} enquiries
-                        </span>
-                        <span className={`text-xs ${(revenue.overdueFollowUps ?? 0) > 0 ? 'text-red-600 dark:text-red-400 font-medium' : 'text-zinc-500 dark:text-zinc-400'}`}>
-                          {fmt(revenue.overdueFollowUps)} overdue
-                        </span>
-                        <span className={`text-xs ${(revenue.meetingsBooked ?? 0) > 0 ? 'text-emerald-600 dark:text-emerald-400 font-medium' : 'text-zinc-500 dark:text-zinc-400'}`}>
-                          {fmt(revenue.meetingsBooked)} meetings
-                        </span>
-                      </>
-                    ) : (
-                      <span className="text-xs text-zinc-500 dark:text-zinc-400">
-                        Revenue source not yet connected — agents not run
-                      </span>
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-xs text-zinc-400 dark:text-zinc-500">No revenue data</p>
-                )}
               </div>
             )}
 
@@ -559,26 +517,9 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
                   </div>
                 )}
 
-                {/* Legacy Agents */}
-                <div className="flex flex-col gap-2">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Legacy Agents</p>
-                  {agentSummaries.length === 0 ? (
-                    <p className="text-xs text-zinc-400">No agent data available</p>
-                  ) : agentSummaries.map(agent => (
-                    <div key={agent.name} className="flex items-center justify-between rounded-lg px-3 py-2" style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}>
-                      <div>
-                        <p className="text-xs font-medium text-zinc-700 dark:text-zinc-300">{agent.displayName}</p>
-                        {agent.lastAction && (
-                          <p className="text-xs text-zinc-400 dark:text-zinc-500">{agent.lastAction}</p>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        {agent.ago && <span className="text-xs text-zinc-400">{agent.ago}</span>}
-                        <StatusBadge status={agent.status} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                {!status.subagentStatus && !status.graderVerdict && (
+                  <p className="text-xs text-zinc-400 dark:text-zinc-500">No pipeline activity yet — run the pipeline to populate</p>
+                )}
 
               </div>
             )}
@@ -792,13 +733,13 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
                           </div>
                         )}
                       </div>
-                      {site.marketingPlan.blotato.contentPillars && (
+                      {getSitePillars(site.id).length > 0 && (
                         <div className="flex flex-col gap-1">
                           <span className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Content Pillars</span>
                           <div className="flex flex-wrap gap-1">
-                            {site.marketingPlan.blotato.contentPillars.map((pillar, i) => (
-                              <span key={i} className="rounded-md bg-zinc-200 px-2 py-0.5 text-[10px] font-medium text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">
-                                {pillar}
+                            {getSitePillars(site.id).map(pillar => (
+                              <span key={pillar.id} className="rounded-md bg-zinc-200 px-2 py-0.5 text-[10px] font-medium text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">
+                                {pillar.name}
                               </span>
                             ))}
                           </div>

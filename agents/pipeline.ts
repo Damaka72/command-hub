@@ -7,22 +7,22 @@
 //
 // What this does:
 //   1. Reads content-coordinator.json for this week's per-site themes
-//   2. Lead coordinator generates 5 daily briefs per site (Mon–Fri) — 25 total
-//   3. 25 subagents draft content in parallel
-//   4. 25 graders score each draft (with auto-retry on fail)
+//   2. Lead coordinator generates 5 daily briefs per site (Mon–Fri) — 20 total across 4 sites
+//   3. 20 subagents draft content in parallel
+//   4. 20 graders score each draft (with auto-retry on fail)
 //   5. Approved drafts written to review-queue.json per site (all 5 days)
-//   6. Approved LinkedIn/Facebook posts pushed to Blotato, scheduled Mon–Fri
-//   7. Pipeline session saved for dreaming to review on Sunday
+//   6. Pipeline session saved as a run-history record
 //
-// After this runs: review posts in Blotato and the dashboard, edit if needed.
+// This pipeline NEVER creates or schedules posts. It ends at the review queues and
+// the content library — approved drafts are reviewed in the dashboard. (Pushing to
+// Blotato is an approval-triggered step handled separately, not from here.)
 // Set up next week's themes: npm run dev → /plan (do this on Saturday)
 
 import { ReviewQueueFile, ReviewItem, PipelineSession } from './types.js';
 import { runCoordinator } from './coordinator.js';
 import { runSubagents } from './subagents.js';
 import { runGraders } from './grader.js';
-import { pushApprovedToBlotato } from './blotato.js';
-import { writeJson, readJson, sitePath, sessionPath, log, logStep, logOk, logError, now, pushSiteDataToSupabase, appendToContentLibrary } from './utils.js';
+import { writeJson, readJson, sitePath, sessionPath, log, logStep, logOk, now, pushSiteDataToSupabase, appendToContentLibrary } from './utils.js';
 import { SITE_CONFIGS } from './site-configs.js';
 
 async function run(): Promise<void> {
@@ -108,17 +108,7 @@ async function run(): Promise<void> {
     logOk(`${siteId} — review-queue.json written (${sitePass}/5 days approved)`);
   }
 
-  // ── Step 5: Push approved drafts to Blotato ─────────────────────────────────
-  logStep('▶', `Pushing ${approved.length} approved drafts to Blotato (Mon–Fri)…`);
-  const blotatoResults = await pushApprovedToBlotato(approved);
-  const blotatoQueued  = blotatoResults.filter(r => r.status === 'queued').length;
-  const blotatoSkipped = blotatoResults.filter(r => r.status === 'skipped').length;
-  const blotatoFailed  = blotatoResults.filter(r => r.status === 'failed').length;
-  if (blotatoQueued  > 0) logOk(`${blotatoQueued} post${blotatoQueued === 1 ? '' : 's'} queued in Blotato`);
-  if (blotatoSkipped > 0) logOk(`${blotatoSkipped} skipped (need media — add in Blotato manually)`);
-  if (blotatoFailed  > 0) logError(`${blotatoFailed} failed to push — check BLOTATO_API_KEY in .env.local`);
-
-  // ── Step 6: Save session for dreaming ────────────────────────────────────────
+  // ── Step 5: Save session as a run-history record ─────────────────────────────
   const session: PipelineSession = {
     runAt:          now(),
     weekCommencing: coordinator.weekCommencing,
@@ -151,10 +141,10 @@ async function run(): Promise<void> {
   }
 
   log('\n  Next steps:');
-  log('  1. Review all posts in Blotato — edit timing or content as needed');
-  log('  2. Add images/video to Instagram and TikTok posts manually');
+  log('  1. Review this week\'s drafts in the dashboard review queue — edit as needed');
+  log('  2. Approve the drafts you want to publish (approval handles scheduling separately)');
   log('  3. Push to git: git add -A && git commit -m "pipeline run ' + runId + '" && git push');
-  log('  Run on Saturday or Sunday so everything is ready before Monday.\n');
+  log('  Run on Saturday or Sunday so everything is ready for review before Monday.\n');
 }
 
 run().catch(err => {

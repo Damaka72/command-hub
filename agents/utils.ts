@@ -68,7 +68,7 @@ export const claude = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
-export const MODEL_GENERATION = 'claude-sonnet-4-6';   // coordinator, subagents, dreaming
+export const MODEL_GENERATION = 'claude-sonnet-4-6';   // coordinator, subagents
 export const MODEL_GRADING    = 'claude-haiku-4-5-20251001'; // graders — simpler task, faster
 
 // ── File paths ────────────────────────────────────────────────────────────────
@@ -81,10 +81,6 @@ export function coordinatorPath(): string {
 
 export function sitePath(siteId: string, filename: string): string {
   return path.join(DATA_ROOT, 'sites', siteId, filename);
-}
-
-export function dreamingPath(): string {
-  return path.join(DATA_ROOT, 'dreaming-status.json');
 }
 
 export function sessionPath(runId: string): string {

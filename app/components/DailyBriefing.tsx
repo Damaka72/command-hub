@@ -81,7 +81,7 @@ function buildTaskItems(): FocusItem[] {
 
 function buildSystemItems(statusMap: StatusResponse): FocusItem[] {
   const items: FocusItem[] = [];
-  const { sites, portfolioCoordinator, dreaming } = statusMap;
+  const { sites, portfolioCoordinator } = statusMap;
 
   items.push({
     id: "s-workshops",
@@ -130,21 +130,6 @@ function buildSystemItems(statusMap: StatusResponse): FocusItem[] {
       text: "No weekly theme set — lead coordinator has not run",
       tag: "Agents",
     });
-  }
-
-  if (dreaming) {
-    const lastRunDate = dreaming.lastRun ? new Date(dreaming.lastRun) : null;
-    const daysSince = lastRunDate
-      ? Math.floor((Date.now() - lastRunDate.getTime()) / 86_400_000)
-      : Infinity;
-    if (daysSince > 7) {
-      items.push({
-        id: "dreaming-overdue",
-        dot: "grey",
-        text: "Dreaming has not run this week",
-        tag: "Dreaming",
-      });
-    }
   }
 
   return items;

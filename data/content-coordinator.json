@@ -3,10 +3,6 @@
   "campaignObjective": null,
   "setAt": "2026-07-14T00:00:00.000Z",
   "sites": {
-    "didianolue": {
-      "pillarId": "thought-leadership",
-      "theme": "Insights & thought leadership — AI in procurement, Procurement Act 2023, G-Cloud frameworks, sector trends and a forward-looking perspective"
-    },
     "masteryourcareerpath": {
       "pillarId": "ai-job-market",
       "theme": "AI & the changing job market — how AI is reshaping hiring, screening and careers, and what professionals need to do about it now"

@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
 import SiteCard from "./components/SiteCard";
 import DailyBriefing from "./components/DailyBriefing";
 import AgentCommandCentre from "./components/AgentCommandCentre";
@@ -10,7 +9,8 @@ import DiPipeline from "./components/DiPipeline";
 import SundayView from "./components/SundayView";
 import PipelineRunner from "./components/PipelineRunner";
 import ActivityFeed from "./components/ActivityFeed";
-import type { SiteDetail, AgentSummary, StatusResponse, PortfolioCoordinator } from "./api/status/route";
+import type { SiteDetail, StatusResponse, PortfolioCoordinator, DraftItem } from "./api/status/route";
+import { PIPELINE_SITE_COUNT } from "@/agents/site-configs";
 
 const sites = [
   {
@@ -29,14 +29,13 @@ const sites = [
         statusLabel: 'Active',
         platform: 'Instagram',
         schedule: '1 post/day',
-        contentPillars: ['Local news', 'Business spotlights', 'Regeneration updates', 'Community events', 'Planning & development'],
         nextAction: 'Continue weekly scheduling in Blotato',
       },
       beehiiv: {
         status: 'in_progress' as const,
         statusLabel: 'Set up — content needed',
-        cadence: 'Weekly newsletter (TBC)',
-        nextAction: 'Set Beehiiv newsletter template and cadence',
+        cadence: 'The Oak — Thursday',
+        nextAction: 'Draft this week\'s The Oak issue in Beehiiv',
       },
     },
   },
@@ -56,14 +55,13 @@ const sites = [
         statusLabel: 'Active',
         platform: 'Instagram + YouTube',
         schedule: '1 post/day',
-        contentPillars: ['IR35 guidance', 'Contracting tips', 'Community wins', 'TCC Command Centre', 'Career transitions'],
         nextAction: 'Continue weekly scheduling in Blotato',
       },
       beehiiv: {
-        status: 'not_started' as const,
-        statusLabel: 'Not set up',
-        cadence: 'Weekly (Constant Contact)',
-        nextAction: 'Complete Constant Contact OAuth setup — flip DEMO_MODE=false',
+        status: 'in_progress' as const,
+        statusLabel: 'Published within The Pathway',
+        cadence: 'The Consultant — published within The Pathway (MYCP Beehiiv)',
+        nextAction: 'Contribute The Consultant section to The Pathway (MYCP Beehiiv)',
       },
     },
   },
@@ -88,14 +86,13 @@ const sites = [
         statusLabel: 'Active',
         platform: 'Instagram',
         schedule: '1 post/day',
-        contentPillars: ['Career strategy', 'IR35 & contracting', 'PRIME framework', 'Community wins', 'LinkedIn growth'],
         nextAction: 'Continue weekly scheduling in Blotato',
       },
       beehiiv: {
         status: 'in_progress' as const,
         statusLabel: 'Set up — content needed',
-        cadence: 'Weekly newsletter (TBC)',
-        nextAction: 'Draft welcome email sequence in Beehiiv',
+        cadence: 'The Pathway — Tuesday',
+        nextAction: 'Draft this week\'s The Pathway issue in Beehiiv',
       },
     },
   },
@@ -115,14 +112,13 @@ const sites = [
         statusLabel: 'Active',
         platform: 'Instagram + TikTok + Pinterest + YouTube',
         schedule: '1 post/day',
-        contentPillars: ['Prompt demos', 'Before/after results', 'Quick tutorials', 'Gumroad product spotlights', 'Creator tips'],
         nextAction: 'Continue weekly scheduling in Blotato',
       },
       beehiiv: {
         status: 'in_progress' as const,
         statusLabel: 'Set up — content needed',
-        cadence: 'Weekly newsletter (TBC)',
-        nextAction: 'Set up Beehiiv promotional email for 50% off campaign',
+        cadence: 'The Prompt-ly — Wednesday',
+        nextAction: 'Draft this week\'s The Prompt-ly issue in Beehiiv',
       },
     },
   },
@@ -142,14 +138,13 @@ const sites = [
         statusLabel: 'Active',
         platform: 'Instagram + Twitter/X + YouTube',
         schedule: '3x/week',
-        contentPillars: ['Procurement insights', 'Contract wins', 'Commercial leadership', 'IR35 & consulting', 'Behind the brand'],
         nextAction: 'Continue weekly scheduling in Blotato',
       },
       beehiiv: {
         status: 'not_started' as const,
-        statusLabel: 'Not set up',
-        cadence: 'Monthly newsletter (TBC)',
-        nextAction: 'Choose email provider and set up newsletter',
+        statusLabel: 'None — handled personally',
+        cadence: 'None — handled personally',
+        nextAction: 'No newsletter — handled personally',
       },
     },
   },
@@ -165,11 +160,7 @@ function updatedAgoLabel(d: Date | null): string {
   return `${Math.floor(s / 60)}m ago`;
 }
 
-function countActiveAgents(summaries: AgentSummary[]): number {
-  return summaries.filter(a => a.status !== 'never_run').length;
-}
-
-function PortfolioBar({ statusMap, portfolioCoordinator }: { statusMap: StatusMap; portfolioCoordinator: PortfolioCoordinator | null }) {
+function PortfolioBar({ statusMap, portfolioCoordinator, reviewQueue }: { statusMap: StatusMap; portfolioCoordinator: PortfolioCoordinator | null; reviewQueue: DraftItem[] }) {
   const statuses = Object.values(statusMap);
 
   const allRevenueNull = statuses.every(s => s.monthlyRevenue === null);
@@ -177,9 +168,8 @@ function PortfolioBar({ statusMap, portfolioCoordinator }: { statusMap: StatusMa
     ? null
     : statuses.reduce((sum, s) => sum + (s.monthlyRevenue ?? 0), 0);
 
-  const activeAgents = statuses.reduce(
-    (sum, s) => sum + countActiveAgents(s.agentSummaries), 0
-  );
+  // Pipeline activity: how many of the pipeline sites have drafts in this week's review queue.
+  const pipelineSites = new Set(reviewQueue.map(d => d.siteId)).size;
 
   const outstanding = statuses.reduce(
     (sum, s) => sum + s.outstanding.overdueFollowUps + s.outstanding.awaitingApproval, 0
@@ -206,9 +196,15 @@ function PortfolioBar({ statusMap, portfolioCoordinator }: { statusMap: StatusMa
         <Divider />
 
         <span className="flex items-center gap-1.5 text-xs">
-          <span style={{ color: 'var(--hub-text-3)' }}>Agents</span>
-          <span className="font-semibold" style={{ color: activeAgents > 0 ? '#10b981' : 'var(--hub-text-3)' }}>
-            {activeAgents} active
+          <span style={{ color: 'var(--hub-text-3)' }}>Pipeline</span>
+          <span className="font-semibold" style={{
+            color: pipelineSites === PIPELINE_SITE_COUNT
+              ? '#10b981'
+              : pipelineSites > 0
+                ? '#f59e0b'
+                : 'var(--hub-text-3)',
+          }}>
+            {pipelineSites}/{PIPELINE_SITE_COUNT} sites
           </span>
         </span>
 
@@ -235,13 +231,13 @@ function PortfolioBar({ statusMap, portfolioCoordinator }: { statusMap: StatusMa
         <span className="flex items-center gap-1.5 text-xs">
           <span style={{ color: 'var(--hub-text-3)' }}>Batch</span>
           <span className="font-semibold" style={{
-            color: (portfolioCoordinator?.batchStatus.approved ?? 0) === 5
+            color: (portfolioCoordinator?.batchStatus.approved ?? 0) === PIPELINE_SITE_COUNT
               ? '#10b981'
               : (portfolioCoordinator?.batchStatus.approved ?? 0) > 0
                 ? '#f59e0b'
                 : 'var(--hub-text-3)',
           }}>
-            {portfolioCoordinator?.batchStatus.approved ?? 0}/5 approved
+            {portfolioCoordinator?.batchStatus.approved ?? 0}/{PIPELINE_SITE_COUNT} approved
           </span>
         </span>
       </div>
@@ -261,7 +257,7 @@ export default function Home() {
     fetch('/api/status')
       .then(r => r.json())
       .then((d: StatusResponse) => { setStatusMap(d); setLastUpdated(new Date()); })
-      .catch(() => setStatusMap(prev => prev ?? { sites: {}, portfolioCoordinator: null, dreaming: null, reviewQueue: [] }))
+      .catch(() => setStatusMap(prev => prev ?? { sites: {}, portfolioCoordinator: null, reviewQueue: [] }))
       .finally(() => setRefreshing(false));
   }, []);
 
@@ -320,26 +316,11 @@ export default function Home() {
                 Sunday
               </button>
               <a
-                href="/content-cycle"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded-lg border border-emerald-400 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-100 dark:border-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/40"
-              >
-                Content Cycle
-              </a>
-              <a
                 href="/plan"
                 className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:brightness-125"
                 style={{ background: 'rgba(34,211,238,0.1)', color: 'var(--hub-cyan)', border: '1px solid rgba(34,211,238,0.25)' }}
               >
                 Weekly Plan
-              </a>
-              <a
-                href="/video-brief"
-                className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:brightness-125"
-                style={{ background: 'var(--hub-accent-dim)', color: '#a5b4fc', border: '1px solid var(--hub-border-hi)' }}
-              >
-                Video Brief
               </a>
               <a
                 href="/guide"
@@ -406,13 +387,12 @@ export default function Home() {
           ) : (
             <>
               {statusMap && Object.keys(statusMap.sites).length > 0 && (
-                <PortfolioBar statusMap={statusMap.sites} portfolioCoordinator={statusMap.portfolioCoordinator} />
+                <PortfolioBar statusMap={statusMap.sites} portfolioCoordinator={statusMap.portfolioCoordinator} reviewQueue={statusMap.reviewQueue} />
               )}
 
               {statusMap && (
                 <AgentCommandCentre
                   portfolioCoordinator={statusMap.portfolioCoordinator}
-                  dreaming={statusMap.dreaming}
                   sites={statusMap.sites}
                 />
               )}
@@ -433,37 +413,6 @@ export default function Home() {
                       reviewQueue={statusMap?.reviewQueue ?? []}
                     />
                   ))}
-
-                  <Link
-                    href="/video-brief"
-                    className="group block rounded-2xl p-5 transition-all hover:brightness-110"
-                    style={{
-                      background: 'var(--hub-surface)',
-                      border: '1px solid var(--hub-border)',
-                    }}
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex gap-1.5">
-                        {['#185FA5','#1D9E75','#993C1D','#534AB7','#BA7517'].map(c => (
-                          <div key={c} className="w-2.5 h-2.5 rounded-full" style={{ background: c, boxShadow: `0 0 6px ${c}80` }} />
-                        ))}
-                      </div>
-                      <span className="text-xs transition-colors" style={{ color: 'var(--hub-text-3)' }}>Open →</span>
-                    </div>
-                    <h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--hub-text-1)' }}>Video Brief Generator</h3>
-                    <p className="text-xs leading-relaxed" style={{ color: 'var(--hub-text-2)' }}>
-                      Build a Claude Code video production prompt — script, voiceover, visuals, render &amp; metadata, end-to-end.
-                    </p>
-                    <div className="flex gap-1.5 mt-4 flex-wrap">
-                      {['ElevenLabs', 'Higgsfield', 'FFmpeg'].map(tag => (
-                        <span
-                          key={tag}
-                          className="px-2 py-0.5 rounded-full text-xs"
-                          style={{ border: '1px solid var(--hub-border)', color: 'var(--hub-text-3)' }}
-                        >{tag}</span>
-                      ))}
-                    </div>
-                  </Link>
                 </div>
                 <DiPipeline />
               </main>
