@@ -96,10 +96,20 @@ export interface SiteDetail {
   graderVerdict: GraderVerdict | null;
 }
 
+export interface WeekReview {
+  week: string | null;
+  approved: number;
+  pushed: number;
+  needsMedia: number;
+  draft: number;
+  rejected: number;
+}
+
 export interface StatusResponse {
   sites: Record<string, SiteDetail>;
   portfolioCoordinator: PortfolioCoordinator | null;
   reviewQueue: DraftItem[];
+  weekReview: WeekReview | null;
 }
 
 // ─── Static site configuration ───────────────────────────────────────────────
@@ -373,6 +383,39 @@ async function fetchReviewQueue(): Promise<DraftItem[]> {
   return allItems;
 }
 
+// Review status for the most recent week in the content library (approved +
+// pushed drive the Portfolio "Batch" metric).
+async function fetchWeekReview(): Promise<WeekReview | null> {
+  try {
+    const supabase = getSupabase();
+    const { data: latest } = await supabase
+      .from('content_library')
+      .select('week_commencing')
+      .order('week_commencing', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    const week = (latest as { week_commencing?: string } | null)?.week_commencing ?? null;
+    if (!week) return { week: null, approved: 0, pushed: 0, needsMedia: 0, draft: 0, rejected: 0 };
+
+    const { data } = await supabase
+      .from('content_library')
+      .select('status')
+      .eq('week_commencing', week);
+    const rows = (data ?? []) as { status: string }[];
+    const c = (s: string) => rows.filter(r => r.status === s).length;
+    return {
+      week,
+      approved:   c('approved'),
+      pushed:     c('pushed'),
+      needsMedia: c('approved_needs_media'),
+      draft:      c('draft'),
+      rejected:   c('rejected'),
+    };
+  } catch {
+    return null;
+  }
+}
+
 function computeReadiness(
   coordinator: CoordinatorData | null,
   site: SiteConfig,
@@ -415,10 +458,11 @@ function computeReadiness(
 // ─── Main handler ─────────────────────────────────────────────────────────────
 
 export async function GET() {
-  const [blotatoCounts, portfolioCoordinator, reviewQueue] = await Promise.all([
+  const [blotatoCounts, portfolioCoordinator, reviewQueue, weekReview] = await Promise.all([
     fetchBlotatoScheduledCounts(),
     fetchPortfolioCoordinator(),
     fetchReviewQueue(),
+    fetchWeekReview(),
   ]);
 
   const results = await Promise.all(
@@ -464,6 +508,7 @@ export async function GET() {
     sites: Object.fromEntries(results),
     portfolioCoordinator,
     reviewQueue,
+    weekReview,
   };
   return NextResponse.json(response, {
     headers: { 'Cache-Control': 'no-store' },
