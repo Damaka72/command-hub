@@ -330,6 +330,13 @@ export default function Home() {
                 Weekly Plan
               </a>
               <a
+                href="/newsletters"
+                className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:brightness-125"
+                style={{ background: 'rgba(245,158,11,0.1)', color: 'var(--hub-gold)', border: '1px solid rgba(245,158,11,0.25)' }}
+              >
+                Newsletters
+              </a>
+              <a
                 href="/guide"
                 className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:brightness-125"
                 style={{ background: 'var(--hub-surface-2)', color: 'var(--hub-text-2)', border: '1px solid var(--hub-border)' }}
