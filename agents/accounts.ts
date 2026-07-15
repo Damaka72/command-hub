@@ -18,21 +18,11 @@ export interface AccountTarget {
   target:    Record<string, unknown>; // platform-specific fields inside target{}
 }
 
+// Publish targets for the four pipeline sites only. didianolue is NOT a pipeline
+// site and is never produced/approved/pushed here, so it is intentionally absent
+// from the publish path. (It remains in BLOTATO_SITE_ACCOUNTS below purely for the
+// status route's scheduled-post monitoring.)
 export const ACCOUNT_MAP: Record<string, Record<string, AccountTarget | null>> = {
-  didianolue: {
-    'LinkedIn':    {
-      accountId: '21073',
-      platform:  'linkedin',
-      target:    {}, // personal profile (Didi Anolue) — no pageId needed
-    },
-    'X (Twitter)': {
-      accountId: '18212',
-      platform:  'twitter',
-      target:    {}, // @DidiAnolue
-    },
-    'Instagram':   null, // needs media — add manually in Blotato
-  },
-
   masteryourcareerpath: {
     'LinkedIn':    {
       accountId: '21073',
