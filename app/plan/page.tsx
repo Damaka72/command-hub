@@ -23,7 +23,6 @@ interface CoordinatorData {
 type PillarsData = Record<string, Pillar[]>;
 
 const SITE_LABELS: Record<string, string> = {
-  didianolue:              'Didi Anolue (didianolue.co.uk)',
   masteryourcareerpath:    'Master Your Career Path',
   theconcurrentcontractor: 'The Concurrent Contractor',
   oldoaktown:              'Old Oak Town',
@@ -31,7 +30,6 @@ const SITE_LABELS: Record<string, string> = {
 };
 
 const SITE_ORDER = [
-  'didianolue',
   'masteryourcareerpath',
   'theconcurrentcontractor',
   'oldoaktown',
@@ -42,6 +40,7 @@ export default function PlanPage() {
   const [coordinator, setCoordinator]           = useState<CoordinatorData | null>(null);
   const [pillars, setPillars]                   = useState<PillarsData>({});
   const [form, setForm]                         = useState<CoordinatorData | null>(null);
+  const [briefs, setBriefs]                     = useState<Record<string, string>>({});
   const [status, setStatus]                     = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [errorMsg, setErrorMsg]                 = useState('');
 
@@ -54,19 +53,32 @@ export default function PlanPage() {
     return d.toISOString().slice(0, 10);
   }
 
+  // Load the plan + pillars once; default the form's week to next Monday.
   useEffect(() => {
-    fetch('/api/plan')
+    const week = nextMonday();
+    fetch(`/api/plan?week=${week}`)
       .then(r => r.json())
       .then(data => {
         setCoordinator(data.coordinator);
         setPillars(data.pillars);
         // Deep-copy for form state, always default weekCommencing to next Monday
         const fresh = JSON.parse(JSON.stringify(data.coordinator));
-        fresh.weekCommencing = nextMonday();
+        fresh.weekCommencing = week;
         setForm(fresh);
       })
-      .catch(() => setErrorMsg('Could not load plan data. Make sure you are running npm run dev locally.'));
+      .catch(() => setErrorMsg('Could not load plan data.'));
   }, []);
+
+  // Load any research briefs for the selected week (read-only), refreshing when
+  // the week changes.
+  useEffect(() => {
+    const week = form?.weekCommencing;
+    if (!week) return;
+    fetch(`/api/plan?week=${week}`)
+      .then(r => r.json())
+      .then(data => setBriefs(data.briefs ?? {}))
+      .catch(() => setBriefs({}));
+  }, [form?.weekCommencing]);
 
   function handlePillarChange(siteId: string, pillarId: string) {
     if (!form || !pillars[siteId]) return;
@@ -205,6 +217,16 @@ export default function PlanPage() {
             <div key={siteId} className="bg-gray-900 border border-gray-700 rounded-xl p-5 space-y-4">
               <h2 className="text-sm font-semibold text-white">{SITE_LABELS[siteId] ?? siteId}</h2>
 
+              {/* Research brief for the selected week (read-only, collapsible) */}
+              {briefs[siteId] && (
+                <details className="rounded-lg border border-gray-700 bg-gray-800/50">
+                  <summary className="cursor-pointer px-3 py-2 text-xs font-medium text-gray-300">
+                    Research brief for this week
+                  </summary>
+                  <div className="px-3 pb-3 text-xs text-gray-400 whitespace-pre-wrap">{briefs[siteId]}</div>
+                </details>
+              )}
+
               {/* Pillar selector */}
               <div>
                 <label className="block text-xs font-medium text-gray-400 mb-1 uppercase tracking-wide">Content pillar</label>
@@ -264,7 +286,7 @@ export default function PlanPage() {
         {/* Instruction */}
         <div className="bg-gray-900 border border-gray-700 rounded-xl p-5 text-sm text-gray-400 space-y-1">
           <p className="text-gray-300 font-medium">After saving</p>
-          <p>Run <code className="bg-gray-800 px-1.5 py-0.5 rounded text-gray-200 text-xs">npm run pipeline</code> in your terminal to generate and schedule this week&apos;s content. The pipeline will produce 5 posts per site (Monday–Friday) and push approved LinkedIn and Facebook posts to Blotato automatically.</p>
+          <p>Run the weekly pipeline to generate this week&apos;s drafts — 5 per site (Monday–Friday). Drafts appear in the <a href="/review" className="text-blue-400 hover:text-blue-300 underline">Review</a> queue, where you edit, approve, and push approved posts to Blotato.</p>
         </div>
       </div>
     </div>

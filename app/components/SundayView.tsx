@@ -18,17 +18,15 @@ const CHECKLIST_ITEMS = [
   "Beehiiv — The Prompt-ly draft ready (Wednesday send)",
   "Beehiiv — The Pathway draft ready (Tuesday send)",
   "Beehiiv — The Oak draft ready (Thursday send)",
-  "Cowork posting session complete — all posts in Blotato calendar",
+  "Review queue cleared — approved posts pushed to Blotato",
 ] as const;
 
 // The exact paste text used every Sunday to brief Cowork.
 // To update, edit this constant directly.
-const COWORK_BRIEF = `I need you to post this week's approved social media content to Blotato.
+const COWORK_BRIEF = `I need you to post this week's approved media posts (Instagram, TikTok, Pinterest, YouTube) to Blotato. Text posts (LinkedIn, Facebook, Twitter/X) are pushed from the dashboard Review queue — this brief covers media posts only.
 API key: [YOUR BLOTATO API KEY]
 Post each item using the Blotato API at https://backend.blotato.com/v2/posts with the header blotato-api-key and the exact accountId, pageId, platform, and content fields shown below.
 Scheduling rules:
-LinkedIn posts: 08:00 GMT on the specified day
-Facebook posts: 10:00 GMT on the specified day
 Instagram Reels: 09:00 GMT on the specified day
 Instagram Stories: post immediately
 TikTok posts: 18:00 GMT on the specified day
@@ -249,6 +247,13 @@ export default function SundayView() {
               </label>
             ))}
           </div>
+
+          <a
+            href="/review"
+            className="self-start rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-500 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-400 dark:hover:bg-zinc-800"
+          >
+            Open Review queue →
+          </a>
         </section>
 
         {/* ── Section 3 — Quick links ── */}
@@ -279,7 +284,7 @@ export default function SundayView() {
               briefOpen ? "rounded-t-xl" : "rounded-xl"
             }`}
           >
-            <span>Cowork Posting Brief</span>
+            <span>Cowork brief — media posts only (Instagram / TikTok / Pinterest / YouTube)</span>
             <span className="text-xs text-zinc-400">{briefOpen ? "▲" : "▼"}</span>
           </button>
           {briefOpen && (

@@ -9,7 +9,7 @@ import DiPipeline from "./components/DiPipeline";
 import SundayView from "./components/SundayView";
 import PipelineRunner from "./components/PipelineRunner";
 import ActivityFeed from "./components/ActivityFeed";
-import type { SiteDetail, StatusResponse, PortfolioCoordinator, DraftItem } from "./api/status/route";
+import type { SiteDetail, StatusResponse, DraftItem, WeekReview } from "./api/status/route";
 import { PIPELINE_SITE_COUNT } from "@/agents/site-configs";
 
 const sites = [
@@ -160,7 +160,7 @@ function updatedAgoLabel(d: Date | null): string {
   return `${Math.floor(s / 60)}m ago`;
 }
 
-function PortfolioBar({ statusMap, portfolioCoordinator, reviewQueue }: { statusMap: StatusMap; portfolioCoordinator: PortfolioCoordinator | null; reviewQueue: DraftItem[] }) {
+function PortfolioBar({ statusMap, reviewQueue, weekReview }: { statusMap: StatusMap; reviewQueue: DraftItem[]; weekReview: WeekReview | null }) {
   const statuses = Object.values(statusMap);
 
   const allRevenueNull = statuses.every(s => s.monthlyRevenue === null);
@@ -231,13 +231,13 @@ function PortfolioBar({ statusMap, portfolioCoordinator, reviewQueue }: { status
         <span className="flex items-center gap-1.5 text-xs">
           <span style={{ color: 'var(--hub-text-3)' }}>Batch</span>
           <span className="font-semibold" style={{
-            color: (portfolioCoordinator?.batchStatus.approved ?? 0) === PIPELINE_SITE_COUNT
+            color: (weekReview?.pushed ?? 0) > 0 && (weekReview?.approved ?? 0) === 0
               ? '#10b981'
-              : (portfolioCoordinator?.batchStatus.approved ?? 0) > 0
+              : (weekReview?.approved ?? 0) > 0
                 ? '#f59e0b'
                 : 'var(--hub-text-3)',
           }}>
-            {portfolioCoordinator?.batchStatus.approved ?? 0}/{PIPELINE_SITE_COUNT} approved
+            {weekReview?.approved ?? 0} approved · {weekReview?.pushed ?? 0} pushed
           </span>
         </span>
       </div>
@@ -257,7 +257,7 @@ export default function Home() {
     fetch('/api/status')
       .then(r => r.json())
       .then((d: StatusResponse) => { setStatusMap(d); setLastUpdated(new Date()); })
-      .catch(() => setStatusMap(prev => prev ?? { sites: {}, portfolioCoordinator: null, reviewQueue: [] }))
+      .catch(() => setStatusMap(prev => prev ?? { sites: {}, portfolioCoordinator: null, reviewQueue: [], weekReview: null }))
       .finally(() => setRefreshing(false));
   }, []);
 
@@ -315,6 +315,13 @@ export default function Home() {
               >
                 Sunday
               </button>
+              <a
+                href="/review"
+                className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:brightness-125"
+                style={{ background: 'var(--hub-accent-dim)', color: '#a5b4fc', border: '1px solid var(--hub-border-hi)' }}
+              >
+                Review
+              </a>
               <a
                 href="/plan"
                 className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:brightness-125"
@@ -387,7 +394,7 @@ export default function Home() {
           ) : (
             <>
               {statusMap && Object.keys(statusMap.sites).length > 0 && (
-                <PortfolioBar statusMap={statusMap.sites} portfolioCoordinator={statusMap.portfolioCoordinator} reviewQueue={statusMap.reviewQueue} />
+                <PortfolioBar statusMap={statusMap.sites} reviewQueue={statusMap.reviewQueue} weekReview={statusMap.weekReview} />
               )}
 
               {statusMap && (

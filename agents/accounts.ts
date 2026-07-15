@@ -2,7 +2,8 @@
 // Verified against blotato_list_accounts. Two maps, two purposes:
 //
 //   ACCOUNT_MAP           — publish targets: siteId → platform → { accountId,
-//                           platform, target }. Used to CREATE posts (agents/blotato.ts).
+//                           platform, target }. Used to CREATE posts
+//                           (app/api/review/push — the only publisher).
 //   BLOTATO_SITE_ACCOUNTS — the site-specific (1:1) account IDs used to COUNT
 //                           scheduled posts per site from the Blotato schedules
 //                           listing (app/api/status/route.ts). Facebook (31336)
@@ -17,21 +18,11 @@ export interface AccountTarget {
   target:    Record<string, unknown>; // platform-specific fields inside target{}
 }
 
+// Publish targets for the four pipeline sites only. didianolue is NOT a pipeline
+// site and is never produced/approved/pushed here, so it is intentionally absent
+// from the publish path. (It remains in BLOTATO_SITE_ACCOUNTS below purely for the
+// status route's scheduled-post monitoring.)
 export const ACCOUNT_MAP: Record<string, Record<string, AccountTarget | null>> = {
-  didianolue: {
-    'LinkedIn':    {
-      accountId: '21073',
-      platform:  'linkedin',
-      target:    {}, // personal profile (Didi Anolue) — no pageId needed
-    },
-    'X (Twitter)': {
-      accountId: '18212',
-      platform:  'twitter',
-      target:    {}, // @DidiAnolue
-    },
-    'Instagram':   null, // needs media — add manually in Blotato
-  },
-
   masteryourcareerpath: {
     'LinkedIn':    {
       accountId: '21073',
@@ -63,6 +54,11 @@ export const ACCOUNT_MAP: Record<string, Record<string, AccountTarget | null>> =
   },
 
   aiviralvideoprompts: {
+    'LinkedIn':    {
+      accountId: '21073',
+      platform:  'linkedin',
+      target:    { pageId: '109540269' }, // AI Viral Video Prompts company page (confirmed; duplicate 109539232 disconnected)
+    },
     'TikTok':      null, // TikTok requires video — add in Blotato manually
     'Instagram':   null, // needs media
     'X (Twitter)': null, // not connected

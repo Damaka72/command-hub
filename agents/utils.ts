@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
+import type { CoordinatorData } from './types.js';
 
 // Load .env.local for API keys when running outside Next.js
 dotenv.config({ path: path.join(process.cwd(), '.env.local') });
@@ -28,10 +29,18 @@ export async function pushSiteDataToSupabase(
   }, { onConflict: 'site_id' });
 }
 
+// Statuses that mean a human has already actioned the row. The pipeline must
+// never overwrite these when re-running a week.
+const PROTECTED_STATUSES = ['approved', 'approved_needs_media', 'pushed'];
+
 // Append this run's drafts to the permanent, append-only content library — one
 // row per site/week/day/platform. Unlike pipeline_site_data (which holds only
 // the latest run per site), this accumulates every week for repurposing.
-// Re-running the same week upserts in place rather than duplicating.
+//
+// Each row is written with status 'draft' (grader pass) or 'rejected' (grader
+// fail — the failed criterion is stored in push_error). Re-running a week upserts
+// in place, but rows already approved / approved_needs_media / pushed are skipped
+// so human decisions are never clobbered.
 export async function appendToContentLibrary(
   siteId: string,
   weekCommencing: string,
@@ -40,13 +49,34 @@ export async function appendToContentLibrary(
     platform: string;
     graderVerdict: string;
     retryCount?: number;
+    failedCriterion?: string | null;
     fullContent: string;
     generatedAt: string;
   }[],
 ): Promise<void> {
   if (items.length === 0) return;
 
-  const rows = items.map(it => ({
+  // Look up existing statuses for this site+week so actioned rows are protected.
+  const { data: existing } = await supabase
+    .from('content_library')
+    .select('day_name, platform, status')
+    .eq('site_id', siteId)
+    .eq('week_commencing', weekCommencing);
+
+  const protectedKeys = new Set(
+    ((existing ?? []) as { day_name: string; platform: string; status: string }[])
+      .filter(r => PROTECTED_STATUSES.includes(r.status))
+      .map(r => `${r.day_name}|${r.platform}`),
+  );
+
+  const toWrite = items.filter(it => !protectedKeys.has(`${it.dayName}|${it.platform}`));
+  const skipped = items.length - toWrite.length;
+  if (skipped > 0) {
+    logWarn(`${siteId} — left ${skipped} already-actioned row(s) (approved/pushed) untouched`);
+  }
+  if (toWrite.length === 0) return;
+
+  const rows = toWrite.map(it => ({
     site_id:         siteId,
     week_commencing: weekCommencing,
     day_name:        it.dayName,
@@ -55,11 +85,61 @@ export async function appendToContentLibrary(
     retry_count:     it.retryCount ?? 0,
     content:         it.fullContent,
     generated_at:    it.generatedAt,
+    status:          it.graderVerdict === 'pass' ? 'draft' : 'rejected',
+    push_error:      it.graderVerdict === 'pass' ? null : (it.failedCriterion ?? null),
   }));
 
   await supabase
     .from('content_library')
     .upsert(rows, { onConflict: 'site_id,week_commencing,day_name,platform' });
+}
+
+// Fetch this week's research briefs (if any), keyed by siteId. Read-only; the
+// coordinator seeds them into each site's prompt.
+export async function getResearchBriefs(weekCommencing: string): Promise<Record<string, string>> {
+  const out: Record<string, string> = {};
+  try {
+    const { data, error } = await supabase
+      .from('research_briefs')
+      .select('site_id, brief')
+      .eq('week_commencing', weekCommencing);
+    if (error) throw error;
+    for (const r of (data ?? []) as { site_id: string; brief: string }[]) out[r.site_id] = r.brief;
+  } catch (err) {
+    logWarn(`Could not load research briefs (${err instanceof Error ? err.message : String(err)})`);
+  }
+  return out;
+}
+
+// Read the weekly plan from Supabase (the source of truth). Falls back to the
+// local content-coordinator.json ONLY if Supabase is unreachable or has no plan
+// row. Logs which source was used so pipeline runs are auditable.
+export async function getWeeklyPlan(): Promise<CoordinatorData> {
+  try {
+    const { data, error } = await supabase
+      .from('weekly_plan')
+      .select('*')
+      .order('week_commencing', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw error;
+    if (data) {
+      logOk(`Weekly plan loaded from Supabase (week commencing ${data.week_commencing})`);
+      return {
+        weekCommencing:    data.week_commencing as string,
+        campaignObjective: (data.campaign_objective as string | null) ?? undefined,
+        setAt:             (data.set_at as string) ?? now(),
+        sites:             (data.sites as CoordinatorData['sites']) ?? {},
+      };
+    }
+    logWarn('No weekly_plan row in Supabase — falling back to content-coordinator.json');
+  } catch (err) {
+    logWarn(`Supabase weekly_plan unreachable (${err instanceof Error ? err.message : String(err)}) — falling back to content-coordinator.json`);
+  }
+
+  const fallback = readJson<CoordinatorData>(coordinatorPath());
+  logOk('Weekly plan loaded from local content-coordinator.json (fallback)');
+  return fallback;
 }
 
 // ── Claude client ─────────────────────────────────────────────────────────────

@@ -6,8 +6,8 @@
 import { CoordinatorData, SiteBrief } from './types.js';
 import { SITE_CONFIGS } from './site-configs.js';
 import {
-  ask, parseJson, readJson, coordinatorPath,
-  MODEL_GENERATION, logOk, logError, now,
+  ask, parseJson, getWeeklyPlan, getResearchBriefs,
+  MODEL_GENERATION, logOk, logError,
 } from './utils.js';
 
 const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
@@ -31,6 +31,7 @@ Be specific. Generic briefs produce generic content. Return only valid JSON — 
 async function generateWeeklyBriefs(
   coordinator: CoordinatorData,
   siteId: string,
+  researchBrief?: string,
 ): Promise<SiteBrief[]> {
   const site = SITE_CONFIGS.find(s => s.id === siteId);
   if (!site) throw new Error(`Unknown site: ${siteId}`);
@@ -48,6 +49,7 @@ Primary platform: ${site.primaryPlatform}
 
 This week's content pillar: ${sitePlan.theme}
 ${sitePlan.notes ? `Additional notes: ${sitePlan.notes}` : ''}
+${researchBrief ? `\nThis week's research brief: ${researchBrief}` : ''}
 
 Generate five weekday content briefs (Monday to Friday) for this site. Each should be a distinct
 angle on the pillar — no repeated angles, no repeated key points across days.
@@ -81,12 +83,12 @@ export async function runCoordinator(siteIds?: string[]): Promise<{
   coordinator: CoordinatorData;
   briefs:      SiteBrief[];
 }> {
-  const coordinator = readJson<CoordinatorData>(coordinatorPath());
+  const coordinator = await getWeeklyPlan();
 
   // Validate that per-site themes are set
   if (!coordinator.sites || Object.keys(coordinator.sites).length === 0) {
     throw new Error(
-      'No weekly plan set. Use the planning form (npm run dev → /plan) to set this week\'s themes before running the pipeline.'
+      'No weekly plan set. Set this week\'s themes on the /plan page (saved to Supabase) before running the pipeline.'
     );
   }
 
@@ -98,6 +100,9 @@ export async function runCoordinator(siteIds?: string[]): Promise<{
     throw new Error(`No matching site configs for: ${siteIds.join(', ')}`);
   }
 
+  // Research briefs for this week (optional), seeded into each site's prompt.
+  const researchBriefs = await getResearchBriefs(coordinator.weekCommencing);
+
   const allBriefs: SiteBrief[] = [];
 
   for (const site of sites) {
@@ -106,7 +111,7 @@ export async function runCoordinator(siteIds?: string[]): Promise<{
       continue;
     }
     try {
-      const briefs = await generateWeeklyBriefs(coordinator, site.id);
+      const briefs = await generateWeeklyBriefs(coordinator, site.id, researchBriefs[site.id]);
       allBriefs.push(...briefs);
       logOk(`${site.name} — 5 briefs generated (Mon–Fri: ${site.primaryPlatform})`);
     } catch (err) {
