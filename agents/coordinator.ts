@@ -6,8 +6,8 @@
 import { CoordinatorData, SiteBrief } from './types.js';
 import { SITE_CONFIGS } from './site-configs.js';
 import {
-  ask, parseJson, readJson, coordinatorPath,
-  MODEL_GENERATION, logOk, logError, now,
+  ask, parseJson, getWeeklyPlan,
+  MODEL_GENERATION, logOk, logError,
 } from './utils.js';
 
 const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
@@ -81,12 +81,12 @@ export async function runCoordinator(siteIds?: string[]): Promise<{
   coordinator: CoordinatorData;
   briefs:      SiteBrief[];
 }> {
-  const coordinator = readJson<CoordinatorData>(coordinatorPath());
+  const coordinator = await getWeeklyPlan();
 
   // Validate that per-site themes are set
   if (!coordinator.sites || Object.keys(coordinator.sites).length === 0) {
     throw new Error(
-      'No weekly plan set. Use the planning form (npm run dev → /plan) to set this week\'s themes before running the pipeline.'
+      'No weekly plan set. Set this week\'s themes on the /plan page (saved to Supabase) before running the pipeline.'
     );
   }
 

@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
+import type { CoordinatorData } from './types.js';
 
 // Load .env.local for API keys when running outside Next.js
 dotenv.config({ path: path.join(process.cwd(), '.env.local') });
@@ -60,6 +61,37 @@ export async function appendToContentLibrary(
   await supabase
     .from('content_library')
     .upsert(rows, { onConflict: 'site_id,week_commencing,day_name,platform' });
+}
+
+// Read the weekly plan from Supabase (the source of truth). Falls back to the
+// local content-coordinator.json ONLY if Supabase is unreachable or has no plan
+// row. Logs which source was used so pipeline runs are auditable.
+export async function getWeeklyPlan(): Promise<CoordinatorData> {
+  try {
+    const { data, error } = await supabase
+      .from('weekly_plan')
+      .select('*')
+      .order('week_commencing', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw error;
+    if (data) {
+      logOk(`Weekly plan loaded from Supabase (week commencing ${data.week_commencing})`);
+      return {
+        weekCommencing:    data.week_commencing as string,
+        campaignObjective: (data.campaign_objective as string | null) ?? undefined,
+        setAt:             (data.set_at as string) ?? now(),
+        sites:             (data.sites as CoordinatorData['sites']) ?? {},
+      };
+    }
+    logWarn('No weekly_plan row in Supabase — falling back to content-coordinator.json');
+  } catch (err) {
+    logWarn(`Supabase weekly_plan unreachable (${err instanceof Error ? err.message : String(err)}) — falling back to content-coordinator.json`);
+  }
+
+  const fallback = readJson<CoordinatorData>(coordinatorPath());
+  logOk('Weekly plan loaded from local content-coordinator.json (fallback)');
+  return fallback;
 }
 
 // ── Claude client ─────────────────────────────────────────────────────────────

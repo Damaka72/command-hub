@@ -1,4 +1,5 @@
 {
+  "_note": "Fallback only — source of truth is Supabase weekly_plan",
   "weekCommencing": "2026-07-20",
   "campaignObjective": null,
   "setAt": "2026-07-14T00:00:00.000Z",
