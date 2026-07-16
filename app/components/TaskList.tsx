@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import type { ActionLogEntry, ActionsResponse } from "../api/actions/route";
 
 interface Task {
   id: string;
@@ -8,59 +9,73 @@ interface Task {
   done: boolean;
 }
 
+function toTask(a: ActionLogEntry): Task {
+  return { id: a.id, text: a.action, done: a.status === "done" };
+}
+
 export default function TaskList({ siteId }: { siteId: string }) {
-  const storageKey = `tasks-${siteId}`;
   const [tasks,   setTasks]   = useState<Task[]>([]);
   const [input,   setInput]   = useState("");
   const [loading, setLoading] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    fetch('/data/tasks.json')
+  // Backed by the central actions_log table (via /api/actions), which replaces
+  // the old localStorage `tasks-${siteId}` store so Cowork / automation and the
+  // dashboard share one source of truth.
+  const load = useCallback(() => {
+    fetch(`/api/actions?site=${encodeURIComponent(siteId)}&limit=100`)
       .then(r => r.ok ? r.json() : null)
-      .then((data: Record<string, Task[]> | null) => {
-        if (data && Array.isArray(data[siteId])) {
-          setTasks(data[siteId]);
-        } else {
-          try {
-            const stored = localStorage.getItem(storageKey);
-            if (stored) setTasks(JSON.parse(stored));
-          } catch {}
-        }
+      .then((data: ActionsResponse | null) => {
+        setTasks(data?.actions ? data.actions.map(toTask) : []);
       })
-      .catch(() => {
-        try {
-          const stored = localStorage.getItem(storageKey);
-          if (stored) setTasks(JSON.parse(stored));
-        } catch {}
-      })
+      .catch(() => setTasks([]))
       .finally(() => setLoading(false));
-  }, [siteId, storageKey]);
+  }, [siteId]);
 
-  function save(next: Task[]) {
-    setTasks(next);
-    localStorage.setItem(storageKey, JSON.stringify(next));
-    fetch('/api/tasks', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ siteId, tasks: next }),
-    }).catch(() => {});
-  }
+  useEffect(() => { load(); }, [load]);
 
-  function addTask() {
+  async function addTask() {
     const text = input.trim();
     if (!text) return;
-    save([...tasks, { id: crypto.randomUUID(), text, done: false }]);
     setInput("");
     inputRef.current?.focus();
+    try {
+      const res = await fetch("/api/actions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ siteId, action: text, status: "in_progress" }),
+      });
+      const json = await res.json() as { action?: ActionLogEntry };
+      if (json.action) setTasks(prev => [toTask(json.action!), ...prev]);
+    } catch { /* keep input cleared; a reload will resync */ }
   }
 
-  function toggle(id: string) {
-    save(tasks.map(t => t.id === id ? { ...t, done: !t.done } : t));
+  async function toggle(id: string) {
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+    const nextDone = !task.done;
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, done: nextDone } : t)); // optimistic
+    try {
+      const res = await fetch("/api/actions", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status: nextDone ? "done" : "in_progress" }),
+      });
+      if (!res.ok) throw new Error("patch failed");
+    } catch {
+      setTasks(prev => prev.map(t => t.id === id ? { ...t, done: task.done } : t)); // revert
+    }
   }
 
-  function remove(id: string) {
-    save(tasks.filter(t => t.id !== id));
+  async function remove(id: string) {
+    const prev = tasks;
+    setTasks(prev.filter(t => t.id !== id)); // optimistic
+    try {
+      const res = await fetch(`/api/actions?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("delete failed");
+    } catch {
+      setTasks(prev); // revert
+    }
   }
 
   const remaining  = tasks.filter(t => !t.done).length;
