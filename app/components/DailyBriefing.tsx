@@ -3,21 +3,8 @@
 import { useEffect, useState } from "react";
 import type { StatusResponse } from "../api/status/route";
 import type { CoordinatorStatusData, SiteCoordinatorStatus } from "../api/coordinator-status/route";
+import type { ActionLogEntry, ActionsResponse } from "../api/actions/route";
 import { SITE_SHORT } from "../lib/siteConstants";
-
-const SITE_IDS = [
-  "oldoaktown",
-  "theconcurrentcontractor",
-  "masteryourcareerpath",
-  "aiviralvideoprompts",
-  "didianolue",
-] as const;
-
-interface Task {
-  id: string;
-  text: string;
-  done: boolean;
-}
 
 interface FocusItem {
   id: string;
@@ -51,29 +38,33 @@ function isAllClear(site: SiteCoordinatorStatus): boolean {
   return site.postsApproved > 0 && site.postsPending === 0 && site.newsletterStatus === "scheduled";
 }
 
-// Task-based items — reads localStorage client-side.
-function buildTaskItems(): FocusItem[] {
+function titleCase(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+// Open actions from the central `actions_log` table (via /api/actions?status=open),
+// replacing the old localStorage `tasks-${siteId}` tracker. Blocked and
+// revenue-related items surface as red; everything in progress is amber.
+function buildActionItems(actions: ActionLogEntry[]): FocusItem[] {
   const revenue: FocusItem[] = [];
   const rest: FocusItem[] = [];
 
-  for (const siteId of SITE_IDS) {
-    try {
-      const stored = localStorage.getItem(`tasks-${siteId}`);
-      if (!stored) continue;
-      const tasks: Task[] = JSON.parse(stored);
-      const tag = SITE_SHORT[siteId] ?? siteId;
-      for (const t of tasks) {
-        if (t.done) continue;
-        const isRevenue = /revenue/i.test(t.text);
-        const item: FocusItem = {
-          id: `task-${siteId}-${t.id}`,
-          dot: isRevenue ? "red" : "amber",
-          text: t.text,
-          tag,
-        };
-        if (isRevenue) revenue.push(item); else rest.push(item);
-      }
-    } catch {}
+  for (const a of actions) {
+    const isRevenue = /revenue|consult/i.test(`${a.action} ${a.channel ?? ""}`);
+    const dot: FocusItem["dot"] =
+      a.status === "blocked" || isRevenue ? "red" : "amber";
+    const tag = a.siteId
+      ? SITE_SHORT[a.siteId] ?? a.siteId
+      : a.channel
+      ? titleCase(a.channel)
+      : "General";
+    const item: FocusItem = {
+      id: `action-${a.id}`,
+      dot,
+      text: a.action,
+      tag,
+    };
+    if (dot === "red") revenue.push(item); else rest.push(item);
   }
 
   return [...revenue, ...rest];
@@ -147,7 +138,13 @@ export default function DailyBriefing({ statusMap }: { statusMap: StatusResponse
   useEffect(() => {
     const stored = localStorage.getItem("hub-briefing-open");
     if (stored !== null) setOpen(stored === "true");
-    setTaskItems(buildTaskItems());
+
+    fetch("/api/actions?status=open&limit=50")
+      .then(r => r.ok ? r.json() : null)
+      .then((data: ActionsResponse | null) => {
+        if (data?.actions) setTaskItems(buildActionItems(data.actions));
+      })
+      .catch(() => {});
 
     fetch("/api/coordinator-status")
       .then(r => r.ok ? r.json() : null)
