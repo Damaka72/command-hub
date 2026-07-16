@@ -2,7 +2,7 @@
 // Reads and triggers the Weekly Content Pipeline workflow so the dashboard can
 // show a live run in progress and let you kick one off on demand.
 //
-// Uses the same GITHUB_TOKEN / REPO already relied on by app/api/tasks/route.ts.
+// Uses the same GITHUB_TOKEN / REPO already relied on by app/api/coordinator-status/route.ts.
 // Everything degrades gracefully when the token is missing.
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
