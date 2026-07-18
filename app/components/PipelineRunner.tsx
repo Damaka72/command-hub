@@ -129,7 +129,7 @@ export default function PipelineRunner() {
             </span>
           ) : confirming ? (
             <div className="flex items-center gap-2">
-              <span className="text-[11px]" style={{ color: 'var(--hub-gold)' }}>Publishes to Blotato — sure?</span>
+              <span className="text-[11px]" style={{ color: 'var(--hub-gold)' }}>Generates this week&rsquo;s drafts for review — go?</span>
               <button
                 onClick={trigger}
                 disabled={triggering}
