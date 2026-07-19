@@ -165,6 +165,29 @@ export default function NewslettersPage() {
     } finally { setBusy(null); }
   }
 
+  async function generateDraft(slug: string) {
+    // Regenerating replaces the editor text. Guard unsaved work.
+    if ((edits[slug] ?? '').trim() && !window.confirm('Replace the current draft with a freshly generated one?')) {
+      return;
+    }
+    setBusy(`generate-${slug}`);
+    setError('');
+    try {
+      const res = await fetch('/api/newsletters/draft', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ publication: slug, week }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Draft generation failed');
+      // Show the new draft immediately, then reload so the saved row/subjects refresh.
+      setEdits(prev => ({ ...prev, [slug]: data.draft ?? '' }));
+      load(week);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally { setBusy(null); }
+  }
+
   async function copyForBeehiiv(slug: string) {
     // Copies edited_content ?? draft_content — the live editor text, falling back
     // to any generated draft — ready to paste into Beehiiv's editor.
@@ -354,6 +377,14 @@ export default function NewslettersPage() {
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-400">Draft</h3>
                 <div className="flex items-center gap-2">
                   <button
+                    onClick={() => generateDraft(block.slug)}
+                    disabled={busy !== null}
+                    className="rounded-lg bg-purple-700 hover:bg-purple-600 text-white px-3 py-1.5 text-xs font-medium disabled:opacity-50"
+                    title="Synthesise a newsletter draft from the research brief and social highlights"
+                  >
+                    {busy === `generate-${block.slug}` ? 'Generating…' : '✨ Generate draft'}
+                  </button>
+                  <button
                     onClick={() => copyForBeehiiv(block.slug)}
                     disabled={busy !== null}
                     className="rounded-lg bg-gray-700 hover:bg-gray-600 text-white px-3 py-1.5 text-xs font-medium disabled:opacity-50"
@@ -369,11 +400,31 @@ export default function NewslettersPage() {
                   </button>
                 </div>
               </div>
+              {(() => {
+                const opts = block.newsletter?.subject_options;
+                const subjects = Array.isArray(opts) ? (opts as unknown[]).filter((s): s is string => typeof s === 'string') : [];
+                if (subjects.length === 0) return null;
+                return (
+                  <div className="rounded-xl border border-gray-700 bg-gray-900 p-3 space-y-1.5">
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Subject line options</p>
+                    {subjects.map((s, i) => (
+                      <button
+                        key={i}
+                        onClick={() => { navigator.clipboard.writeText(s).catch(() => {}); }}
+                        className="block w-full text-left text-sm text-gray-200 hover:text-white"
+                        title="Click to copy"
+                      >
+                        · {s}
+                      </button>
+                    ))}
+                  </div>
+                );
+              })()}
               <textarea
                 value={edits[block.slug] ?? ''}
                 onChange={e => setEdits(prev => ({ ...prev, [block.slug]: e.target.value }))}
                 rows={16}
-                placeholder="Write the newsletter here, or pull passed content-library items in above and edit."
+                placeholder="Hit ✨ Generate draft to synthesise a newsletter from the research brief and social highlights — then edit here. You can also write from scratch or pull individual content-library items in above."
                 className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-gray-100 text-sm focus:outline-none focus:border-blue-500 font-sans leading-relaxed"
               />
             </section>
