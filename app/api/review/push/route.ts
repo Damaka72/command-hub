@@ -1,11 +1,17 @@
 // ── Review → Blotato push ─────────────────────────────────────────────────────
 // POST /api/review/push  { week: 'YYYY-MM-DD', siteId?: string }
 //
-// The ONLY code path allowed to publish to Blotato. Loads approved rows from
-// content_library, builds payloads from agents/accounts.ts (no inline IDs),
-// schedules each in Europe/London time (LinkedIn 08:00, Facebook 10:00,
-// Twitter/X 12:00) on its weekday in the target week — next occurrence if the
-// slot has already passed — and pushes to the Blotato v2 REST API.
+// The ONLY code path allowed to publish to Blotato. Loads approved rows (and
+// approved_needs_media rows) from content_library, builds payloads from
+// agents/accounts.ts (no inline IDs), schedules each in Europe/London time
+// (LinkedIn 08:00, Facebook 10:00, Twitter/X 12:00) on its weekday in the target
+// week — next occurrence if the slot has already passed — and pushes to the
+// Blotato v2 REST API.
+//
+// Media: each row's media_urls (public image/video URLs attached in the review
+// queue) are forwarded in content.mediaUrls. Instagram/TikTok/Pinterest/YouTube
+// cannot publish without media, so those rows are skipped until a URL is attached;
+// LinkedIn/Facebook publish with or without one. Instagram posts a video as a reel.
 //
 // On success: status 'pushed' + blotato_submission_id + scheduled_for.
 // On failure: status stays 'approved' + push_error (so it can be retried).
@@ -15,7 +21,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabase } from '@/app/lib/supabase';
-import { ACCOUNT_MAP } from '@/agents/accounts';
+import { ACCOUNT_MAP, MEDIA_REQUIRED_PLATFORMS, isVideoUrl } from '@/agents/accounts';
 
 export const dynamic = 'force-dynamic';
 
@@ -77,19 +83,31 @@ interface PushResult {
   error?:        string;
 }
 
+// Build the platform `target` object for a row, applying per-post dynamics that
+// can't be static in ACCOUNT_MAP. Instagram: a video attachment publishes as a
+// reel (mediaType 'reel'); image(s) publish to the feed (no mediaType).
+function buildTarget(platform: string, baseTarget: Record<string, unknown>, mediaUrls: string[]): Record<string, unknown> {
+  const target: Record<string, unknown> = { targetType: platform, ...baseTarget };
+  if (platform === 'instagram' && mediaUrls.some(isVideoUrl)) {
+    target.mediaType = 'reel';
+  }
+  return target;
+}
+
 async function callBlotato(
   apiKey: string,
   accountId: string,
   platform: string,
   text: string,
   target: Record<string, unknown>,
+  mediaUrls: string[],
   scheduledTime: string,
 ): Promise<{ postSubmissionId?: string; error?: string }> {
   const body = {
     post: {
       accountId,
-      content: { text, mediaUrls: [], platform },
-      target:  { targetType: platform, ...target },
+      content: { text, mediaUrls, platform },
+      target,
     },
     scheduledTime,
   };
@@ -123,13 +141,13 @@ export async function POST(request: NextRequest) {
 
     const supabase = getSupabase();
 
-    // Only status 'approved' is pushed. approved_needs_media rows are held back
-    // (they need media attached first).
+    // Push both 'approved' and 'approved_needs_media'. The needs-media rows only go
+    // out once a media URL is attached; without one they are skipped and left as-is.
     let query = supabase
       .from('content_library')
-      .select('id, site_id, day_name, platform, content, edited_content')
+      .select('id, site_id, day_name, platform, content, edited_content, media_urls')
       .eq('week_commencing', week)
-      .eq('status', 'approved');
+      .in('status', ['approved', 'approved_needs_media']);
     if (siteId) query = query.eq('site_id', siteId);
 
     const { data, error } = await query;
@@ -137,7 +155,7 @@ export async function POST(request: NextRequest) {
 
     const rows = (data ?? []) as {
       id: string; site_id: string; day_name: string; platform: string;
-      content: string; edited_content: string | null;
+      content: string; edited_content: string | null; media_urls: unknown;
     }[];
 
     const results: PushResult[] = [];
@@ -145,21 +163,38 @@ export async function POST(request: NextRequest) {
     for (const row of rows) {
       const acct = ACCOUNT_MAP[row.site_id]?.[row.platform];
       if (acct == null) {
-        // null (needs media) or undefined (not configured) — leave status approved.
+        // null (not a publish target) or undefined (not configured) — leave as-is.
         results.push({
           id: row.id, siteId: row.site_id, platform: row.platform, day: row.day_name,
           status: 'skipped',
-          error: acct === null ? 'Platform requires media' : 'Platform not in account map',
+          error: acct === null ? 'Platform not a publish target' : 'Platform not in account map',
+        });
+        continue;
+      }
+
+      // Normalise the row's attached media into a clean string[] of URLs.
+      const mediaUrls = Array.isArray(row.media_urls)
+        ? (row.media_urls as unknown[]).filter((u): u is string => typeof u === 'string' && u.trim().length > 0).map(u => u.trim())
+        : [];
+
+      // Instagram/TikTok/etc. can't publish without media — hold them back (they
+      // keep their approved_needs_media status so they resurface next push).
+      if (MEDIA_REQUIRED_PLATFORMS.has(acct.platform) && mediaUrls.length === 0) {
+        results.push({
+          id: row.id, siteId: row.site_id, platform: row.platform, day: row.day_name,
+          status: 'skipped',
+          error: 'Needs media — attach an image/video URL, then push',
         });
         continue;
       }
 
       const text = row.edited_content ?? row.content;
+      const target = buildTarget(acct.platform, acct.target, mediaUrls);
       const scheduledIso = scheduledUtc(week, row.day_name, acct.platform).toISOString();
 
       try {
         const { postSubmissionId, error: pushErr } = await callBlotato(
-          apiKey, acct.accountId, acct.platform, text, acct.target, scheduledIso,
+          apiKey, acct.accountId, acct.platform, text, target, mediaUrls, scheduledIso,
         );
 
         if (pushErr) {

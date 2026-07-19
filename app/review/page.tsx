@@ -12,10 +12,21 @@ interface Row {
   status:                string;
   content:               string;
   edited_content:        string | null;
+  media_urls:            string[] | null;
   approved_at:           string | null;
   blotato_submission_id: string | null;
   scheduled_for:         string | null;
   push_error:            string | null;
+}
+
+// Platforms that can't publish without media attached (mirrors the push route /
+// accounts.ts). Used only for UI hinting here.
+const MEDIA_PLATFORMS = new Set(['Instagram', 'TikTok', 'Pinterest', 'YouTube']);
+
+// Parse a textarea's worth of URLs (one per line, or comma-separated) into a
+// clean array; and render an array back into that textarea form.
+function parseMediaUrls(raw: string): string[] {
+  return raw.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
 }
 
 const SITE_LABELS: Record<string, string> = {
@@ -52,6 +63,7 @@ export default function ReviewPage() {
   const [week, setWeek]     = useState<string>(nextMonday());
   const [rows, setRows]     = useState<Row[]>([]);
   const [edits, setEdits]   = useState<Record<string, string>>({});
+  const [mediaEdits, setMediaEdits] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError]   = useState('');
   const [busy, setBusy]     = useState<string | null>(null); // label of the in-flight action
@@ -65,6 +77,7 @@ export default function ReviewPage() {
         if (data.error) throw new Error(data.error);
         setRows(data.rows ?? []);
         setEdits({});
+        setMediaEdits({});
       })
       .catch(err => setError(err instanceof Error ? err.message : String(err)))
       .finally(() => setLoading(false));
@@ -72,18 +85,20 @@ export default function ReviewPage() {
 
   useEffect(() => { load(week); }, [week, load]);
 
-  const textFor = (row: Row) => edits[row.id] ?? row.edited_content ?? row.content;
+  const textFor  = (row: Row) => edits[row.id] ?? row.edited_content ?? row.content;
+  const mediaFor = (row: Row) => mediaEdits[row.id] ?? (row.media_urls ?? []).join('\n');
 
   async function saveEdit(row: Row) {
     setBusy(`save-${row.id}`);
+    const mediaUrls = parseMediaUrls(mediaFor(row));
     try {
       const res = await fetch('/api/review', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: row.id, editedContent: textFor(row) }),
+        body: JSON.stringify({ id: row.id, editedContent: textFor(row), mediaUrls }),
       });
       if (!res.ok) throw new Error((await res.json()).error || 'Save failed');
-      setRows(prev => prev.map(r => r.id === row.id ? { ...r, edited_content: textFor(row) } : r));
+      setRows(prev => prev.map(r => r.id === row.id ? { ...r, edited_content: textFor(row), media_urls: mediaUrls } : r));
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally { setBusy(null); }
@@ -163,7 +178,9 @@ export default function ReviewPage() {
         {bySite.map(({ siteId, items }) => {
           const sorted    = [...items].sort((a, b) => (DAY_ORDER[a.day_name] ?? 9) - (DAY_ORDER[b.day_name] ?? 9));
           const draftIds  = items.filter(r => r.status === 'draft').map(r => r.id);
-          const needsMedia = items.filter(r => r.status === 'approved_needs_media');
+          // Needs-media rows still waiting on a URL (once one is pasted + saved they
+          // become pushable and drop off this list).
+          const needsMedia = items.filter(r => r.status === 'approved_needs_media' && !(r.media_urls?.length));
           const counts = items.reduce((m, r) => { m[r.status] = (m[r.status] ?? 0) + 1; return m; }, {} as Record<string, number>);
 
           return (
@@ -196,7 +213,7 @@ export default function ReviewPage() {
               {/* Needs-media strip */}
               {needsMedia.length > 0 && (
                 <div className="rounded-lg border border-amber-700 bg-amber-900/20 px-4 py-3">
-                  <p className="text-amber-200 text-xs font-semibold uppercase tracking-wide mb-1">Needs media — add image/video in the design step</p>
+                  <p className="text-amber-200 text-xs font-semibold uppercase tracking-wide mb-1">Needs media — paste an image/video URL on each post below, then Save and Push</p>
                   <p className="text-amber-100/80 text-xs">
                     {needsMedia.map(r => `${r.day_name} ${r.platform}`).join(' · ')}
                   </p>
@@ -228,6 +245,31 @@ export default function ReviewPage() {
                     rows={6}
                     className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-gray-100 text-sm focus:outline-none focus:border-blue-500"
                   />
+
+                  {/* Media URLs — public image/video links, one per line. Required
+                      for Instagram/TikTok; optional (but supported) for LinkedIn/Facebook. */}
+                  {row.status !== 'pushed' && (
+                    <div className="space-y-1">
+                      <label className="block text-[11px] uppercase tracking-wide text-gray-400">
+                        Media URLs {MEDIA_PLATFORMS.has(row.platform)
+                          ? <span className="text-amber-400">· required for {row.platform}</span>
+                          : <span className="text-gray-500">· optional image/video</span>}
+                      </label>
+                      <textarea
+                        value={mediaFor(row)}
+                        onChange={e => setMediaEdits(prev => ({ ...prev, [row.id]: e.target.value }))}
+                        rows={2}
+                        placeholder={row.platform === 'TikTok'
+                          ? 'https://…/video.mp4  (one per line)'
+                          : 'https://…/image.jpg  (one per line; a video URL posts as a reel on Instagram)'}
+                        className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-gray-100 text-xs font-mono focus:outline-none focus:border-blue-500"
+                      />
+                    </div>
+                  )}
+
+                  {row.status === 'pushed' && (row.media_urls?.length ?? 0) > 0 && (
+                    <p className="text-[11px] text-blue-300/80 break-all">Media: {row.media_urls!.join(', ')}</p>
+                  )}
 
                   {row.status === 'pushed' && (
                     <p className="text-xs text-blue-300">
