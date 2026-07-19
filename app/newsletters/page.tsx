@@ -28,6 +28,7 @@ interface NewsletterRow {
   week_commencing: string;
   status:          string;
   subject_options: unknown;
+  research_brief:  string | null;
   draft_content:   string | null;
   edited_content:  string | null;
   repurposed_from: string[] | null;
@@ -66,6 +67,7 @@ export default function NewslettersPage() {
   const [blocks, setBlocks]     = useState<PublicationBlock[]>([]);
   const [active, setActive]     = useState<string>('the-prompt-ly');
   const [edits, setEdits]       = useState<Record<string, string>>({});     // slug -> draft text
+  const [research, setResearch] = useState<Record<string, string>>({});     // slug -> research brief text
   const [selected, setSelected] = useState<Record<string, string[]>>({});   // slug -> repurposed content_library ids
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState('');
@@ -89,12 +91,15 @@ export default function NewslettersPage() {
         setBlocks(pubs);
         // Seed the editor and selections from what's saved.
         const nextEdits: Record<string, string> = {};
+        const nextResearch: Record<string, string> = {};
         const nextSel: Record<string, string[]> = {};
         for (const p of pubs) {
-          nextEdits[p.slug] = p.newsletter?.edited_content ?? p.newsletter?.draft_content ?? '';
-          nextSel[p.slug]   = p.newsletter?.repurposed_from ?? [];
+          nextEdits[p.slug]    = p.newsletter?.edited_content ?? p.newsletter?.draft_content ?? '';
+          nextResearch[p.slug] = p.newsletter?.research_brief ?? '';
+          nextSel[p.slug]      = p.newsletter?.repurposed_from ?? [];
         }
         setEdits(nextEdits);
+        setResearch(nextResearch);
         setSelected(nextSel);
       })
       .catch(err => setError(err instanceof Error ? err.message : String(err)))
@@ -159,6 +164,44 @@ export default function NewslettersPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Status change failed');
+      load(week);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally { setBusy(null); }
+  }
+
+  async function generateResearch(slug: string) {
+    if ((research[slug] ?? '').trim() && !window.confirm('Replace the current research brief with a freshly generated one?')) {
+      return;
+    }
+    setBusy(`research-${slug}`);
+    setError('');
+    try {
+      const res = await fetch('/api/newsletters/research', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ publication: slug, week }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Research generation failed');
+      setResearch(prev => ({ ...prev, [slug]: data.researchBrief ?? '' }));
+      load(week);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally { setBusy(null); }
+  }
+
+  async function saveResearch(slug: string) {
+    setBusy(`save-research-${slug}`);
+    setError('');
+    try {
+      const res = await fetch('/api/newsletters', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ publication: slug, week, researchBrief: research[slug] ?? '' }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Save failed');
       load(week);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -302,24 +345,57 @@ export default function NewslettersPage() {
               </div>
             </div>
 
-            {/* Research briefs (read-only) */}
+            {/* Research brief — the newsletter's own, generatable + editable */}
             <section className="space-y-2">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-400">Research brief</h3>
-              {block.briefs.length === 0 ? (
-                <p className="text-gray-500 text-sm">No research brief for {block.siteIds.map(s => SITE_SHORT[s] ?? s).join(' / ')} this week.</p>
-              ) : (
-                block.briefs
-                  .slice()
-                  .sort((a, b) => (block.siteIds.indexOf(a.site_id)) - (block.siteIds.indexOf(b.site_id)))
-                  .map(brief => (
-                    <div key={brief.id} className="bg-gray-900 border border-gray-700 rounded-xl p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-xs font-semibold text-gray-300">{SITE_SHORT[brief.site_id] ?? brief.site_id}</span>
-                        <span className="text-[10px] text-gray-500 uppercase tracking-wide">{brief.source}</span>
-                      </div>
-                      <p className="whitespace-pre-wrap text-sm text-gray-200 leading-relaxed">{brief.brief}</p>
-                    </div>
-                  ))
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-400">Research brief</h3>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => generateResearch(block.slug)}
+                    disabled={busy !== null}
+                    className="rounded-lg bg-purple-700 hover:bg-purple-600 text-white px-3 py-1.5 text-xs font-medium disabled:opacity-50"
+                    title="Research this issue from the weekly-plan theme and social highlights"
+                  >
+                    {busy === `research-${block.slug}` ? 'Researching…' : '🔎 Generate research brief'}
+                  </button>
+                  <button
+                    onClick={() => saveResearch(block.slug)}
+                    disabled={busy !== null}
+                    className="rounded-lg bg-gray-700 hover:bg-gray-600 text-white px-3 py-1.5 text-xs font-medium disabled:opacity-50"
+                  >
+                    {busy === `save-research-${block.slug}` ? 'Saving…' : 'Save brief'}
+                  </button>
+                </div>
+              </div>
+              <textarea
+                value={research[block.slug] ?? ''}
+                onChange={e => setResearch(prev => ({ ...prev, [block.slug]: e.target.value }))}
+                rows={8}
+                placeholder="Hit 🔎 Generate research brief to distil this issue's angle from the weekly-plan theme and social highlights — or write the brief yourself. It feeds the draft below."
+                className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-gray-100 text-sm focus:outline-none focus:border-blue-500 font-sans leading-relaxed"
+              />
+
+              {/* Upstream per-site research from the weekly plan (reference only) */}
+              {block.briefs.length > 0 && (
+                <details className="text-sm">
+                  <summary className="cursor-pointer text-xs text-gray-500 hover:text-gray-300">
+                    Site research from the weekly plan ({block.briefs.length})
+                  </summary>
+                  <div className="mt-2 space-y-2">
+                    {block.briefs
+                      .slice()
+                      .sort((a, b) => (block.siteIds.indexOf(a.site_id)) - (block.siteIds.indexOf(b.site_id)))
+                      .map(brief => (
+                        <div key={brief.id} className="bg-gray-900 border border-gray-700 rounded-xl p-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-xs font-semibold text-gray-300">{SITE_SHORT[brief.site_id] ?? brief.site_id}</span>
+                            <span className="text-[10px] text-gray-500 uppercase tracking-wide">{brief.source}</span>
+                          </div>
+                          <p className="whitespace-pre-wrap text-sm text-gray-200 leading-relaxed">{brief.brief}</p>
+                        </div>
+                      ))}
+                  </div>
+                </details>
               )}
             </section>
 

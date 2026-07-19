@@ -110,7 +110,14 @@ export async function POST(request: Request) {
     const pub = PUBLICATIONS.find(p => p.slug === publication)!;
     const supabase = getSupabase();
 
-    const [briefs, thisWeek, past] = await Promise.all([
+    const [nlRow, briefs, thisWeek, past] = await Promise.all([
+      // The newsletter's own research brief (generated via ../research), if any.
+      supabase
+        .from('newsletters')
+        .select('research_brief')
+        .eq('publication', publication)
+        .eq('week_commencing', week)
+        .maybeSingle(),
       supabase
         .from('research_briefs')
         .select('site_id, brief, source')
@@ -134,23 +141,29 @@ export async function POST(request: Request) {
         .limit(60),
     ]);
 
+    if (nlRow.error)    throw nlRow.error;
     if (briefs.error)   throw briefs.error;
     if (thisWeek.error) throw thisWeek.error;
     if (past.error)     throw past.error;
 
+    const newsletterBrief = (nlRow.data?.research_brief as string | null | undefined)?.trim() || '';
     const briefRows    = (briefs.data ?? []) as { site_id: string; brief: string; source: string }[];
     const thisWeekRows = (thisWeek.data ?? []) as LibraryRow[];
     const pastRows     = rankPastHighlights((past.data ?? []) as LibraryRow[]);
 
-    if (briefRows.length === 0 && thisWeekRows.length === 0 && pastRows.length === 0) {
+    if (!newsletterBrief && briefRows.length === 0 && thisWeekRows.length === 0 && pastRows.length === 0) {
       return NextResponse.json({
         error: 'Nothing to draft from — no research brief or grader-passed content for this week.',
       }, { status: 422 });
     }
 
-    const researchSection = briefRows.length
-      ? briefRows.map(b => `[${SITE_SHORT[b.site_id] ?? b.site_id}] ${b.brief}`).join('\n\n')
-      : '(no research brief this week)';
+    // Prefer the newsletter's own research brief; fall back to the per-site
+    // pipeline briefs when it hasn't been generated yet.
+    const researchSection = newsletterBrief
+      ? newsletterBrief
+      : briefRows.length
+        ? briefRows.map(b => `[${SITE_SHORT[b.site_id] ?? b.site_id}] ${b.brief}`).join('\n\n')
+        : '(no research brief this week)';
 
     const thisWeekSection = thisWeekRows.length
       ? thisWeekRows.map(formatHighlight).join('\n\n')

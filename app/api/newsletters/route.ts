@@ -31,6 +31,7 @@ interface NewsletterRow {
   week_commencing:  string;
   status:           string;
   subject_options:  unknown;
+  research_brief:   string | null;
   draft_content:    string | null;
   edited_content:   string | null;
   repurposed_from:  string[] | null;
@@ -48,7 +49,7 @@ export async function GET(request: Request) {
     const [nl, briefs, library] = await Promise.all([
       supabase
         .from('newsletters')
-        .select('id, publication, week_commencing, status, subject_options, draft_content, edited_content, repurposed_from, sent_at')
+        .select('id, publication, week_commencing, status, subject_options, research_brief, draft_content, edited_content, repurposed_from, sent_at')
         .eq('week_commencing', week),
       supabase
         .from('research_briefs')
@@ -99,6 +100,7 @@ export async function PATCH(request: Request) {
     // Only the fields present in the request are updated.
     const fields: Record<string, unknown> = { publication, week_commencing: week };
     if ('editedContent'  in body) fields.edited_content  = body.editedContent ?? null;
+    if ('researchBrief'  in body) fields.research_brief  = body.researchBrief ?? null;
     if ('subjectOptions' in body) fields.subject_options = body.subjectOptions ?? null;
     if ('repurposedFrom' in body) fields.repurposed_from = Array.isArray(body.repurposedFrom) ? body.repurposedFrom : null;
 
