@@ -87,17 +87,30 @@ export async function POST(request: Request) {
     }
 
     if (action === 'approve') {
-      // Media platforms park as approved_needs_media; the rest as approved.
+      // A media platform only parks as approved_needs_media when it has NO media
+      // attached yet. Once media_urls is populated the row is fully approved, so
+      // we must read that column here (the same one GET returns) and not bucket
+      // by platform alone. Everything else approves straight through.
       const { data, error: selErr } = await supabase
         .from('content_library')
-        .select('id, platform')
+        .select('id, platform, media_urls')
         .in('id', ids);
       if (selErr) throw selErr;
 
-      const rows = (data ?? []) as { id: string; platform: string }[];
+      const rows = (data ?? []) as { id: string; platform: string; media_urls: unknown }[];
       const now = new Date().toISOString();
-      const mediaIds = rows.filter(r => MEDIA_PLATFORMS.has(r.platform)).map(r => r.id);
-      const otherIds = rows.filter(r => !MEDIA_PLATFORMS.has(r.platform)).map(r => r.id);
+
+      // A row satisfies the media requirement when media_urls holds at least one
+      // non-empty string URL (mirrors the normalisation in PATCH and the push route).
+      const hasMedia = (mediaUrls: unknown): boolean =>
+        Array.isArray(mediaUrls) &&
+        mediaUrls.some(u => typeof u === 'string' && u.trim().length > 0);
+
+      const needsMedia = (r: { platform: string; media_urls: unknown }): boolean =>
+        MEDIA_PLATFORMS.has(r.platform) && !hasMedia(r.media_urls);
+
+      const mediaIds = rows.filter(needsMedia).map(r => r.id);
+      const otherIds = rows.filter(r => !needsMedia(r)).map(r => r.id);
 
       if (mediaIds.length) {
         const { error } = await supabase
