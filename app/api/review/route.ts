@@ -26,7 +26,7 @@ export async function GET(request: Request) {
 
     const { data, error } = await supabase
       .from('content_library')
-      .select('id, site_id, week_commencing, day_name, platform, grader_verdict, status, content, edited_content, approved_at, blotato_submission_id, scheduled_for, push_error')
+      .select('id, site_id, week_commencing, day_name, platform, grader_verdict, status, content, edited_content, media_urls, approved_at, blotato_submission_id, scheduled_for, push_error')
       .eq('week_commencing', week);
     if (error) throw error;
 
@@ -39,13 +39,26 @@ export async function GET(request: Request) {
 export async function PATCH(request: Request) {
   try {
     const body = await request.json();
-    const { id, editedContent } = body;
+    const { id, editedContent, mediaUrls } = body;
     if (!id) return NextResponse.json({ error: 'id is required' }, { status: 400 });
+
+    // Only update the fields the caller actually sent, so saving media never
+    // clobbers edited text and vice versa.
+    const update: Record<string, unknown> = {};
+    if (editedContent !== undefined) update.edited_content = editedContent ?? null;
+    if (mediaUrls !== undefined) {
+      update.media_urls = Array.isArray(mediaUrls)
+        ? mediaUrls.filter((u: unknown): u is string => typeof u === 'string' && u.trim().length > 0).map((u: string) => u.trim())
+        : [];
+    }
+    if (Object.keys(update).length === 0) {
+      return NextResponse.json({ error: 'nothing to update' }, { status: 400 });
+    }
 
     const supabase = getSupabase();
     const { error } = await supabase
       .from('content_library')
-      .update({ edited_content: editedContent ?? null })
+      .update(update)
       .eq('id', id);
     if (error) throw error;
 
