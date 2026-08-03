@@ -213,7 +213,7 @@ export default function ReviewPage() {
               {/* Needs-media strip */}
               {needsMedia.length > 0 && (
                 <div className="rounded-lg border border-amber-700 bg-amber-900/20 px-4 py-3">
-                  <p className="text-amber-200 text-xs font-semibold uppercase tracking-wide mb-1">Needs media — paste an image/video URL on each post below, then Save and Push</p>
+                  <p className="text-amber-200 text-xs font-semibold uppercase tracking-wide mb-1">Needs media — generate with Higgsfield, Blotato, or HyperFrames, then paste the image/video URL on each post below and Save and Push</p>
                   <p className="text-amber-100/80 text-xs">
                     {needsMedia.map(r => `${r.day_name} ${r.platform}`).join(' · ')}
                   </p>
@@ -254,6 +254,7 @@ export default function ReviewPage() {
                         Media URLs {MEDIA_PLATFORMS.has(row.platform)
                           ? <span className="text-amber-400">· required for {row.platform}</span>
                           : <span className="text-gray-500">· optional image/video</span>}
+                        <span className="text-gray-500"> · generate with Higgsfield, Blotato, or HyperFrames</span>
                       </label>
                       <textarea
                         value={mediaFor(row)}
