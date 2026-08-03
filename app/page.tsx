@@ -357,6 +357,15 @@ export default function Home() {
               >
                 Ops Guide
               </a>
+              <a
+                href="https://drive.google.com/drive/folders/1F86zrfpRSPSD5Crat5YnPNMC5zZzPF5U"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:brightness-125"
+                style={{ background: 'var(--hub-surface-2)', color: 'var(--hub-text-2)', border: '1px solid var(--hub-border)' }}
+              >
+                Finished Videos
+              </a>
               <button
                 onClick={loadStatus}
                 title="Refresh now"
