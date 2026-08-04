@@ -1,6 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { useWeek } from '../context/WeekContext';
+import WeekSelector from '../components/WeekSelector';
 
 interface Row {
   id:                    string;
@@ -51,16 +53,8 @@ const STATUS_LABEL: Record<string, string> = {
   rejected: 'Rejected', pushed: 'Pushed', failed: 'Failed',
 };
 
-function nextMonday(): string {
-  const d = new Date();
-  const day = d.getDay();
-  const daysUntilMonday = day === 0 ? 1 : 8 - day;
-  d.setDate(d.getDate() + daysUntilMonday);
-  return d.toISOString().slice(0, 10);
-}
-
 export default function ReviewPage() {
-  const [week, setWeek]     = useState<string>(nextMonday());
+  const { week }             = useWeek();
   const [rows, setRows]     = useState<Row[]>([]);
   const [edits, setEdits]   = useState<Record<string, string>>({});
   const [mediaEdits, setMediaEdits] = useState<Record<string, string>>({});
@@ -149,13 +143,7 @@ export default function ReviewPage() {
           <h1 className="text-lg font-semibold text-white">Review Queue</h1>
         </div>
         <div className="flex items-center gap-3">
-          <label className="text-xs text-gray-400 uppercase tracking-wide">Week</label>
-          <input
-            type="date"
-            value={week}
-            onChange={e => setWeek(e.target.value)}
-            className="bg-gray-800 border border-gray-600 rounded-lg px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500"
-          />
+          <WeekSelector />
           <button
             onClick={() => push(undefined, 'push-all')}
             disabled={busy !== null}

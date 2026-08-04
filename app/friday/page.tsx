@@ -1,6 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { useWeek } from '../context/WeekContext';
+import WeekSelector from '../components/WeekSelector';
 
 // ── Friday report ─────────────────────────────────────────────────────────────
 // End-of-week analysis for the current (or selected) week. Four panels:
@@ -69,22 +71,12 @@ interface FridayResponse {
   subscriberCounts: SubscriberRow[];
 }
 
-// Monday (YYYY-MM-DD) of the week containing today — the Friday view is a
-// retrospective on the week you're currently posting in.
-function currentMonday(): string {
-  const d = new Date();
-  const day = d.getDay();                    // 0=Sun … 6=Sat
-  const diff = day === 0 ? -6 : 1 - day;     // Sun→-6, Mon→0, Tue→-1 …
-  d.setDate(d.getDate() + diff);
-  return d.toISOString().slice(0, 10);
-}
-
 function fmtMoney(n: number | null): string {
   return n === null ? '—' : `£${n.toLocaleString()}`;
 }
 
 export default function FridayPage() {
-  const [week, setWeek]       = useState<string>(currentMonday());
+  const { week }               = useWeek();
   const [data, setData]       = useState<FridayResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState('');
@@ -167,15 +159,7 @@ export default function FridayPage() {
           <a href="/" className="text-gray-400 hover:text-white text-sm">← Dashboard</a>
           <h1 className="text-lg font-semibold text-white">Friday Report</h1>
         </div>
-        <div className="flex items-center gap-3">
-          <label className="text-xs text-gray-400 uppercase tracking-wide">Week commencing</label>
-          <input
-            type="date"
-            value={week}
-            onChange={e => setWeek(e.target.value)}
-            className="bg-gray-800 border border-gray-600 rounded-lg px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500"
-          />
-        </div>
+        <WeekSelector />
       </div>
 
       <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">

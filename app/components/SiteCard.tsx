@@ -27,7 +27,7 @@ function BrandAvatar({ name, color, initials }: { name: string; color: string; i
   );
 }
 
-interface MarketingChannel {
+export interface MarketingChannel {
   status: 'active' | 'in_progress' | 'not_started';
   statusLabel: string;
   platform?: string;
@@ -37,12 +37,12 @@ interface MarketingChannel {
   nextAction: string;
 }
 
-interface MarketingPlan {
+export interface MarketingPlan {
   blotato: MarketingChannel;
   beehiiv: MarketingChannel;
 }
 
-interface Site {
+export interface Site {
   id: string;
   name: string;
   url: string;
@@ -392,6 +392,7 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
       <div style={{ borderTop: '1px solid var(--hub-border)' }}>
         <button
           onClick={() => setShowTech(t => !t)}
+          aria-expanded={showTech}
           className="flex w-full items-center justify-between px-6 py-3 text-xs font-medium transition-colors hover:brightness-125"
           style={{ color: 'var(--hub-text-3)' }}
         >

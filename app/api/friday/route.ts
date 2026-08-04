@@ -13,19 +13,10 @@
 import { NextResponse } from 'next/server';
 import { getSupabase } from '@/app/lib/supabase';
 import { PUBLICATIONS, PUBLICATION_SLUGS } from '@/app/lib/siteConstants';
+import { getWeekCounts } from '@/app/lib/contentLibraryStats';
+import { PIPELINE_SITE_ORDER as SITE_ORDER } from '@/app/lib/siteColors';
 
 export const dynamic = 'force-dynamic';
-
-// The four pipeline sites that produce content_library rows (didianolue is
-// handled personally and has no pipeline).
-const SITE_ORDER = ['masteryourcareerpath', 'theconcurrentcontractor', 'oldoaktown', 'aiviralvideoprompts'];
-
-const STATUS_KEYS = ['draft', 'approved', 'approved_needs_media', 'rejected', 'pushed', 'failed'] as const;
-type StatusKey = (typeof STATUS_KEYS)[number];
-
-function emptyCounts(): Record<StatusKey, number> {
-  return { draft: 0, approved: 0, approved_needs_media: 0, rejected: 0, pushed: 0, failed: 0 };
-}
 
 // Add `days` to a YYYY-MM-DD date, returning YYYY-MM-DD (UTC-safe).
 function addDays(isoDate: string, days: number): string {
@@ -83,12 +74,8 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'week query param is required' }, { status: 400 });
     }
 
-    const [library, newsletters, subscribers, gumroad] = await Promise.all([
-      supabase
-        .from('content_library')
-        .select('site_id, status')
-        .eq('week_commencing', week)
-        .in('site_id', SITE_ORDER),
+    const [planned, newsletters, subscribers, gumroad] = await Promise.all([
+      getWeekCounts(supabase, week, SITE_ORDER),
       supabase
         .from('newsletters')
         .select('publication, status')
@@ -102,24 +89,8 @@ export async function GET(request: Request) {
       fetchGumroadWeeks(week),
     ]);
 
-    if (library.error) throw library.error;
     if (newsletters.error) throw newsletters.error;
     if (subscribers.error) throw subscribers.error;
-
-    // Planned vs published: per-site status counts.
-    const countsBySite: Record<string, Record<StatusKey, number>> = {};
-    for (const siteId of SITE_ORDER) countsBySite[siteId] = emptyCounts();
-    for (const row of (library.data ?? []) as { site_id: string; status: string }[]) {
-      const counts = countsBySite[row.site_id];
-      if (counts && (STATUS_KEYS as readonly string[]).includes(row.status)) {
-        counts[row.status as StatusKey]++;
-      }
-    }
-    const planned = SITE_ORDER.map(siteId => {
-      const counts = countsBySite[siteId];
-      const total = STATUS_KEYS.reduce((sum, k) => sum + counts[k], 0);
-      return { siteId, counts, total };
-    });
 
     // Newsletter status per publication (null if no row yet).
     const nlRows = (newsletters.data ?? []) as { publication: string; status: string }[];
