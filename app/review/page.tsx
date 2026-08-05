@@ -17,6 +17,59 @@ interface Row {
   blotato_submission_id: string | null;
   scheduled_for:         string | null;
   push_error:            string | null;
+  asset_type:            string | null;
+  creation_tool:         string | null;
+  drive_file_id:         string | null;
+  asset_duration_s:      number | null;
+  aspect_ratio:          string | null;
+  creation_requested_at: string | null;
+}
+
+// A short "3h ago" / "2d ago" label for the Create-requested marker.
+function agoLabel(iso: string): string {
+  const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (s < 60)   return 'just now';
+  if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+  return `${Math.floor(s / 86400)}d ago`;
+}
+
+// Inline preview for a row's first media URL — video gets a muted player,
+// image gets an <img>; both fall back to a plain link if the asset type is
+// unknown or the URL fails to render (Drive's direct-download bridge can be
+// slow or occasionally challenge automated fetches).
+function MediaPreview({ row }: { row: Row }) {
+  const [broken, setBroken] = useState(false);
+  const url = (row.media_urls ?? [])[0];
+  if (!url) return null;
+
+  if (!broken && row.asset_type === 'video') {
+    return (
+      <video
+        src={url}
+        controls
+        muted
+        className="w-full max-w-[220px] rounded-lg border border-gray-700 bg-black"
+        onError={() => setBroken(true)}
+      />
+    );
+  }
+  if (!broken && (row.asset_type === 'image' || row.asset_type === 'carousel')) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={url}
+        alt=""
+        className="max-h-[160px] rounded-lg border border-gray-700 object-cover"
+        onError={() => setBroken(true)}
+      />
+    );
+  }
+  return (
+    <a href={url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-400 hover:underline break-all">
+      {url}
+    </a>
+  );
 }
 
 // Platforms that can't publish without media attached (mirrors the push route /
@@ -104,7 +157,7 @@ export default function ReviewPage() {
     } finally { setBusy(null); }
   }
 
-  async function setStatus(action: 'approve' | 'reject', ids: string[], label: string) {
+  async function setStatus(action: 'approve' | 'reject' | 'request_creation', ids: string[], label: string) {
     if (!ids.length) return;
     setBusy(label);
     try {
@@ -213,10 +266,21 @@ export default function ReviewPage() {
               {/* Needs-media strip */}
               {needsMedia.length > 0 && (
                 <div className="rounded-lg border border-amber-700 bg-amber-900/20 px-4 py-3">
-                  <p className="text-amber-200 text-xs font-semibold uppercase tracking-wide mb-1">Needs media — generate with Higgsfield, Blotato, or HyperFrames, then paste the image/video URL on each post below and Save and Push</p>
-                  <p className="text-amber-100/80 text-xs">
-                    {needsMedia.map(r => `${r.day_name} ${r.platform}`).join(' · ')}
-                  </p>
+                  <div className="flex items-start justify-between gap-3 flex-wrap">
+                    <div>
+                      <p className="text-amber-200 text-xs font-semibold uppercase tracking-wide mb-1">Needs media</p>
+                      <p className="text-amber-100/80 text-xs">
+                        {needsMedia.map(r => `${r.day_name} ${r.platform}`).join(' · ')}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setStatus('request_creation', needsMedia.filter(r => !r.creation_requested_at).map(r => r.id), `create-all-${siteId}`)}
+                      disabled={busy !== null || needsMedia.every(r => r.creation_requested_at)}
+                      className="rounded-lg bg-amber-700 hover:bg-amber-600 text-white px-3 py-1.5 text-xs font-medium disabled:opacity-40 shrink-0"
+                    >
+                      {busy === `create-all-${siteId}` ? 'Requesting…' : 'Create all'}
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -246,16 +310,45 @@ export default function ReviewPage() {
                     className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-gray-100 text-sm focus:outline-none focus:border-blue-500"
                   />
 
+                  {/* Existing media, previewed inline rather than just as a URL. */}
+                  {(row.media_urls?.length ?? 0) > 0 && (
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <MediaPreview row={row} />
+                      {row.creation_tool && (
+                        <span className="text-[11px] text-gray-500">
+                          {row.asset_type ?? 'asset'} · {row.creation_tool}
+                          {row.aspect_ratio ? ` · ${row.aspect_ratio}` : ''}
+                          {row.asset_duration_s ? ` · ${Math.round(row.asset_duration_s)}s` : ''}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
                   {/* Media URLs — public image/video links, one per line. Required
                       for Instagram/TikTok; optional (but supported) for LinkedIn/Facebook. */}
                   {row.status !== 'pushed' && (
                     <div className="space-y-1">
-                      <label className="block text-[11px] uppercase tracking-wide text-gray-400">
-                        Media URLs {MEDIA_PLATFORMS.has(row.platform)
-                          ? <span className="text-amber-400">· required for {row.platform}</span>
-                          : <span className="text-gray-500">· optional image/video</span>}
-                        <span className="text-gray-500"> · generate with Higgsfield, Blotato, or HyperFrames</span>
-                      </label>
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <label className="block text-[11px] uppercase tracking-wide text-gray-400">
+                          Media URLs {MEDIA_PLATFORMS.has(row.platform)
+                            ? <span className="text-amber-400">· required for {row.platform}</span>
+                            : <span className="text-gray-500">· optional image/video</span>}
+                          <span className="text-gray-500"> · generate with Higgsfield, Blotato, or HyperFrames</span>
+                        </label>
+                        {MEDIA_PLATFORMS.has(row.platform) && !(row.media_urls?.length) && (
+                          row.creation_requested_at ? (
+                            <span className="text-[11px] text-amber-300/80 shrink-0">Requested {agoLabel(row.creation_requested_at)}</span>
+                          ) : (
+                            <button
+                              onClick={() => setStatus('request_creation', [row.id], `create-${row.id}`)}
+                              disabled={busy !== null}
+                              className="rounded-lg bg-amber-700 hover:bg-amber-600 text-white px-2.5 py-1 text-[11px] font-medium disabled:opacity-50 shrink-0"
+                            >
+                              {busy === `create-${row.id}` ? 'Requesting…' : 'Create'}
+                            </button>
+                          )
+                        )}
+                      </div>
                       <textarea
                         value={mediaFor(row)}
                         onChange={e => setMediaEdits(prev => ({ ...prev, [row.id]: e.target.value }))}

@@ -41,7 +41,26 @@ interface LibraryRow {
   content:            string | null;
   edited_content:     string | null;
   repurposed_from_id: string | null;
+  media_urls:         string[] | null;
+  asset_type:         string | null;
+  creation_tool:      string | null;
+  aspect_ratio:       string | null;
 }
+
+const ASSET_TYPE_BADGE: Record<string, string> = {
+  video:    'bg-indigo-900/60 text-indigo-200',
+  image:    'bg-cyan-900/60 text-cyan-200',
+  carousel: 'bg-purple-900/60 text-purple-200',
+};
+
+// Repurposing an asset (not just text) skips the draft queue and goes straight
+// to a creation run's worklist — see /api/library POST for what each value does.
+const REPURPOSE_ASSET_TYPES = [
+  { value: '',         label: 'Text only (draft, as today)' },
+  { value: 'video',    label: 'Video — flag for creation' },
+  { value: 'image',    label: 'Image — flag for creation' },
+  { value: 'carousel', label: 'Carousel — flag for creation' },
+];
 interface LibraryResponse {
   rows:      LibraryRow[];
   sites:     string[];
@@ -58,11 +77,12 @@ function currentMonday(): string {
 }
 
 interface RepurposeDraft {
-  siteId:   string;
-  week:     string;
-  day:      string;
-  platform: string;
-  content:  string;
+  siteId:    string;
+  week:      string;
+  day:       string;
+  platform:  string;
+  content:   string;
+  assetType: string; // '' = text-only, else 'video' | 'image' | 'carousel'
 }
 
 export default function LibraryPage() {
@@ -106,11 +126,12 @@ export default function LibraryPage() {
     setOpenId(row.id);
     setFlash('');
     setDraft({
-      siteId:   row.site_id,
-      week:     currentMonday(),
-      day:      row.day_name && DAY_NAMES.includes(row.day_name) ? row.day_name : 'Monday',
-      platform: row.platform ?? '',
-      content:  row.edited_content ?? row.content ?? '',
+      siteId:    row.site_id,
+      week:      currentMonday(),
+      day:       row.day_name && DAY_NAMES.includes(row.day_name) ? row.day_name : 'Monday',
+      platform:  row.platform ?? '',
+      content:   row.edited_content ?? row.content ?? '',
+      assetType: '',
     });
   }
 
@@ -127,11 +148,21 @@ export default function LibraryPage() {
       const res = await fetch('/api/library', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ sourceId, ...draft }),
+        body:    JSON.stringify({
+          sourceId,
+          siteId:    draft.siteId,
+          week:      draft.week,
+          day:       draft.day,
+          platform:  draft.platform,
+          content:   draft.content,
+          ...(draft.assetType ? { assetType: draft.assetType } : {}),
+        }),
       });
       const body = await res.json();
       if (!res.ok) throw new Error(body.error || 'Repurpose failed');
-      setFlash('Repurposed — new draft added to the library.');
+      setFlash(draft.assetType
+        ? `Repurposed — flagged for ${draft.assetType} creation, on the worklist now.`
+        : 'Repurposed — new draft added to the library.');
       closeRepurpose();
       load();
       setTimeout(() => setFlash(''), 4000);
@@ -222,6 +253,18 @@ export default function LibraryPage() {
                       </span>
                     )}
                   </div>
+                  {row.asset_type && (
+                    <span className={`inline-block mb-2 px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wide ${ASSET_TYPE_BADGE[row.asset_type] ?? 'bg-gray-800 text-gray-300'}`}>
+                      {row.asset_type}{row.creation_tool ? ` · ${row.creation_tool}` : ''}{row.aspect_ratio ? ` · ${row.aspect_ratio}` : ''}
+                    </span>
+                  )}
+                  {row.asset_type === 'image' && row.media_urls?.[0] && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={row.media_urls[0]} alt="" className="max-h-32 rounded-lg border border-gray-700 mb-2 object-cover" />
+                  )}
+                  {row.asset_type === 'video' && row.media_urls?.[0] && (
+                    <video src={row.media_urls[0]} controls muted className="max-h-32 rounded-lg border border-gray-700 mb-2 bg-black" />
+                  )}
                   <p className="text-sm text-gray-300 whitespace-pre-wrap break-words">
                     {preview.length > 280 && !isOpen ? preview.slice(0, 280) + '…' : preview}
                   </p>
@@ -237,7 +280,17 @@ export default function LibraryPage() {
               {/* Repurpose editor */}
               {isOpen && draft && (
                 <div className="mt-4 border-t border-gray-800 pt-4 space-y-3">
-                  <div className="grid gap-3 sm:grid-cols-4">
+                  <div className="grid gap-3 sm:grid-cols-5">
+                    <div>
+                      <label className="block text-xs text-gray-400 mb-1 uppercase tracking-wide">Repurpose as</label>
+                      <select
+                        value={draft.assetType}
+                        onChange={e => setDraft(d => d && { ...d, assetType: e.target.value })}
+                        className="w-full bg-gray-800 border border-gray-600 rounded-lg px-2 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500"
+                      >
+                        {REPURPOSE_ASSET_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                      </select>
+                    </div>
                     <div>
                       <label className="block text-xs text-gray-400 mb-1 uppercase tracking-wide">Target site</label>
                       <select
@@ -291,11 +344,14 @@ export default function LibraryPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-400 mb-1 uppercase tracking-wide">Content (editable copy)</label>
+                    <label className="block text-xs text-gray-400 mb-1 uppercase tracking-wide">
+                      {draft.assetType ? 'Creation brief (what the new asset should be)' : 'Content (editable copy)'}
+                    </label>
                     <textarea
                       value={draft.content}
                       onChange={e => setDraft(d => d && { ...d, content: e.target.value })}
                       rows={6}
+                      placeholder={draft.assetType ? `e.g. "Cut this into a 9:16 vertical for TikTok, keep the same script and pacing."` : undefined}
                       className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
                     />
                   </div>
@@ -305,7 +361,7 @@ export default function LibraryPage() {
                       disabled={saving}
                       className="px-4 py-2 rounded-lg text-sm font-medium bg-purple-700 hover:bg-purple-600 text-white disabled:opacity-50"
                     >
-                      {saving ? 'Saving…' : 'Add as new draft'}
+                      {saving ? 'Saving…' : draft.assetType ? 'Flag for creation' : 'Add as new draft'}
                     </button>
                     <button
                       onClick={closeRepurpose}
@@ -313,7 +369,11 @@ export default function LibraryPage() {
                     >
                       Cancel
                     </button>
-                    <span className="text-xs text-gray-500">Inserts a new draft row — the original stays untouched.</span>
+                    <span className="text-xs text-gray-500">
+                      {draft.assetType
+                        ? 'Inserts a new row, flagged for creation — the original stays untouched.'
+                        : 'Inserts a new draft row — the original stays untouched.'}
+                    </span>
                   </div>
                 </div>
               )}
