@@ -43,6 +43,8 @@ export default function PlanPage() {
   const [briefs, setBriefs]                     = useState<Record<string, string>>({});
   const [status, setStatus]                     = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [errorMsg, setErrorMsg]                 = useState('');
+  const [busy, setBusy]                         = useState<string | null>(null);
+  const [researchError, setResearchError]       = useState<Record<string, string>>({});
 
   // Returns the date string (YYYY-MM-DD) for the next Monday from today
   function nextMonday(): string {
@@ -140,6 +142,50 @@ export default function PlanPage() {
     }
   }
 
+  async function generateBrief(siteId: string) {
+    const week = form?.weekCommencing;
+    if (!week) return;
+    if ((briefs[siteId] ?? '').trim() && !window.confirm('Replace the current research brief with a freshly generated one?')) {
+      return;
+    }
+    setBusy(`research-${siteId}`);
+    setResearchError(prev => ({ ...prev, [siteId]: '' }));
+    try {
+      const res = await fetch('/api/research', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ siteId, week, action: 'generate' }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Research generation failed');
+      setBriefs(prev => ({ ...prev, [siteId]: data.brief ?? '' }));
+    } catch (err) {
+      setResearchError(prev => ({ ...prev, [siteId]: err instanceof Error ? err.message : String(err) }));
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function saveBrief(siteId: string) {
+    const week = form?.weekCommencing;
+    if (!week) return;
+    setBusy(`save-research-${siteId}`);
+    setResearchError(prev => ({ ...prev, [siteId]: '' }));
+    try {
+      const res = await fetch('/api/research', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ siteId, week, action: 'save', brief: briefs[siteId] ?? '' }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Save failed');
+    } catch (err) {
+      setResearchError(prev => ({ ...prev, [siteId]: err instanceof Error ? err.message : String(err) }));
+    } finally {
+      setBusy(null);
+    }
+  }
+
   if (errorMsg && !form) {
     return (
       <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center">
@@ -217,15 +263,39 @@ export default function PlanPage() {
             <div key={siteId} className="bg-gray-900 border border-gray-700 rounded-xl p-5 space-y-4">
               <h2 className="text-sm font-semibold text-white">{SITE_LABELS[siteId] ?? siteId}</h2>
 
-              {/* Research brief for the selected week (read-only, collapsible) */}
-              {briefs[siteId] && (
-                <details className="rounded-lg border border-gray-700 bg-gray-800/50">
-                  <summary className="cursor-pointer px-3 py-2 text-xs font-medium text-gray-300">
-                    Research brief for this week
-                  </summary>
-                  <div className="px-3 pb-3 text-xs text-gray-400 whitespace-pre-wrap">{briefs[siteId]}</div>
-                </details>
-              )}
+              {/* Research brief for the selected week — generatable + editable */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-medium text-gray-400 uppercase tracking-wide">Research brief for this week</label>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => generateBrief(siteId)}
+                      disabled={busy !== null}
+                      className="rounded-lg bg-purple-700 hover:bg-purple-600 text-white px-3 py-1.5 text-xs font-medium disabled:opacity-50"
+                      title="Search the web for what's actually happening right now, relevant to this site's audience"
+                    >
+                      {busy === `research-${siteId}` ? 'Researching…' : '🔎 Generate research brief'}
+                    </button>
+                    <button
+                      onClick={() => saveBrief(siteId)}
+                      disabled={busy !== null}
+                      className="rounded-lg bg-gray-700 hover:bg-gray-600 text-white px-3 py-1.5 text-xs font-medium disabled:opacity-50"
+                    >
+                      {busy === `save-research-${siteId}` ? 'Saving…' : 'Save brief'}
+                    </button>
+                  </div>
+                </div>
+                <textarea
+                  value={briefs[siteId] ?? ''}
+                  onChange={e => setBriefs(prev => ({ ...prev, [siteId]: e.target.value }))}
+                  rows={6}
+                  placeholder="Hit 🔎 Generate research brief to search the web for what's happening this week for this audience — or write the brief yourself. It feeds this week's content pipeline."
+                  className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-gray-100 text-xs focus:outline-none focus:border-blue-500 font-sans leading-relaxed whitespace-pre-wrap"
+                />
+                {researchError[siteId] && (
+                  <p className="text-xs text-red-400">{researchError[siteId]}</p>
+                )}
+              </div>
 
               {/* Pillar selector */}
               <div>
