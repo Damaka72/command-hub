@@ -58,7 +58,26 @@ interface LibraryRow {
   content:            string | null;
   edited_content:     string | null;
   repurposed_from_id: string | null;
+  media_urls:         string[] | null;
+  asset_type:         string | null;
+  creation_tool:      string | null;
+  aspect_ratio:       string | null;
 }
+
+const ASSET_TYPE_BADGE: Record<string, string> = {
+  video:    'bg-indigo-900/60 text-indigo-200',
+  image:    'bg-cyan-900/60 text-cyan-200',
+  carousel: 'bg-purple-900/60 text-purple-200',
+};
+
+// Repurposing an asset (not just text) skips the draft queue and goes straight
+// to a creation run's worklist — see /api/library POST for what each value does.
+const REPURPOSE_ASSET_TYPES = [
+  { value: '',         label: 'Text only (draft, as today)' },
+  { value: 'video',    label: 'Video — flag for creation' },
+  { value: 'image',    label: 'Image — flag for creation' },
+  { value: 'carousel', label: 'Carousel — flag for creation' },
+];
 interface LibraryResponse {
   rows:      LibraryRow[];
   sites:     string[];
@@ -66,11 +85,12 @@ interface LibraryResponse {
 }
 
 interface RepurposeDraft {
-  siteId:   string;
-  week:     string;
-  day:      string;
-  platform: string;
-  content:  string;
+  siteId:    string;
+  week:      string;
+  day:       string;
+  platform:  string;
+  content:   string;
+  assetType: string; // '' = text-only, else 'video' | 'image' | 'carousel'
 }
 
 function ViewSegment({ view, onChange }: { view: View; onChange: (v: View) => void }) {
@@ -188,11 +208,12 @@ export default function LibraryPage() {
     setFlash('');
     setView('list');
     setDraft({
-      siteId:   row.site_id,
-      week:     week,
-      day:      row.day_name && DAY_NAMES.includes(row.day_name) ? row.day_name : 'Monday',
-      platform: row.platform ?? '',
-      content:  row.edited_content ?? row.content ?? '',
+      siteId:    row.site_id,
+      week:      currentMonday(),
+      day:       row.day_name && DAY_NAMES.includes(row.day_name) ? row.day_name : 'Monday',
+      platform:  row.platform ?? '',
+      content:   row.edited_content ?? row.content ?? '',
+      assetType: '',
     });
   }
 
@@ -209,11 +230,21 @@ export default function LibraryPage() {
       const res = await fetch('/api/library', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ sourceId, ...draft }),
+        body:    JSON.stringify({
+          sourceId,
+          siteId:    draft.siteId,
+          week:      draft.week,
+          day:       draft.day,
+          platform:  draft.platform,
+          content:   draft.content,
+          ...(draft.assetType ? { assetType: draft.assetType } : {}),
+        }),
       });
       const body = await res.json();
       if (!res.ok) throw new Error(body.error || 'Repurpose failed');
-      setFlash('Repurposed — new draft added to the library.');
+      setFlash(draft.assetType
+        ? `Repurposed — flagged for ${draft.assetType} creation, on the worklist now.`
+        : 'Repurposed — new draft added to the library.');
       closeRepurpose();
       load();
       setTimeout(() => setFlash(''), 4000);
@@ -302,56 +333,151 @@ export default function LibraryPage() {
             : <WeekView week={week} rows={weekRows} onOpenRow={openRepurpose} filterLabel={filterLabel} />
         )}
 
-        {view === 'month' && (
-          monthLoading && monthRows.length === 0
-            ? <p className="text-sm" style={{ color: 'var(--fg-3)' }}>Loading…</p>
-            : <MonthView month={month} rows={monthRows} onCellClick={switchToWeek} />
-        )}
+        {data && filtered.map(row => {
+          const isOpen = openId === row.id;
+          const preview = row.edited_content ?? row.content ?? '';
+          return (
+            <div key={row.id} className="bg-gray-900 border border-gray-700 rounded-xl p-4">
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2 mb-2 text-xs text-gray-400">
+                    <span className="text-gray-200 font-medium">{SITE_LABELS[row.site_id] ?? row.site_id}</span>
+                    <span>·</span>
+                    <span>{row.week_commencing ?? 'no week'}</span>
+                    <span>·</span>
+                    <span>{row.day_name ?? '—'}</span>
+                    <span>·</span>
+                    <span className="text-gray-300">{row.platform ?? '—'}</span>
+                    <span className={`px-2 py-0.5 rounded-full ${STATUS_PILL[row.status] ?? 'bg-gray-700 text-gray-200'}`}>
+                      {STATUS_LABEL[row.status] ?? row.status}
+                    </span>
+                    {row.repurposed_from_id && (
+                      <span className="px-2 py-0.5 rounded-full bg-purple-900/60 text-purple-200" title={`Repurposed from ${row.repurposed_from_id}`}>
+                        Repurposed
+                      </span>
+                    )}
+                  </div>
+                  {row.asset_type && (
+                    <span className={`inline-block mb-2 px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wide ${ASSET_TYPE_BADGE[row.asset_type] ?? 'bg-gray-800 text-gray-300'}`}>
+                      {row.asset_type}{row.creation_tool ? ` · ${row.creation_tool}` : ''}{row.aspect_ratio ? ` · ${row.aspect_ratio}` : ''}
+                    </span>
+                  )}
+                  {row.asset_type === 'image' && row.media_urls?.[0] && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={row.media_urls[0]} alt="" className="max-h-32 rounded-lg border border-gray-700 mb-2 object-cover" />
+                  )}
+                  {row.asset_type === 'video' && row.media_urls?.[0] && (
+                    <video src={row.media_urls[0]} controls muted className="max-h-32 rounded-lg border border-gray-700 mb-2 bg-black" />
+                  )}
+                  <p className="text-sm text-gray-300 whitespace-pre-wrap break-words">
+                    {preview.length > 280 && !isOpen ? preview.slice(0, 280) + '…' : preview}
+                  </p>
+                </div>
+                <button
+                  onClick={() => (isOpen ? closeRepurpose() : openRepurpose(row))}
+                  className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium bg-purple-700 hover:bg-purple-600 text-white"
+                >
+                  {isOpen ? 'Cancel' : 'Repurpose'}
+                </button>
+              </div>
 
-        {view === 'list' && (
-          <>
-            {loading && !data && <p className="text-sm" style={{ color: 'var(--fg-3)' }}>Loading…</p>}
-            {data && (
-              <p className="text-xs" style={{ color: 'var(--fg-3)' }}>
-                {filtered.length} of {data.rows.length} rows
-                {data.rows.length >= 500 && ' (showing the 500 most recent)'}
-              </p>
-            )}
-
-            {data && filtered.map(row => {
-              const isOpen = openId === row.id;
-              const preview = row.edited_content ?? row.content ?? '';
-              return (
-                <div key={row.id} className="rounded-xl p-4" style={{ background: 'var(--panel)', border: '1px solid var(--line)' }}>
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="min-w-0 flex-1">
-                      <div className="mb-2 flex flex-wrap items-center gap-2 text-xs" style={{ color: 'var(--fg-3)' }}>
-                        <span className="font-medium" style={{ color: 'var(--fg)' }}>{SITE_LABELS[row.site_id] ?? row.site_id}</span>
-                        <span>·</span>
-                        <span>{row.week_commencing ?? 'no week'}</span>
-                        <span>·</span>
-                        <span>{row.day_name ?? '—'}</span>
-                        <span>·</span>
-                        <span style={{ color: 'var(--fg-2)' }}>{row.platform ?? '—'}</span>
-                        <span className={`px-2 py-0.5 rounded-full ${STATUS_PILL[row.status] ?? 'bg-gray-700 text-gray-200'}`}>
-                          {STATUS_LABEL[row.status] ?? row.status}
-                        </span>
-                        {row.repurposed_from_id && (
-                          <span className="rounded-full bg-purple-900/60 px-2 py-0.5 text-purple-200" title={`Repurposed from ${row.repurposed_from_id}`}>
-                            Repurposed
-                          </span>
-                        )}
-                      </div>
-                      <p className="whitespace-pre-wrap break-words text-sm" style={{ color: 'var(--fg-2)' }}>
-                        {preview.length > 280 && !isOpen ? preview.slice(0, 280) + '…' : preview}
-                      </p>
+              {/* Repurpose editor */}
+              {isOpen && draft && (
+                <div className="mt-4 border-t border-gray-800 pt-4 space-y-3">
+                  <div className="grid gap-3 sm:grid-cols-5">
+                    <div>
+                      <label className="block text-xs text-gray-400 mb-1 uppercase tracking-wide">Repurpose as</label>
+                      <select
+                        value={draft.assetType}
+                        onChange={e => setDraft(d => d && { ...d, assetType: e.target.value })}
+                        className="w-full bg-gray-800 border border-gray-600 rounded-lg px-2 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500"
+                      >
+                        {REPURPOSE_ASSET_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                      </select>
                     </div>
+                    <div>
+                      <label className="block text-xs text-gray-400 mb-1 uppercase tracking-wide">Target site</label>
+                      <select
+                        value={draft.siteId}
+                        onChange={e => setDraft(d => d && { ...d, siteId: e.target.value })}
+                        className="w-full bg-gray-800 border border-gray-600 rounded-lg px-2 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500"
+                      >
+                        {TARGET_SITES.map(s => (
+                          <option key={s} value={s}>{SITE_LABELS[s] ?? s}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-400 mb-1 uppercase tracking-wide">Week</label>
+                      <input
+                        type="date"
+                        value={draft.week}
+                        onChange={e => setDraft(d => d && { ...d, week: e.target.value })}
+                        className="w-full bg-gray-800 border border-gray-600 rounded-lg px-2 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-400 mb-1 uppercase tracking-wide">Day</label>
+                      <select
+                        value={draft.day}
+                        onChange={e => setDraft(d => d && { ...d, day: e.target.value })}
+                        className="w-full bg-gray-800 border border-gray-600 rounded-lg px-2 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500"
+                      >
+                        {DAY_NAMES.map(dn => <option key={dn} value={dn}>{dn}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-400 mb-1 uppercase tracking-wide">Platform</label>
+                      {data && data.platforms.length > 0 ? (
+                        <select
+                          value={draft.platform}
+                          onChange={e => setDraft(d => d && { ...d, platform: e.target.value })}
+                          className="w-full bg-gray-800 border border-gray-600 rounded-lg px-2 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500"
+                        >
+                          <option value="">— select —</option>
+                          {data.platforms.map(p => <option key={p} value={p}>{p}</option>)}
+                        </select>
+                      ) : (
+                        <input
+                          type="text"
+                          value={draft.platform}
+                          onChange={e => setDraft(d => d && { ...d, platform: e.target.value })}
+                          className="w-full bg-gray-800 border border-gray-600 rounded-lg px-2 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500"
+                        />
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-400 mb-1 uppercase tracking-wide">
+                      {draft.assetType ? 'Creation brief (what the new asset should be)' : 'Content (editable copy)'}
+                    </label>
+                    <textarea
+                      value={draft.content}
+                      onChange={e => setDraft(d => d && { ...d, content: e.target.value })}
+                      rows={6}
+                      placeholder={draft.assetType ? `e.g. "Cut this into a 9:16 vertical for TikTok, keep the same script and pacing."` : undefined}
+                      className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => submitRepurpose(row.id)}
+                      disabled={saving}
+                      className="px-4 py-2 rounded-lg text-sm font-medium bg-purple-700 hover:bg-purple-600 text-white disabled:opacity-50"
+                    >
+                      {saving ? 'Saving…' : draft.assetType ? 'Flag for creation' : 'Add as new draft'}
+                    </button>
                     <button
                       onClick={() => (isOpen ? closeRepurpose() : openRepurpose(row))}
                       className="shrink-0 rounded-lg bg-purple-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-purple-600"
                     >
                       {isOpen ? 'Cancel' : 'Repurpose'}
                     </button>
+                    <span className="text-xs text-gray-500">
+                      {draft.assetType
+                        ? 'Inserts a new row, flagged for creation — the original stays untouched.'
+                        : 'Inserts a new draft row — the original stays untouched.'}
+                    </span>
                   </div>
 
                   {/* Repurpose editor */}
