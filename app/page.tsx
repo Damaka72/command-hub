@@ -5,6 +5,7 @@ import DailyBriefing from "./components/DailyBriefing";
 import AgentCommandCentre from "./components/AgentCommandCentre";
 import SidebarTasks from "./components/SidebarTasks";
 import DiPipeline from "./components/DiPipeline";
+import ResearchPanel from "./components/ResearchPanel";
 import SundayView from "./components/SundayView";
 import PipelineRunner from "./components/PipelineRunner";
 import ActivityFeed from "./components/ActivityFeed";
@@ -473,19 +474,9 @@ export default function Home() {
               )}
 
               <main className="flex-1 px-6 py-8">
-
-                {/* ── Hero: aggregate dial + stat rail (UX spec §3.1–3.2) ── */}
-                <section
-                  className="mb-5 flex flex-wrap items-center gap-8 rounded-2xl p-6"
-                  style={{ background: 'var(--panel)', border: '1px solid var(--line)' }}
-                >
-                  <HeroDial pct={homeData?.aggregatePct ?? 0} />
-                  <StatRail week={week} home={homeData} />
-                </section>
-
-                {/* ── Operating-principle quote panel (UX spec §3.3) ── */}
+                {/* Research: ground next week's content before running the pipeline */}
                 <div className="mb-6">
-                  <QuotePanel />
+                  <ResearchPanel />
                 </div>
 
                 {/* Live control + history: what's happening now / what has happened */}

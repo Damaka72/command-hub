@@ -31,6 +31,7 @@ export interface SiteConfig {
   primaryPlatform: string;
   automateBlotato: boolean;    // false = owner manages posting manually
   blotatoPlatforms: string[];  // platforms to draft + auto-schedule via Blotato
+  researchFocus: string;       // what the weekly web-research step should look for
 }
 
 export const SITE_CONFIGS: SiteConfig[] = [
@@ -76,6 +77,7 @@ Confirmed products (only reference these — do not invent free resources or oth
 Tone: Encouraging, practical, and aspirational — but grounded. Not motivational fluff. Always show how the advice connects to a real career outcome for the specific segment you are speaking to.
 
 Reference PRIME or OPERATE by name when relevant to the pillar. Every post should include a path to a confirmed product or the Skool community. UK English throughout.`,
+    researchFocus: 'UK hiring market shifts, redundancy waves, in-demand skills, salary/negotiation benchmarks, graduate job market conditions, and notable career-development or AI-in-hiring news relevant to graduates, early/mid-career professionals, career changers, and contractors/freelancers.',
   },
 
   {
@@ -105,6 +107,7 @@ Content pillars:
 ${pillarBlock('theconcurrentcontractor')}
 
 Never write generic career content. Never sound like a recruiter or financial advisor. Never be preachy. UK English throughout. Peer-to-peer tone always.`,
+    researchFocus: 'IR35/off-payroll working rule changes, HMRC guidance updates, day-rate and contract-market trends, notable contractor tribunal cases or client-side IR35 policy shifts, and UK contracting-market conditions.',
   },
 
   {
@@ -147,6 +150,7 @@ ${pillarBlock('oldoaktown')}
 TONE: Community-first. Write as a local voice for residents and businesses — not developers or investors. Never write like a press release. UK English throughout.
 
 When the brief's theme does not map to a specific verifiable local story, write a community-education post from the verified facts above. This is always valid content for this audience.`,
+    researchFocus: 'Real, dated local news for Old Oak Common and Park Royal, West London — OPDC planning decisions, HS2/Elizabeth line construction updates, new local business openings, community events, and Hammersmith & Fulham / Brent / Ealing council announcements affecting the area. Zero tolerance for anything not directly sourced from search results.',
   },
 
   {
@@ -184,6 +188,7 @@ Platform notes:
 - Instagram: 200 words max, include 3-5 relevant hashtags at the end
 
 UK English. Energetic but not breathless. Show the result, not the tool.`,
+    researchFocus: 'New AI video-generation model/tool releases, TikTok/Instagram/YouTube algorithm or feature changes, viral video trends and formats, and notable creator-economy news relevant to social media marketers and small business owners making AI video content.',
   },
 ];
 

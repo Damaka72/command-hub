@@ -10,7 +10,7 @@
     "pipeline": "tsx agents/pipeline.ts"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.39.0",
+    "@anthropic-ai/sdk": "^0.115.0",
     "@supabase/supabase-js": "^2.105.4",
     "dotenv": "^16.4.5",
     "next": "16.2.4",
