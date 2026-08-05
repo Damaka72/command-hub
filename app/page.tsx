@@ -358,13 +358,13 @@ export default function Home() {
                 Ops Guide
               </a>
               <a
-                href="https://drive.google.com/drive/folders/1F86zrfpRSPSD5Crat5YnPNMC5zZzPF5U"
+                href="https://drive.google.com/drive/folders/1VQFSQuwQyATw_voZanV0rQ_Z6TRvE7rk"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:brightness-125"
                 style={{ background: 'var(--hub-surface-2)', color: 'var(--hub-text-2)', border: '1px solid var(--hub-border)' }}
               >
-                Finished Videos
+                Content Library
               </a>
               <button
                 onClick={loadStatus}

@@ -24,6 +24,27 @@ agent team," not a separate codebase.
    `app/api/library/asset/route.ts`) to attach it — this is what flips the row
    from `approved_needs_media` to `approved` and makes it pushable.
 
+## Where assets actually live in Drive
+
+There's a real, pre-existing library structure — `Command Hub Content
+Library` (root, created July 2026) — not the ad-hoc `Command Hub Videos`
+folder earlier video work used before this file existed. Use the real one.
+Per-site folders, already there:
+
+| site_id                    | Drive folder     |
+| --------------------------- | ---------------- |
+| `aiviralvideoprompts`       | `01 AIVVP`       |
+| `masteryourcareerpath`      | `02 MYCP`        |
+| `oldoaktown`                 | `03 OOT`         |
+| `theconcurrentcontractor`   | `04 TCC`         |
+| `didianolue`                 | `05 Didi Anolue` |
+
+Each site folder already has content-type subfolders (`newsletters`,
+`evergreen`, monthly folders). Save a new asset into a `videos/` subfolder
+inside the matching site folder — create that subfolder the first time a
+site needs it, sibling to `newsletters`, rather than inventing a
+`{site}/{asset_type}/{date}/` tree from scratch.
+
 ## Recipe: video → TikTok vertical cut
 
 **When it applies:** a `content_library` row has `asset_type = 'video'`,
