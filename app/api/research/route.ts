@@ -48,6 +48,9 @@ must be something the search results actually returned — if you did not find
 it via search, do not state it. Tag each factual claim inline with its source
 and date, e.g. "(Source: BBC News, 3 Aug 2026)".
 
+Do not narrate your search process ("I'll search for...", "Now let me check...").
+Run the searches you need, then write only the finished brief.
+
 Write a tight research brief (roughly 120-250 words) that a writer could hand
 straight to a content-brief step. Use short markdown sections:
 
@@ -116,10 +119,21 @@ export async function POST(request: Request) {
       messages: [{ role: 'user', content: `Research and write this week's research brief for ${site.name}, week commencing ${week}.` }],
     });
 
+    // The response interleaves narration ("I'll search for...") with tool calls
+    // before the actual brief. Only the text blocks after the LAST tool round
+    // trip are the final answer — take those, not every text block in the
+    // response. Join with '' (not '\n\n'): a single sentence with a web-search
+    // citation comes back as several adjacent text blocks, one per cited
+    // segment, and forcing a paragraph break between them fragments the prose.
+    const lastToolIndex = response.content.reduce(
+      (last, b, i) => (b.type === 'server_tool_use' || b.type === 'web_search_tool_result') ? i : last,
+      -1,
+    );
     const brief = response.content
+      .slice(lastToolIndex + 1)
       .filter((b): b is Anthropic.TextBlock => b.type === 'text')
       .map(b => b.text)
-      .join('\n\n')
+      .join('')
       .trim();
 
     if (!brief) {
