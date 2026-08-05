@@ -1,20 +1,40 @@
 @import "tailwindcss";
 
 :root {
-  /* Command Hub palette */
-  --hub-bg:         #070c18;
-  --hub-surface:    #0d1424;
-  --hub-surface-2:  #12192e;
-  --hub-surface-3:  #1a2440;
-  --hub-border:     rgba(99, 102, 241, 0.14);
-  --hub-border-hi:  rgba(99, 102, 241, 0.35);
+  /* ── UX spec §2.3 — surfaces, type, semantics ── */
+  --bg:      #05070d;
+  --panel:   #0b0f18;
+  --panel-2: #111725;
+  --line:    rgba(255, 255, 255, .07);
+  --line-2:  rgba(255, 255, 255, .14);
+  --fg:      #e8edf7;
+  --fg-2:    #9aa6bd;
+  --fg-3:    #5d6880;
+  --mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* Semantic colours (§2.2) — status only, never a site accent */
+  --ok:   #22c55e;
+  --warn: #f59e0b;
+  --idle: #64748b;
+
+  --radius-control: 9px;
+  --radius-card:    12px;
+
+  /* Command Hub palette — mapped onto the spec surfaces so every existing
+     component (which reads these) picks up the new design language. */
+  --hub-bg:         var(--bg);
+  --hub-surface:    var(--panel);
+  --hub-surface-2:  var(--panel-2);
+  --hub-surface-3:  #161d30;
+  --hub-border:     var(--line);
+  --hub-border-hi:  var(--line-2);
   --hub-accent:     #6366f1;
   --hub-accent-dim: rgba(99, 102, 241, 0.18);
   --hub-cyan:       #22d3ee;
   --hub-gold:       #f59e0b;
-  --hub-text-1:     #e2e8f0;
-  --hub-text-2:     #94a3b8;
-  --hub-text-3:     #475569;
+  --hub-text-1:     var(--fg);
+  --hub-text-2:     var(--fg-2);
+  --hub-text-3:     var(--fg-3);
 
   --background: var(--hub-bg);
   --foreground: var(--hub-text-1);
@@ -61,4 +81,40 @@ body {
 }
 @utility animate-hub-pulse {
   animation: hub-pulse 2s ease-in-out infinite;
+}
+
+/* Every number on screen uses this — tabular figures so digits don't jitter
+   when values change (UX spec §2.3). */
+@utility mono-num {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The two very-low-opacity radial washes — the only gradient permitted
+   outside the hero dial (UX spec §2.3). Sits behind everything at z-index 0. */
+@utility hub-radial-wash {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 900px 600px at 0% 0%, rgba(59,130,246,0.10), transparent 60%),
+    radial-gradient(ellipse 900px 600px at 100% 0%, rgba(168,85,247,0.10), transparent 60%);
+}
+
+/* Collapsible panels animate max-height to an auto-sized value via grid
+   rows (0fr → 1fr) so arbitrarily tall nested content still animates. */
+@utility hub-collapse-grid {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 300ms ease;
+  &.hub-collapse-open { grid-template-rows: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }

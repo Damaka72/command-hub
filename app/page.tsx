@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import SiteCard from "./components/SiteCard";
 import DailyBriefing from "./components/DailyBriefing";
 import AgentCommandCentre from "./components/AgentCommandCentre";
 import SidebarTasks from "./components/SidebarTasks";
@@ -10,8 +9,16 @@ import ResearchPanel from "./components/ResearchPanel";
 import SundayView from "./components/SundayView";
 import PipelineRunner from "./components/PipelineRunner";
 import ActivityFeed from "./components/ActivityFeed";
+import HeroDial from "./components/HeroDial";
+import StatRail from "./components/StatRail";
+import QuotePanel from "./components/QuotePanel";
+import CollapsibleSitePanel from "./components/CollapsibleSitePanel";
+import { useWeek } from "./context/WeekContext";
 import type { SiteDetail, StatusResponse, DraftItem, WeekReview } from "./api/status/route";
+import type { HomeResponse } from "./api/home/route";
 import { PIPELINE_SITE_COUNT } from "@/agents/site-configs";
+
+const OPEN_PANELS_KEY = "hub:sitePanelsOpen";
 
 const sites = [
   {
@@ -247,11 +254,35 @@ function PortfolioBar({ statusMap, reviewQueue, weekReview }: { statusMap: Statu
 }
 
 export default function Home() {
+  const { week } = useWeek();
   const [statusMap,   setStatusMap]   = useState<StatusResponse | null>(null);
+  const [homeData,    setHomeData]    = useState<HomeResponse | null>(null);
   const [showSunday,  setShowSunday]  = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [refreshing,  setRefreshing]  = useState(false);
   const [, setTick]   = useState(0);
+  const [openPanels,  setOpenPanels]  = useState<Set<string>>(new Set());
+
+  // Panel open state persists across visits (UX spec §3.4). Reads
+  // localStorage — an external, client-only source not available during the
+  // initial render — so the sync happens post-mount.
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(OPEN_PANELS_KEY) ?? '[]') as string[];
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setOpenPanels(new Set(saved));
+    } catch { /* ignore malformed storage */ }
+  }, []);
+
+  const togglePanel = useCallback((siteId: string) => {
+    setOpenPanels(prev => {
+      const next = new Set(prev);
+      if (next.has(siteId)) next.delete(siteId);
+      else next.add(siteId);
+      localStorage.setItem(OPEN_PANELS_KEY, JSON.stringify([...next]));
+      return next;
+    });
+  }, []);
 
   const loadStatus = useCallback(() => {
     setRefreshing(true);
@@ -261,6 +292,13 @@ export default function Home() {
       .catch(() => setStatusMap(prev => prev ?? { sites: {}, portfolioCoordinator: null, reviewQueue: [], weekReview: null }))
       .finally(() => setRefreshing(false));
   }, []);
+
+  useEffect(() => {
+    fetch(`/api/home?week=${week}`)
+      .then(r => r.json())
+      .then((d: HomeResponse) => setHomeData('error' in d ? null : d))
+      .catch(() => setHomeData(null));
+  }, [week]);
 
   // Poll for fresh status every 30s so the board stays live without a reload.
   useEffect(() => {
@@ -358,6 +396,15 @@ export default function Home() {
               >
                 Ops Guide
               </a>
+              <a
+                href="https://drive.google.com/drive/folders/1VQFSQuwQyATw_voZanV0rQ_Z6TRvE7rk"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:brightness-125"
+                style={{ background: 'var(--hub-surface-2)', color: 'var(--hub-text-2)', border: '1px solid var(--hub-border)' }}
+              >
+                Content Library
+              </a>
               <button
                 onClick={loadStatus}
                 title="Refresh now"
@@ -438,16 +485,22 @@ export default function Home() {
                   <ActivityFeed />
                 </div>
 
-                <div className="grid gap-5 sm:grid-cols-2">
+                {/* ── Collapsible site panels (UX spec §3.4) ── */}
+                <div className="flex flex-col gap-3">
                   {sites.map((site) => (
-                    <SiteCard
+                    <CollapsibleSitePanel
                       key={site.id}
                       site={site}
                       status={statusMap?.sites[site.id]}
+                      homeStat={homeData?.sites[site.id]}
                       reviewQueue={statusMap?.reviewQueue ?? []}
+                      week={week}
+                      open={openPanels.has(site.id)}
+                      onToggle={() => togglePanel(site.id)}
                     />
                   ))}
                 </div>
+
                 <DiPipeline />
               </main>
 

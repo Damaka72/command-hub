@@ -2,10 +2,19 @@
 // GET  /api/library — every content_library row across all weeks (newest week
 //        first, capped), plus the distinct site/platform values present so the
 //        browse view can build its filter dropdowns.
-// POST /api/library — "Repurpose": insert a NEW content_library row (status
-//        'draft') that copies an existing row's content into a chosen
-//        site/week/day/platform, with repurposed_from_id pointing back at the
-//        source. The original row is never touched.
+// POST /api/library — "Repurpose": insert a NEW content_library row that
+//        copies an existing row's content into a chosen site/week/day/platform,
+//        with repurposed_from_id pointing back at the source. The original row
+//        is never touched.
+//
+//        Text repurposes (the default, assetType omitted) behave exactly as
+//        before: status 'draft', ready for the normal review flow.
+//
+//        Asset repurposes (assetType: 'image'|'carousel'|'video' — e.g. "cut
+//        this video for TikTok") skip straight to 'approved_needs_media' with
+//        creation_requested_at set, so the new row lands directly on a creation
+//        run's worklist instead of waiting in the draft queue. `content` on
+//        that row is the repurpose brief, not finished copy.
 //
 // Same conventions as the other route handlers. Auth is enforced app-wide by the
 // root proxy.ts (the hub_auth boundary) — no per-route check here.
@@ -32,6 +41,10 @@ interface LibraryRow {
   content:            string | null;
   edited_content:     string | null;
   repurposed_from_id: string | null;
+  media_urls:         string[] | null;
+  asset_type:         string | null;
+  creation_tool:      string | null;
+  aspect_ratio:       string | null;
 }
 
 export async function GET() {
@@ -39,7 +52,7 @@ export async function GET() {
     const supabase = getSupabase();
     const { data, error } = await supabase
       .from('content_library')
-      .select('id, site_id, week_commencing, day_name, platform, status, content, edited_content, repurposed_from_id')
+      .select('id, site_id, week_commencing, day_name, platform, status, content, edited_content, repurposed_from_id, media_urls, asset_type, creation_tool, aspect_ratio')
       .order('week_commencing', { ascending: false, nullsFirst: false })
       .limit(MAX_ROWS);
     if (error) throw error;
@@ -56,15 +69,18 @@ export async function GET() {
   }
 }
 
+const ASSET_TYPES = new Set(['image', 'carousel', 'video']);
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const sourceId: string = body.sourceId;
-    const siteId:   string = body.siteId;
-    const week:     string = body.week;
-    const day:      string = body.day;
-    const platform: string = body.platform;
-    const content:  string = body.content;
+    const sourceId:   string = body.sourceId;
+    const siteId:     string = body.siteId;
+    const week:       string = body.week;
+    const day:        string = body.day;
+    const platform:   string = body.platform;
+    const content:    string = body.content;
+    const assetType:  string | undefined = body.assetType;
 
     if (!sourceId)                        return NextResponse.json({ error: 'sourceId is required' },            { status: 400 });
     if (!SITE_ORDER.includes(siteId))     return NextResponse.json({ error: 'a valid target site is required' }, { status: 400 });
@@ -72,19 +88,26 @@ export async function POST(request: Request) {
     if (!DAY_NAMES.includes(day))         return NextResponse.json({ error: 'target day must be Monday–Friday' },{ status: 400 });
     if (!platform || !platform.trim())    return NextResponse.json({ error: 'target platform is required' },     { status: 400 });
     if (!content || !content.trim())      return NextResponse.json({ error: 'content is required' },             { status: 400 });
+    if (assetType !== undefined && !ASSET_TYPES.has(assetType)) {
+      return NextResponse.json({ error: `assetType must be one of ${[...ASSET_TYPES].join(', ')}` }, { status: 400 });
+    }
+
+    const isAssetRepurpose = assetType !== undefined;
+    const now = new Date().toISOString();
 
     const supabase = getSupabase();
     const { data, error } = await supabase
       .from('content_library')
       .insert({
-        site_id:            siteId,
-        week_commencing:    week,
-        day_name:           day,
-        platform:           platform.trim(),
+        site_id:               siteId,
+        week_commencing:       week,
+        day_name:              day,
+        platform:              platform.trim(),
         content,
-        status:             'draft',
-        repurposed_from_id: sourceId,
-        generated_at:       new Date().toISOString(),
+        status:                isAssetRepurpose ? 'approved_needs_media' : 'draft',
+        repurposed_from_id:    sourceId,
+        generated_at:          now,
+        ...(isAssetRepurpose ? { asset_type: assetType, creation_requested_at: now, approved_at: now } : {}),
       })
       .select()
       .single();

@@ -1,11 +1,18 @@
 // ── Review API ────────────────────────────────────────────────────────────────
 // GET   /api/review?week=YYYY-MM-DD  — content_library rows for the week.
-// PATCH /api/review                  — save an item's edited_content.
-// POST  /api/review                  — bulk approve / reject items.
+// PATCH /api/review                  — save an item's edited_content / media_urls
+//                                       / asset metadata.
+// POST  /api/review                  — bulk approve / reject / request_creation.
 //
 // Publishing is handled separately by /api/review/push. This route only manages
 // draft text and the review status. Allowed statuses are enforced by a DB check
 // constraint: draft, approved, approved_needs_media, rejected, pushed, failed.
+//
+// Asset creation (video-batch-producer etc.) is requested here via
+// request_creation, which only sets creation_requested_at — it never invents a
+// new status. A media-required row is already "needs media"; this column is
+// just the worklist marker a creation run polls, distinguishing "flagged" from
+// "nobody has asked yet". The asset actually lands via POST /api/library/asset.
 
 import { NextResponse } from 'next/server';
 import { getSupabase } from '@/app/lib/supabase';
@@ -26,7 +33,7 @@ export async function GET(request: Request) {
 
     const { data, error } = await supabase
       .from('content_library')
-      .select('id, site_id, week_commencing, day_name, platform, grader_verdict, status, content, edited_content, media_urls, approved_at, blotato_submission_id, scheduled_for, push_error')
+      .select('id, site_id, week_commencing, day_name, platform, grader_verdict, status, content, edited_content, media_urls, approved_at, blotato_submission_id, scheduled_for, push_error, asset_type, creation_tool, drive_file_id, asset_duration_s, aspect_ratio, creation_requested_at')
       .eq('week_commencing', week);
     if (error) throw error;
 
@@ -56,6 +63,22 @@ export async function PATCH(request: Request) {
     }
 
     const supabase = getSupabase();
+
+    // A row parked as approved_needs_media clears to approved the moment it
+    // actually has media — whether that URL was pasted by hand here or attached
+    // by a creation run via /api/library/asset. Mirrors the same check the bulk
+    // 'approve' action below uses.
+    if (Array.isArray(update.media_urls) && (update.media_urls as string[]).length > 0) {
+      const { data: current } = await supabase
+        .from('content_library')
+        .select('status')
+        .eq('id', id)
+        .single();
+      if (current?.status === 'approved_needs_media') {
+        update.status = 'approved';
+      }
+    }
+
     const { error } = await supabase
       .from('content_library')
       .update(update)
@@ -76,6 +99,15 @@ export async function POST(request: Request) {
     if (!ids.length) return NextResponse.json({ error: 'ids is required' }, { status: 400 });
 
     const supabase = getSupabase();
+
+    if (action === 'request_creation') {
+      const { error } = await supabase
+        .from('content_library')
+        .update({ creation_requested_at: new Date().toISOString() })
+        .in('id', ids);
+      if (error) throw error;
+      return NextResponse.json({ ok: true, updated: ids.length });
+    }
 
     if (action === 'reject') {
       const { error } = await supabase
