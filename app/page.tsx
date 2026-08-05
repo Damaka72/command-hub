@@ -6,6 +6,7 @@ import DailyBriefing from "./components/DailyBriefing";
 import AgentCommandCentre from "./components/AgentCommandCentre";
 import SidebarTasks from "./components/SidebarTasks";
 import DiPipeline from "./components/DiPipeline";
+import ResearchPanel from "./components/ResearchPanel";
 import SundayView from "./components/SundayView";
 import PipelineRunner from "./components/PipelineRunner";
 import ActivityFeed from "./components/ActivityFeed";
@@ -426,6 +427,11 @@ export default function Home() {
               )}
 
               <main className="flex-1 px-6 py-8">
+                {/* Research: ground next week's content before running the pipeline */}
+                <div className="mb-6">
+                  <ResearchPanel />
+                </div>
+
                 {/* Live control + history: what's happening now / what has happened */}
                 <div className="mb-6 grid gap-5 lg:grid-cols-2">
                   <PipelineRunner />
