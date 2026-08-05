@@ -1,11 +1,28 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useWeek } from '../context/WeekContext';
+import { useSiteFilter } from '../context/SiteFilterContext';
+import WeekSelector from '../components/WeekSelector';
+import SiteFilterChips from '../components/SiteFilterChips';
+import WeekView from '../components/library/WeekView';
+import MonthView from '../components/library/MonthView';
+import { PIPELINE_SITE_ORDER, siteColor } from '../lib/siteColors';
+import { monthOf, addMonths, formatMonthLabel } from '../lib/weekDates';
+import type { LibraryWeekRow } from '../api/library/week/route';
+import type { LibraryMonthRow } from '../api/library/month/route';
 
 // ── Content library / repurpose workspace ─────────────────────────────────────
 // Browse content_library across ALL weeks, filter by site + platform, and
 // "Repurpose" any row: edit a copy and insert it as a NEW draft row targeting a
 // chosen site/week/day/platform. The original is never overwritten.
+//
+// Three-way view switch (UX spec §4): Week · Month · List. Week and Month are
+// new — they read the shared week/site context so navigating in from the home
+// page's "Week view →" link lands pre-filtered and pre-anchored to the right
+// week (UX spec §5).
+
+type View = 'week' | 'month' | 'list';
 
 const SITE_LABELS: Record<string, string> = {
   masteryourcareerpath:    'Master Your Career Path',
@@ -15,7 +32,7 @@ const SITE_LABELS: Record<string, string> = {
   didianolue:              'Didi Anolue',
 };
 // Valid repurpose targets (pipeline sites).
-const TARGET_SITES = ['masteryourcareerpath', 'theconcurrentcontractor', 'oldoaktown', 'aiviralvideoprompts'];
+const TARGET_SITES = PIPELINE_SITE_ORDER;
 const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
 const STATUS_PILL: Record<string, string> = {
@@ -67,15 +84,6 @@ interface LibraryResponse {
   platforms: string[];
 }
 
-// Monday (YYYY-MM-DD) of the week containing today — sensible default target.
-function currentMonday(): string {
-  const d = new Date();
-  const day = d.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  d.setDate(d.getDate() + diff);
-  return d.toISOString().slice(0, 10);
-}
-
 interface RepurposeDraft {
   siteId:    string;
   week:      string;
@@ -85,12 +93,85 @@ interface RepurposeDraft {
   assetType: string; // '' = text-only, else 'video' | 'image' | 'carousel'
 }
 
+function ViewSegment({ view, onChange }: { view: View; onChange: (v: View) => void }) {
+  const options: { key: View; label: string }[] = [
+    { key: 'week', label: 'Week' },
+    { key: 'month', label: 'Month' },
+    { key: 'list', label: 'List' },
+  ];
+  return (
+    <div className="flex rounded-lg p-0.5" style={{ background: 'var(--panel-2)', border: '1px solid var(--line)' }} role="group" aria-label="View">
+      {options.map(o => (
+        <button
+          key={o.key}
+          type="button"
+          onClick={() => onChange(o.key)}
+          className="rounded-md px-3 py-1.5 text-xs font-medium transition-all"
+          style={view === o.key
+            ? { background: 'var(--hub-accent)', color: '#fff' }
+            : { color: 'var(--fg-2)' }
+          }
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export default function LibraryPage() {
+  const { week, setWeek } = useWeek();
+  const { siteId: filterSiteId } = useSiteFilter();
+
+  const [view, setView] = useState<View>(() => {
+    if (typeof window === 'undefined') return 'list';
+    const v = new URLSearchParams(window.location.search).get('view');
+    return v === 'week' || v === 'month' ? v : 'list';
+  });
+  const [month, setMonth] = useState<string>(() => monthOf(week));
+
+  // ── Week view data ──
+  const [weekRows, setWeekRows]       = useState<LibraryWeekRow[]>([]);
+  const [weekLoading, setWeekLoading] = useState(false);
+
+  useEffect(() => {
+    if (view !== 'week') return;
+    setWeekLoading(true);
+    const qs = new URLSearchParams({ week });
+    if (filterSiteId) qs.set('site', filterSiteId);
+    fetch(`/api/library/week?${qs}`)
+      .then(r => r.json())
+      .then(d => setWeekRows(d.rows ?? []))
+      .catch(() => setWeekRows([]))
+      .finally(() => setWeekLoading(false));
+  }, [view, week, filterSiteId]);
+
+  // ── Month view data ──
+  const [monthRows, setMonthRows]       = useState<LibraryMonthRow[]>([]);
+  const [monthLoading, setMonthLoading] = useState(false);
+
+  useEffect(() => {
+    if (view !== 'month') return;
+    setMonthLoading(true);
+    const qs = new URLSearchParams({ month });
+    if (filterSiteId) qs.set('site', filterSiteId);
+    fetch(`/api/library/month?${qs}`)
+      .then(r => r.json())
+      .then(d => setMonthRows(d.rows ?? []))
+      .catch(() => setMonthRows([]))
+      .finally(() => setMonthLoading(false));
+  }, [view, month, filterSiteId]);
+
+  function switchToWeek(weekMonday: string) {
+    setWeek(weekMonday);
+    setView('week');
+  }
+
+  // ── List view data (existing browse/repurpose workspace) ──
   const [data, setData]       = useState<LibraryResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState('');
 
-  const [siteFilter, setSiteFilter]         = useState('');
   const [platformFilter, setPlatformFilter] = useState('');
 
   // Which row is being repurposed, and the editable target draft.
@@ -112,19 +193,20 @@ export default function LibraryPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { if (view === 'list') load(); }, [view, load]);
 
   const filtered = useMemo(() => {
     if (!data) return [];
     return data.rows.filter(r =>
-      (!siteFilter || r.site_id === siteFilter) &&
+      (!filterSiteId || r.site_id === filterSiteId) &&
       (!platformFilter || r.platform === platformFilter)
     );
-  }, [data, siteFilter, platformFilter]);
+  }, [data, filterSiteId, platformFilter]);
 
-  function openRepurpose(row: LibraryRow) {
+  function openRepurpose(row: LibraryRow | LibraryWeekRow) {
     setOpenId(row.id);
     setFlash('');
+    setView('list');
     setDraft({
       siteId:    row.site_id,
       week:      currentMonday(),
@@ -173,60 +255,82 @@ export default function LibraryPage() {
     }
   }
 
+  const filterLabel = filterSiteId ? siteColor(filterSiteId).name : 'all sites';
+
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
+    <div className="min-h-screen" style={{ background: 'var(--bg)', color: 'var(--fg)' }}>
       {/* Header */}
-      <div className="border-b border-gray-800 px-6 py-4 flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-4" style={{ borderBottom: '1px solid var(--line)' }}>
         <div className="flex items-center gap-4">
-          <a href="/" className="text-gray-400 hover:text-white text-sm">← Dashboard</a>
-          <h1 className="text-lg font-semibold text-white">Content Library</h1>
+          <a href="/" className="text-sm" style={{ color: 'var(--fg-3)' }}>← Dashboard</a>
+          <h1 className="text-lg font-semibold" style={{ color: 'var(--fg)' }}>Content Library</h1>
         </div>
-        <div className="flex items-center gap-3">
-          {data && (
-            <>
-              <select
-                value={siteFilter}
-                onChange={e => setSiteFilter(e.target.value)}
-                className="bg-gray-800 border border-gray-600 rounded-lg px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500"
+      </div>
+
+      {/* Shared control bar (UX spec §4.1) */}
+      <div className="flex flex-wrap items-center gap-3 px-6 py-3" style={{ borderBottom: '1px solid var(--line)' }}>
+        <ViewSegment view={view} onChange={setView} />
+        <SiteFilterChips siteIds={PIPELINE_SITE_ORDER} />
+
+        <div className="ml-auto flex items-center gap-3">
+          {view === 'week' && <WeekSelector />}
+          {view === 'month' && (
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setMonth(m => addMonths(m, -1))}
+                aria-label="Previous month"
+                className="flex h-7 w-7 items-center justify-center rounded-md text-sm transition-all hover:brightness-125"
+                style={{ background: 'var(--panel-2)', border: '1px solid var(--line)', color: 'var(--fg-2)' }}
               >
-                <option value="">All sites</option>
-                {data.sites.map(s => (
-                  <option key={s} value={s}>{SITE_LABELS[s] ?? s}</option>
-                ))}
-              </select>
-              <select
-                value={platformFilter}
-                onChange={e => setPlatformFilter(e.target.value)}
-                className="bg-gray-800 border border-gray-600 rounded-lg px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500"
+                ‹
+              </button>
+              <span className="mono-num rounded-md px-3 py-1.5 text-xs font-medium" style={{ background: 'var(--panel-2)', border: '1px solid var(--line)', color: 'var(--fg)' }}>
+                {formatMonthLabel(month)}
+              </span>
+              <button
+                type="button"
+                onClick={() => setMonth(m => addMonths(m, 1))}
+                aria-label="Next month"
+                className="flex h-7 w-7 items-center justify-center rounded-md text-sm transition-all hover:brightness-125"
+                style={{ background: 'var(--panel-2)', border: '1px solid var(--line)', color: 'var(--fg-2)' }}
               >
-                <option value="">All platforms</option>
-                {data.platforms.map(p => (
-                  <option key={p} value={p}>{p}</option>
-                ))}
-              </select>
-            </>
+                ›
+              </button>
+            </div>
+          )}
+          {view === 'list' && (
+            <select
+              value={platformFilter}
+              onChange={e => setPlatformFilter(e.target.value)}
+              className="rounded-lg px-3 py-1.5 text-sm"
+              style={{ background: 'var(--panel-2)', border: '1px solid var(--line)', color: 'var(--fg)' }}
+            >
+              <option value="">All platforms</option>
+              {(data?.platforms ?? []).map(p => (
+                <option key={p} value={p}>{p}</option>
+              ))}
+            </select>
           )}
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-8 space-y-4">
+      <div className="mx-auto max-w-6xl space-y-4 px-6 py-8">
         {flash && (
-          <div className="bg-blue-900/30 border border-blue-700 rounded-lg p-3">
-            <p className="text-blue-200 text-sm">{flash}</p>
+          <div className="rounded-lg border border-blue-700 bg-blue-900/30 p-3">
+            <p className="text-sm text-blue-200">{flash}</p>
           </div>
         )}
         {error && (
-          <div className="bg-red-900/30 border border-red-700 rounded-lg p-4">
-            <p className="text-red-300 text-sm">{error}</p>
+          <div className="rounded-lg border border-red-700 bg-red-900/30 p-4">
+            <p className="text-sm text-red-300">{error}</p>
           </div>
         )}
-        {loading && !data && <p className="text-gray-400 text-sm">Loading…</p>}
 
-        {data && (
-          <p className="text-xs text-gray-500">
-            {filtered.length} of {data.rows.length} rows
-            {data.rows.length >= 500 && ' (showing the 500 most recent)'}
-          </p>
+        {view === 'week' && (
+          weekLoading && weekRows.length === 0
+            ? <p className="text-sm" style={{ color: 'var(--fg-3)' }}>Loading…</p>
+            : <WeekView week={week} rows={weekRows} onOpenRow={openRepurpose} filterLabel={filterLabel} />
         )}
 
         {data && filtered.map(row => {
@@ -364,10 +468,10 @@ export default function LibraryPage() {
                       {saving ? 'Saving…' : draft.assetType ? 'Flag for creation' : 'Add as new draft'}
                     </button>
                     <button
-                      onClick={closeRepurpose}
-                      className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-800 hover:bg-gray-700 text-gray-200"
+                      onClick={() => (isOpen ? closeRepurpose() : openRepurpose(row))}
+                      className="shrink-0 rounded-lg bg-purple-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-purple-600"
                     >
-                      Cancel
+                      {isOpen ? 'Cancel' : 'Repurpose'}
                     </button>
                     <span className="text-xs text-gray-500">
                       {draft.assetType
@@ -375,14 +479,105 @@ export default function LibraryPage() {
                         : 'Inserts a new draft row — the original stays untouched.'}
                     </span>
                   </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
 
-        {data && filtered.length === 0 && !loading && (
-          <p className="text-sm text-gray-600">No rows match the current filters.</p>
+                  {/* Repurpose editor */}
+                  {isOpen && draft && (
+                    <div className="mt-4 space-y-3 pt-4" style={{ borderTop: '1px solid var(--line)' }}>
+                      <div className="grid gap-3 sm:grid-cols-4">
+                        <div>
+                          <label className="mb-1 block text-xs uppercase tracking-wide" style={{ color: 'var(--fg-3)' }}>Target site</label>
+                          <select
+                            value={draft.siteId}
+                            onChange={e => setDraft(d => d && { ...d, siteId: e.target.value })}
+                            className="w-full rounded-lg px-2 py-1.5 text-sm"
+                            style={{ background: 'var(--panel-2)', border: '1px solid var(--line)', color: 'var(--fg)' }}
+                          >
+                            {TARGET_SITES.map(s => (
+                              <option key={s} value={s}>{SITE_LABELS[s] ?? s}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-xs uppercase tracking-wide" style={{ color: 'var(--fg-3)' }}>Week</label>
+                          <input
+                            type="date"
+                            value={draft.week}
+                            onChange={e => setDraft(d => d && { ...d, week: e.target.value })}
+                            className="w-full rounded-lg px-2 py-1.5 text-sm"
+                            style={{ background: 'var(--panel-2)', border: '1px solid var(--line)', color: 'var(--fg)' }}
+                          />
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-xs uppercase tracking-wide" style={{ color: 'var(--fg-3)' }}>Day</label>
+                          <select
+                            value={draft.day}
+                            onChange={e => setDraft(d => d && { ...d, day: e.target.value })}
+                            className="w-full rounded-lg px-2 py-1.5 text-sm"
+                            style={{ background: 'var(--panel-2)', border: '1px solid var(--line)', color: 'var(--fg)' }}
+                          >
+                            {DAY_NAMES.map(dn => <option key={dn} value={dn}>{dn}</option>)}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="mb-1 block text-xs uppercase tracking-wide" style={{ color: 'var(--fg-3)' }}>Platform</label>
+                          {data && data.platforms.length > 0 ? (
+                            <select
+                              value={draft.platform}
+                              onChange={e => setDraft(d => d && { ...d, platform: e.target.value })}
+                              className="w-full rounded-lg px-2 py-1.5 text-sm"
+                              style={{ background: 'var(--panel-2)', border: '1px solid var(--line)', color: 'var(--fg)' }}
+                            >
+                              <option value="">— select —</option>
+                              {data.platforms.map(p => <option key={p} value={p}>{p}</option>)}
+                            </select>
+                          ) : (
+                            <input
+                              type="text"
+                              value={draft.platform}
+                              onChange={e => setDraft(d => d && { ...d, platform: e.target.value })}
+                              className="w-full rounded-lg px-2 py-1.5 text-sm"
+                              style={{ background: 'var(--panel-2)', border: '1px solid var(--line)', color: 'var(--fg)' }}
+                            />
+                          )}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-xs uppercase tracking-wide" style={{ color: 'var(--fg-3)' }}>Content (editable copy)</label>
+                        <textarea
+                          value={draft.content}
+                          onChange={e => setDraft(d => d && { ...d, content: e.target.value })}
+                          rows={6}
+                          className="w-full rounded-lg px-3 py-2 text-sm"
+                          style={{ background: 'var(--panel-2)', border: '1px solid var(--line)', color: 'var(--fg)' }}
+                        />
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => submitRepurpose(row.id)}
+                          disabled={saving}
+                          className="rounded-lg bg-purple-700 px-4 py-2 text-sm font-medium text-white hover:bg-purple-600 disabled:opacity-50"
+                        >
+                          {saving ? 'Saving…' : 'Add as new draft'}
+                        </button>
+                        <button
+                          onClick={closeRepurpose}
+                          className="rounded-lg px-4 py-2 text-sm font-medium"
+                          style={{ background: 'var(--panel-2)', color: 'var(--fg-2)' }}
+                        >
+                          Cancel
+                        </button>
+                        <span className="text-xs" style={{ color: 'var(--fg-3)' }}>Inserts a new draft row — the original stays untouched.</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
+            {data && filtered.length === 0 && !loading && (
+              <p className="text-sm" style={{ color: 'var(--fg-3)' }}>No rows match the current filters.</p>
+            )}
+          </>
         )}
       </div>
     </div>

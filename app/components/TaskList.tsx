@@ -158,6 +158,7 @@ export default function TaskList({ siteId }: { siteId: string }) {
 
       <div className="flex gap-2">
         <input
+          id={`task-input-${siteId}`}
           ref={inputRef}
           type="text"
           value={input}
