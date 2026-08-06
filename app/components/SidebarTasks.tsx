@@ -44,7 +44,7 @@ export default function SidebarTasks() {
                 <span className="flex-1 text-xs leading-snug text-zinc-700 dark:text-zinc-200">
                   {task.action}
                 </span>
-                <span className="flex-shrink-0 rounded bg-zinc-100 px-1.5 py-0.5 text-[10px] font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+                <span className="flex-shrink-0 rounded bg-zinc-100 px-1.5 py-0.5 text-[12px] font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
                   {tag}
                 </span>
               </li>

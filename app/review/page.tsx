@@ -115,7 +115,7 @@ function PushStatusBanner({
             Pushing to Blotato{total !== undefined ? ` — ${total} item${total === 1 ? '' : 's'}` : '…'}
           </p>
         </div>
-        <p className="text-blue-100/60 text-[11px]">Scheduling and calling Blotato for each post — can take a few seconds per item.</p>
+        <p className="text-blue-100/60 text-[13px]">Scheduling and calling Blotato for each post — can take a few seconds per item.</p>
       </div>
     );
   }
@@ -134,7 +134,7 @@ function PushStatusBanner({
         </p>
         <button
           onClick={onDismiss}
-          className={`text-[11px] shrink-0 ${allGood ? 'text-green-300/70 hover:text-green-200' : 'text-amber-300/70 hover:text-amber-200'}`}
+          className={`text-[13px] shrink-0 ${allGood ? 'text-green-300/70 hover:text-green-200' : 'text-amber-300/70 hover:text-amber-200'}`}
         >
           Dismiss
         </button>
@@ -142,10 +142,10 @@ function PushStatusBanner({
       {(failedRows.length > 0 || skippedRows.length > 0) && (
         <div className="space-y-1">
           {failedRows.map(r => (
-            <p key={r.id} className="text-[11px] text-red-300">✗ {r.day} {r.platform} — {r.error ?? 'failed'}</p>
+            <p key={r.id} className="text-[13px] text-red-300">✗ {r.day} {r.platform} — {r.error ?? 'failed'}</p>
           ))}
           {skippedRows.map(r => (
-            <p key={r.id} className="text-[11px] text-amber-300/80">– {r.day} {r.platform} — {r.error ?? 'skipped'}</p>
+            <p key={r.id} className="text-[13px] text-amber-300/80">– {r.day} {r.platform} — {r.error ?? 'skipped'}</p>
           ))}
         </div>
       )}
@@ -443,7 +443,7 @@ export default function ReviewPage() {
                         Creating media… {creatingDone}/{creatingTotal}
                       </p>
                     </div>
-                    <span className="text-amber-100/60 text-[11px]">Runs via the video producer — can take a few minutes</span>
+                    <span className="text-amber-100/60 text-[13px]">Runs via the video producer — can take a few minutes</span>
                   </div>
                   <div
                     role="progressbar"
@@ -458,7 +458,7 @@ export default function ReviewPage() {
                       style={{ width: `${creatingPct}%` }}
                     />
                   </div>
-                  <p className="text-amber-100/70 text-[11px]">
+                  <p className="text-amber-100/70 text-[13px]">
                     {creatingRows.map(r => `${r.day_name} ${r.platform}${(r.media_urls?.length ?? 0) > 0 ? ' ✓' : ''}`).join(' · ')}
                   </p>
                 </div>
@@ -473,14 +473,14 @@ export default function ReviewPage() {
                     </p>
                     <button
                       onClick={() => setJustCompleted(prev => { const next = { ...prev }; delete next[siteId]; return next; })}
-                      className="text-green-300/70 hover:text-green-200 text-[11px]"
+                      className="text-green-300/70 hover:text-green-200 text-[13px]"
                     >
                       Dismiss
                     </button>
                   </div>
                   <div className="space-y-1">
                     {completedBatch.map(r => (
-                      <div key={r.id} className="flex items-center justify-between gap-2 text-[11px] text-green-100/80">
+                      <div key={r.id} className="flex items-center justify-between gap-2 text-[13px] text-green-100/80">
                         <span>{r.day_name} {r.platform}</span>
                         {r.media_urls?.[0] && (
                           <a href={r.media_urls[0]} target="_blank" rel="noopener noreferrer" className="text-green-300 hover:underline shrink-0">
@@ -528,7 +528,7 @@ export default function ReviewPage() {
                         </span>
                       )}
                     </div>
-                    <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium ${STATUS_PILL[row.status] ?? 'bg-gray-700 text-gray-200'}`}>
+                    <span className={`rounded-full px-2.5 py-0.5 text-[13px] font-medium ${STATUS_PILL[row.status] ?? 'bg-gray-700 text-gray-200'}`}>
                       {STATUS_LABEL[row.status] ?? row.status}
                     </span>
                   </div>
@@ -545,7 +545,7 @@ export default function ReviewPage() {
                     <div className="flex items-center gap-3 flex-wrap">
                       <MediaPreview row={row} />
                       {row.creation_tool && (
-                        <span className="text-[11px] text-gray-500">
+                        <span className="text-[13px] text-gray-500">
                           {row.asset_type ?? 'asset'} · {row.creation_tool}
                           {row.aspect_ratio ? ` · ${row.aspect_ratio}` : ''}
                           {row.asset_duration_s ? ` · ${Math.round(row.asset_duration_s)}s` : ''}
@@ -559,7 +559,7 @@ export default function ReviewPage() {
                   {row.status !== 'pushed' && (
                     <div className="space-y-1">
                       <div className="flex items-center justify-between gap-2 flex-wrap">
-                        <label className="block text-[11px] uppercase tracking-wide text-gray-400">
+                        <label className="block text-[13px] uppercase tracking-wide text-gray-400">
                           Media URLs {MEDIA_PLATFORMS.has(row.platform)
                             ? <span className="text-amber-400">· required for {row.platform}</span>
                             : <span className="text-gray-500">· optional image/video</span>}
@@ -567,12 +567,12 @@ export default function ReviewPage() {
                         </label>
                         {MEDIA_PLATFORMS.has(row.platform) && !(row.media_urls?.length) && (
                           row.creation_requested_at ? (
-                            <span className="text-[11px] text-amber-300/80 shrink-0">Requested {agoLabel(row.creation_requested_at)}</span>
+                            <span className="text-[13px] text-amber-300/80 shrink-0">Requested {agoLabel(row.creation_requested_at)}</span>
                           ) : (
                             <button
                               onClick={() => setStatus('request_creation', [row.id], `create-${row.id}`)}
                               disabled={busy !== null}
-                              className="rounded-lg bg-amber-700 hover:bg-amber-600 text-white px-2.5 py-1 text-[11px] font-medium disabled:opacity-50 shrink-0"
+                              className="rounded-lg bg-amber-700 hover:bg-amber-600 text-white px-2.5 py-1 text-[13px] font-medium disabled:opacity-50 shrink-0"
                             >
                               {busy === `create-${row.id}` ? 'Requesting…' : 'Create'}
                             </button>
@@ -592,7 +592,7 @@ export default function ReviewPage() {
                   )}
 
                   {row.status === 'pushed' && (row.media_urls?.length ?? 0) > 0 && (
-                    <p className="text-[11px] text-blue-300/80 break-all">Media: {row.media_urls!.join(', ')}</p>
+                    <p className="text-[13px] text-blue-300/80 break-all">Media: {row.media_urls!.join(', ')}</p>
                   )}
 
                   {row.status === 'pushed' && (

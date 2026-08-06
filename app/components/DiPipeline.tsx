@@ -91,7 +91,7 @@ export default function DiPipeline() {
           </p>
         </div>
         <div className="text-right">
-          <p className="text-[10px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Pipeline total</p>
+          <p className="text-[12px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Pipeline total</p>
           <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
             £{pipelineTotal.toLocaleString("en-GB", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
           </p>
@@ -123,7 +123,7 @@ export default function DiPipeline() {
                 <select
                   value={deal.stage}
                   onChange={e => updateStage(deal.id, e.target.value as Stage)}
-                  className={`rounded-full px-2 py-0.5 text-[11px] font-medium border-0 outline-none cursor-pointer ${STAGE_STYLES[deal.stage]}`}
+                  className={`rounded-full px-2 py-0.5 text-[13px] font-medium border-0 outline-none cursor-pointer ${STAGE_STYLES[deal.stage]}`}
                 >
                   {STAGES.map(s => (
                     <option key={s} value={s}>{s}</option>

@@ -80,7 +80,7 @@ function SiteRow({ siteId, name, week, brief, onChange }: {
             style={{ background: hasBrief ? '#34d399' : 'var(--hub-text-3)' }}
           />
           <span className="truncate text-xs font-medium" style={{ color: 'var(--hub-text-1)' }}>{name}</span>
-          <span className="shrink-0 text-[11px]" style={{ color: 'var(--hub-text-3)' }}>
+          <span className="shrink-0 text-[13px]" style={{ color: 'var(--hub-text-3)' }}>
             {hasBrief ? 'researched' : 'not researched'}
           </span>
         </button>
@@ -88,12 +88,12 @@ function SiteRow({ siteId, name, week, brief, onChange }: {
           <button
             onClick={generate}
             disabled={busy !== null}
-            className="rounded-lg px-2.5 py-1 text-[11px] font-medium transition-all hover:brightness-125 disabled:opacity-50"
+            className="rounded-lg px-2.5 py-1 text-[13px] font-medium transition-all hover:brightness-125 disabled:opacity-50"
             style={{ background: 'rgba(168,85,247,0.12)', color: '#c4b5fd', border: '1px solid rgba(168,85,247,0.3)' }}
           >
             {busy === 'generate' ? 'Researching…' : hasBrief ? '🔎 Regenerate' : '🔎 Generate'}
           </button>
-          <button onClick={() => setOpen(o => !o)} className="text-[11px]" style={{ color: 'var(--hub-text-3)' }}>
+          <button onClick={() => setOpen(o => !o)} className="text-[13px]" style={{ color: 'var(--hub-text-3)' }}>
             {open ? '▲' : '▼'}
           </button>
         </div>
@@ -113,12 +113,12 @@ function SiteRow({ siteId, name, week, brief, onChange }: {
             <button
               onClick={save}
               disabled={busy !== null}
-              className="rounded-lg px-3 py-1.5 text-[11px] font-medium transition-all hover:brightness-125 disabled:opacity-50"
+              className="rounded-lg px-3 py-1.5 text-[13px] font-medium transition-all hover:brightness-125 disabled:opacity-50"
               style={{ background: 'var(--hub-surface)', color: 'var(--hub-text-2)', border: '1px solid var(--hub-border)' }}
             >
               {busy === 'save' ? 'Saving…' : 'Save brief'}
             </button>
-            {error && <span className="text-[11px]" style={{ color: '#f87171' }}>{error}</span>}
+            {error && <span className="text-[13px]" style={{ color: '#f87171' }}>{error}</span>}
           </div>
         </div>
       )}
@@ -148,11 +148,11 @@ export default function ResearchPanel() {
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <h2 className="text-sm font-semibold" style={{ color: 'var(--hub-text-1)' }}>Research</h2>
-          <p className="text-[11px]" style={{ color: 'var(--hub-text-3)' }}>
+          <p className="text-[13px]" style={{ color: 'var(--hub-text-3)' }}>
             Ground next week&rsquo;s content in what&rsquo;s actually happening — search the web per site before running the pipeline
           </p>
         </div>
-        <span className="shrink-0 text-[11px]" style={{ color: researchedCount === SITE_CONFIGS.length ? '#34d399' : 'var(--hub-text-3)' }}>
+        <span className="shrink-0 text-[13px]" style={{ color: researchedCount === SITE_CONFIGS.length ? '#34d399' : 'var(--hub-text-3)' }}>
           {loaded ? `${researchedCount}/${SITE_CONFIGS.length} researched` : '…'}
         </span>
       </div>
@@ -170,7 +170,7 @@ export default function ResearchPanel() {
         ))}
       </div>
 
-      <p className="mt-3 text-[11px]" style={{ color: 'var(--hub-text-3)' }}>
+      <p className="mt-3 text-[13px]" style={{ color: 'var(--hub-text-3)' }}>
         Week commencing {week} — same week /plan defaults to. Briefs saved here feed straight into the pipeline.
       </p>
     </section>

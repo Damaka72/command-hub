@@ -238,7 +238,7 @@ export default function GuidePage() {
                 <div key={i} className={`rounded-xl border px-4 py-4 ${bg}`}>
                   <div className="flex items-center gap-3 mb-2 flex-wrap">
                     <span className={`text-xs font-bold ${dayC}`}>{row.day}</span>
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${whoC}`}>
+                    <span className={`rounded-full px-2 py-0.5 text-[12px] font-semibold ${whoC}`}>
                       {row.who === "you" ? "You" : "Automatic"}
                     </span>
                     <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{row.action}</span>
@@ -295,7 +295,7 @@ export default function GuidePage() {
                   <tr key={row.url}>
                     <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">
                       {row.site}
-                      <span className="ml-1 font-mono text-[10px] text-zinc-400 dark:text-zinc-500">{row.url}</span>
+                      <span className="ml-1 font-mono text-[12px] text-zinc-400 dark:text-zinc-500">{row.url}</span>
                     </td>
                     <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400">{row.primary}</td>
                     <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400">{row.rubric}</td>

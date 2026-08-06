@@ -44,9 +44,9 @@ export default function ActivityFeed() {
       <div className="mb-4 flex items-center justify-between">
         <div>
           <h2 className="text-sm font-semibold" style={{ color: 'var(--hub-text-1)' }}>Activity</h2>
-          <p className="text-[11px]" style={{ color: 'var(--hub-text-3)' }}>What has happened — pipeline runs, newest first</p>
+          <p className="text-[13px]" style={{ color: 'var(--hub-text-3)' }}>What has happened — pipeline runs, newest first</p>
         </div>
-        <span className="text-[10px] font-medium uppercase tracking-widest" style={{ color: 'var(--hub-text-3)' }}>
+        <span className="text-[12px] font-medium uppercase tracking-widest" style={{ color: 'var(--hub-text-3)' }}>
           {events === null ? 'Loading…' : `${events.length} event${events.length === 1 ? '' : 's'}`}
         </span>
       </div>
@@ -56,7 +56,7 @@ export default function ActivityFeed() {
       ) : events.length === 0 ? (
         <div className="rounded-lg py-8 text-center" style={{ background: 'var(--hub-surface-2)', border: '1px dashed var(--hub-border)' }}>
           <p className="text-xs" style={{ color: 'var(--hub-text-2)' }}>No pipeline runs recorded yet.</p>
-          <p className="mt-1 text-[11px]" style={{ color: 'var(--hub-text-3)' }}>
+          <p className="mt-1 text-[13px]" style={{ color: 'var(--hub-text-3)' }}>
             Runs will appear here as they happen — trigger one above or wait for Sunday&rsquo;s scheduled run.
           </p>
         </div>
@@ -79,17 +79,17 @@ export default function ActivityFeed() {
                       <a href={e.url} target="_blank" rel="noopener noreferrer" className="hover:underline">{e.title}</a>
                     ) : e.title}
                   </span>
-                  <span className="shrink-0 text-[10px]" style={{ color: 'var(--hub-text-3)' }}>{relativeTime(e.at)}</span>
+                  <span className="shrink-0 text-[12px]" style={{ color: 'var(--hub-text-3)' }}>{relativeTime(e.at)}</span>
                 </div>
                 {e.detail && (
-                  <p className="mt-0.5 truncate text-[11px]" style={{ color: 'var(--hub-text-2)' }}>{e.detail}</p>
+                  <p className="mt-0.5 truncate text-[13px]" style={{ color: 'var(--hub-text-2)' }}>{e.detail}</p>
                 )}
                 {e.meta.length > 0 && (
                   <div className="mt-1 flex flex-wrap gap-1">
                     {e.meta.map((m, j) => (
                       <span
                         key={j}
-                        className="rounded-full px-1.5 py-0.5 text-[9px]"
+                        className="rounded-full px-1.5 py-0.5 text-[11px]"
                         style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)', color: 'var(--hub-text-3)' }}
                       >
                         {m}

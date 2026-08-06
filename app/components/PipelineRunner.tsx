@@ -36,7 +36,7 @@ function StepRow({ step }: { step: WorkflowStep }) {
     else { icon = '✗'; color = '#f87171'; }
   }
   return (
-    <div className="flex items-center gap-2 text-[11px]">
+    <div className="flex items-center gap-2 text-[13px]">
       <span className={step.status === 'in_progress' ? 'animate-hub-pulse' : ''} style={{ color, width: 12 }}>{icon}</span>
       <span style={{ color: step.status === 'in_progress' ? 'var(--hub-text-1)' : 'var(--hub-text-2)' }}>{step.name}</span>
     </div>
@@ -104,7 +104,7 @@ export default function PipelineRunner() {
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <h2 className="text-sm font-semibold" style={{ color: 'var(--hub-text-1)' }}>Content Pipeline</h2>
-          <p className="text-[11px]" style={{ color: 'var(--hub-text-3)' }}>
+          <p className="text-[13px]" style={{ color: 'var(--hub-text-3)' }}>
             What&rsquo;s happening now — generate this week&rsquo;s posts across all 4 sites
           </p>
         </div>
@@ -113,7 +113,7 @@ export default function PipelineRunner() {
         <div className="flex shrink-0 items-center gap-2">
           {!configured ? (
             <span
-              className="rounded-lg px-3 py-1.5 text-[11px]"
+              className="rounded-lg px-3 py-1.5 text-[13px]"
               style={{ background: 'var(--hub-surface-2)', color: 'var(--hub-text-3)', border: '1px solid var(--hub-border)' }}
               title="Set GITHUB_TOKEN to enable triggering from the dashboard"
             >
@@ -129,7 +129,7 @@ export default function PipelineRunner() {
             </span>
           ) : confirming ? (
             <div className="flex items-center gap-2">
-              <span className="text-[11px]" style={{ color: 'var(--hub-gold)' }}>Generates this week&rsquo;s drafts for review — go?</span>
+              <span className="text-[13px]" style={{ color: 'var(--hub-gold)' }}>Generates this week&rsquo;s drafts for review — go?</span>
               <button
                 onClick={trigger}
                 disabled={triggering}
@@ -159,17 +159,17 @@ export default function PipelineRunner() {
       </div>
 
       {message && (
-        <p className="mt-3 text-[11px]" style={{ color: 'var(--hub-text-2)' }}>{message}</p>
+        <p className="mt-3 text-[13px]" style={{ color: 'var(--hub-text-2)' }}>{message}</p>
       )}
 
       {/* Live run detail */}
       {activeRun && steps.length > 0 && (
         <div className="mt-4 rounded-lg p-3" style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}>
           <div className="mb-2 flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--hub-cyan)' }}>
+            <span className="text-[12px] font-bold uppercase tracking-widest" style={{ color: 'var(--hub-cyan)' }}>
               Live run
             </span>
-            <a href={activeRun.htmlUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] hover:underline" style={{ color: 'var(--hub-text-3)' }}>
+            <a href={activeRun.htmlUrl} target="_blank" rel="noopener noreferrer" className="text-[12px] hover:underline" style={{ color: 'var(--hub-text-3)' }}>
               View on GitHub →
             </a>
           </div>
@@ -181,7 +181,7 @@ export default function PipelineRunner() {
 
       {/* Last run summary (when idle) */}
       {!activeRun && configured && latest && (
-        <div className="mt-3 flex items-center gap-2 text-[11px]">
+        <div className="mt-3 flex items-center gap-2 text-[13px]">
           <span style={{ color: 'var(--hub-text-3)' }}>Last run</span>
           <span className="font-medium" style={{ color: conclusionLabel(latest.conclusion).color }}>
             {conclusionLabel(latest.conclusion).text}
@@ -194,7 +194,7 @@ export default function PipelineRunner() {
       )}
 
       {!activeRun && configured && !latest && (
-        <p className="mt-3 text-[11px]" style={{ color: 'var(--hub-text-3)' }}>No runs yet — trigger one to get started.</p>
+        <p className="mt-3 text-[13px]" style={{ color: 'var(--hub-text-3)' }}>No runs yet — trigger one to get started.</p>
       )}
     </section>
   );

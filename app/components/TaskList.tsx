@@ -181,7 +181,7 @@ export default function TaskList({ siteId }: { siteId: string }) {
       <div className="flex flex-col gap-1">
         <button
           onClick={toggleShowDone}
-          className="self-start text-[11px] font-medium text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300 transition-colors"
+          className="self-start text-[13px] font-medium text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300 transition-colors"
         >
           {showDone
             ? `▲ Hide completed${doneCount !== undefined ? ` (${doneCount})` : ''}`

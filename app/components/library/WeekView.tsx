@@ -55,7 +55,7 @@ export default function WeekView({
                 <span className="mono-num text-lg font-semibold" style={{ color: isToday ? '#3b82f6' : 'var(--fg)' }}>
                   {String(dayOfMonth(date)).padStart(2, '0')}
                 </span>
-                <span className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: 'var(--fg-3)' }}>
+                <span className="text-[12px] font-semibold uppercase tracking-wide" style={{ color: 'var(--fg-3)' }}>
                   {weekdayShort(date)}
                 </span>
               </div>
@@ -74,7 +74,7 @@ export default function WeekView({
                         className="flex flex-col gap-1 rounded-md px-2 py-1.5 text-left transition-transform hover:translate-x-0.5"
                         style={{ borderLeft: `2.5px solid ${c.accent}`, background: c.tint }}
                       >
-                        <span className="mono-num text-[9px] font-semibold uppercase tracking-wide" style={{ color: c.accent }}>
+                        <span className="mono-num text-[11px] font-semibold uppercase tracking-wide" style={{ color: c.accent }}>
                           {c.key} · {row.platform}
                         </span>
                         <span className="text-xs leading-snug" style={{ color: 'var(--fg-2)' }}>

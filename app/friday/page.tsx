@@ -220,7 +220,7 @@ export default function FridayPage() {
                             const v = counts?.[k] ?? 0;
                             if (v === 0) return null;
                             return (
-                              <span key={k} className="text-[11px] text-gray-400">
+                              <span key={k} className="text-[13px] text-gray-400">
                                 {STATUS_LABEL[k]}: <span className="text-gray-200">{v}</span>
                               </span>
                             );

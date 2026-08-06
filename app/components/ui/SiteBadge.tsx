@@ -12,7 +12,7 @@ export default function SiteBadge({ siteId, showName = false }: { siteId: string
         style={{ background: c.accent, boxShadow: `0 0 6px ${c.accent}80` }}
         aria-hidden="true"
       />
-      <span className="mono-num text-[10px] font-semibold uppercase tracking-wide" style={{ color: c.accent }}>
+      <span className="mono-num text-[12px] font-semibold uppercase tracking-wide" style={{ color: c.accent }}>
         {showName ? c.name : c.key}
       </span>
     </span>

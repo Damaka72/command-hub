@@ -41,7 +41,7 @@ export default function MonthView({
     <div className="flex flex-col gap-2">
       <div className="grid grid-cols-7 gap-1.5">
         {WEEKDAY_HEADERS.map(w => (
-          <div key={w} className="px-1 text-center text-[10px] font-semibold uppercase tracking-wide" style={{ color: 'var(--fg-3)' }}>
+          <div key={w} className="px-1 text-center text-[12px] font-semibold uppercase tracking-wide" style={{ color: 'var(--fg-3)' }}>
             {w}
           </div>
         ))}
@@ -80,7 +80,7 @@ export default function MonthView({
                 ))}
               </div>
               {overflow > 0 && (
-                <span className="mono-num text-[10px]" style={{ color: 'var(--fg-3)' }}>+{overflow}</span>
+                <span className="mono-num text-[12px]" style={{ color: 'var(--fg-3)' }}>+{overflow}</span>
               )}
             </button>
           );
