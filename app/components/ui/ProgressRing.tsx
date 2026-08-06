@@ -104,7 +104,7 @@ export default function ProgressRing({
             {displayPct}%
           </span>
           {subLabel && (
-            <span className="mt-1 text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--fg-3)' }}>
+            <span className="mt-1 text-[12px] font-semibold uppercase tracking-widest" style={{ color: 'var(--fg-3)' }}>
               {subLabel}
             </span>
           )}

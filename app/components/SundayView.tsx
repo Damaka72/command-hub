@@ -180,7 +180,7 @@ export default function SundayView() {
                     <td className="px-4 py-2.5 text-xs text-zinc-700 dark:text-zinc-300">
                       {w.label}
                       {w.isCurrent && (
-                        <span className="ml-2 rounded-full bg-zinc-800 px-1.5 py-0.5 text-[10px] font-medium text-white dark:bg-zinc-200 dark:text-zinc-900">
+                        <span className="ml-2 rounded-full bg-zinc-800 px-1.5 py-0.5 text-[12px] font-medium text-white dark:bg-zinc-200 dark:text-zinc-900">
                           this week
                         </span>
                       )}

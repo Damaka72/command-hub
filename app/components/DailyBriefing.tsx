@@ -228,20 +228,20 @@ export default function DailyBriefing({ statusMap }: { statusMap: StatusResponse
           className="flex w-full items-center justify-between gap-3 text-left"
         >
           <div className="flex items-center gap-2.5">
-            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--hub-accent)', letterSpacing: '0.1em' }}>
+            <span className="text-[12px] font-bold uppercase tracking-widest" style={{ color: 'var(--hub-accent)', letterSpacing: '0.1em' }}>
               Today&apos;s Focus
             </span>
-            <span className="text-[10px]" style={{ color: 'var(--hub-text-3)' }}>{today}</span>
+            <span className="text-[12px]" style={{ color: 'var(--hub-text-3)' }}>{today}</span>
             {!open && urgentCount > 0 && (
               <span
-                className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium"
+                className="inline-flex items-center rounded-full px-2 py-0.5 text-[12px] font-medium"
                 style={{ background: 'rgba(248,113,113,0.15)', color: '#f87171', border: '1px solid rgba(248,113,113,0.25)' }}
               >
                 {urgentCount} urgent
               </span>
             )}
           </div>
-          <span className="text-[10px]" style={{ color: 'var(--hub-text-3)' }}>{open ? "▲" : "▼"}</span>
+          <span className="text-[12px]" style={{ color: 'var(--hub-text-3)' }}>{open ? "▲" : "▼"}</span>
         </button>
 
         {/* ── Content status strip ── */}
@@ -252,7 +252,7 @@ export default function DailyBriefing({ statusMap }: { statusMap: StatusResponse
                 const s = coordData.sites[key];
                 const allClear = isAllClear(s);
                 return (
-                  <p key={key} className="text-[10px] leading-relaxed" style={{ color: 'var(--hub-text-3)' }}>
+                  <p key={key} className="text-[12px] leading-relaxed" style={{ color: 'var(--hub-text-3)' }}>
                     {allClear ? (
                       <>
                         <span style={{ color: '#34d399' }}>✓</span>{" "}
@@ -270,12 +270,12 @@ export default function DailyBriefing({ statusMap }: { statusMap: StatusResponse
               })}
             </div>
           ) : (
-            <p className="text-[10px]" style={{ color: 'var(--hub-text-3)' }}>Loading content status…</p>
+            <p className="text-[12px]" style={{ color: 'var(--hub-text-3)' }}>Loading content status…</p>
           )}
 
           <button
             onClick={() => setUpdateOpen(u => !u)}
-            className="mt-2 text-[10px] font-medium transition-colors hover:brightness-125"
+            className="mt-2 text-[12px] font-medium transition-colors hover:brightness-125"
             style={{ color: 'var(--hub-text-3)' }}
           >
             {updateOpen ? "▲ Hide update panel" : "▼ Update content status"}
@@ -285,7 +285,7 @@ export default function DailyBriefing({ statusMap }: { statusMap: StatusResponse
             <div className="mt-2 flex flex-col gap-3 pt-2" style={{ borderTop: '1px solid var(--hub-border)' }}>
               {COORDINATOR_SITES.map(({ key, label }) => (
                 <div key={key} className="flex flex-col gap-1.5">
-                  <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--hub-accent)' }}>
+                  <span className="text-[12px] font-bold uppercase tracking-widest" style={{ color: 'var(--hub-accent)' }}>
                     {label}
                   </span>
                   <div className="grid grid-cols-2 gap-1.5">
@@ -294,7 +294,7 @@ export default function DailyBriefing({ statusMap }: { statusMap: StatusResponse
                       { lbl: 'Pending',  field: 'postsPending'  as const, val: formSites[key].postsPending  },
                     ].map(({ lbl, field, val }) => (
                       <div key={field} className="flex flex-col gap-0.5">
-                        <label className="text-[9px] uppercase tracking-wide" style={{ color: 'var(--hub-text-3)' }}>{lbl}</label>
+                        <label className="text-[11px] uppercase tracking-wide" style={{ color: 'var(--hub-text-3)' }}>{lbl}</label>
                         <input
                           type="number" min={0} value={val}
                           onChange={e => updateFormSite(key, field, Math.max(0, parseInt(e.target.value) || 0))}
@@ -304,7 +304,7 @@ export default function DailyBriefing({ statusMap }: { statusMap: StatusResponse
                     ))}
                   </div>
                   <div className="flex flex-col gap-0.5">
-                    <label className="text-[9px] uppercase tracking-wide" style={{ color: 'var(--hub-text-3)' }}>Newsletter status</label>
+                    <label className="text-[11px] uppercase tracking-wide" style={{ color: 'var(--hub-text-3)' }}>Newsletter status</label>
                     <select
                       value={formSites[key].newsletterStatus}
                       onChange={e => updateFormSite(key, "newsletterStatus", e.target.value)}
@@ -319,7 +319,7 @@ export default function DailyBriefing({ statusMap }: { statusMap: StatusResponse
                       { lbl: 'Next send',    field: 'nextSend'    as const, ph: 'e.g. friday',     val: formSites[key].nextSend    },
                     ].map(({ lbl, field, ph, val }) => (
                       <div key={field} className="flex flex-col gap-0.5">
-                        <label className="text-[9px] uppercase tracking-wide" style={{ color: 'var(--hub-text-3)' }}>{lbl}</label>
+                        <label className="text-[11px] uppercase tracking-wide" style={{ color: 'var(--hub-text-3)' }}>{lbl}</label>
                         <input
                           type="text" value={val} placeholder={ph}
                           onChange={e => updateFormSite(key, field, e.target.value)}
@@ -329,7 +329,7 @@ export default function DailyBriefing({ statusMap }: { statusMap: StatusResponse
                     ))}
                   </div>
                   <div className="flex flex-col gap-0.5">
-                    <label className="text-[9px] uppercase tracking-wide" style={{ color: 'var(--hub-text-3)' }}>Week theme</label>
+                    <label className="text-[11px] uppercase tracking-wide" style={{ color: 'var(--hub-text-3)' }}>Week theme</label>
                     <input
                       type="text" value={formSites[key].weekTheme}
                       onChange={e => updateFormSite(key, "weekTheme", e.target.value)}
@@ -385,7 +385,7 @@ export default function DailyBriefing({ statusMap }: { statusMap: StatusResponse
                       {item.text}
                     </span>
                     <span
-                      className="ml-2 flex-shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium"
+                      className="ml-2 flex-shrink-0 rounded px-1.5 py-0.5 text-[12px] font-medium"
                       style={{ background: 'var(--hub-accent-dim)', color: '#a5b4fc' }}
                     >
                       {item.tag}

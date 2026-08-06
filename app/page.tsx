@@ -190,7 +190,7 @@ function PortfolioBar({ statusMap, reviewQueue, weekReview }: { statusMap: Statu
   return (
     <div style={{ borderBottom: '1px solid var(--hub-border)', background: 'var(--hub-surface-2)' }}>
       <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-4 px-6 py-3">
-        <span className="shrink-0 text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--hub-accent)', letterSpacing: '0.12em' }}>
+        <span className="shrink-0 text-[12px] font-bold uppercase tracking-widest" style={{ color: 'var(--hub-accent)', letterSpacing: '0.12em' }}>
           Portfolio
         </span>
 

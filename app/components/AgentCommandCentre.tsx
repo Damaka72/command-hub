@@ -49,10 +49,10 @@ export default function AgentCommandCentre({ portfolioCoordinator, sites }: Prop
 
           {/* Lead Coordinator */}
           <div className="w-1/4 min-w-0 shrink-0">
-            <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--hub-accent)', letterSpacing: '0.1em' }}>
+            <p className="text-[12px] font-bold uppercase tracking-widest" style={{ color: 'var(--hub-accent)', letterSpacing: '0.1em' }}>
               Lead Coordinator
             </p>
-            <p className="mt-1 font-mono text-[10px]" style={{ color: 'var(--hub-text-3)' }}>
+            <p className="mt-1 font-mono text-[12px]" style={{ color: 'var(--hub-text-3)' }}>
               content-coordinator.json
             </p>
             <div className="mt-2 space-y-1">
@@ -93,12 +93,12 @@ export default function AgentCommandCentre({ portfolioCoordinator, sites }: Prop
                   className="flex flex-1 flex-col items-center gap-1 rounded-lg px-2 py-2"
                   style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}
                 >
-                  <span className="text-[10px] font-bold" style={{ color: 'var(--hub-text-2)' }}>
+                  <span className="text-[12px] font-bold" style={{ color: 'var(--hub-text-2)' }}>
                     {SITE_SHORT[siteId] ?? siteId}
                   </span>
 
                   <span
-                    className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${pillStyle.extra ?? ''}`}
+                    className={`rounded-full px-2 py-0.5 text-[12px] font-medium ${pillStyle.extra ?? ''}`}
                     style={{ background: pillStyle.bg, color: pillStyle.color }}
                   >
                     {statusKey.replace('_', ' ')}
@@ -108,18 +108,18 @@ export default function AgentCommandCentre({ portfolioCoordinator, sites }: Prop
                     const gs = GRADER_PILL[verdictKey];
                     return gs ? (
                       <span
-                        className="rounded-full px-2 py-0.5 text-[10px] font-medium"
+                        className="rounded-full px-2 py-0.5 text-[12px] font-medium"
                         style={{ background: gs.bg, color: gs.color }}
                       >
                         {verdictKey}{(grader?.retryCount ?? 0) > 0 ? ` (×${grader!.retryCount})` : ''}
                       </span>
                     ) : null;
                   })() : (
-                    <span className="text-[10px]" style={{ color: 'var(--hub-text-3)' }}>—</span>
+                    <span className="text-[12px]" style={{ color: 'var(--hub-text-3)' }}>—</span>
                   )}
 
                   {grader?.rubricName && (
-                    <span className="text-center text-[9px] leading-tight" style={{ color: 'var(--hub-text-3)' }}>
+                    <span className="text-center text-[11px] leading-tight" style={{ color: 'var(--hub-text-3)' }}>
                       {grader.rubricName}
                     </span>
                   )}
@@ -130,7 +130,7 @@ export default function AgentCommandCentre({ portfolioCoordinator, sites }: Prop
 
           {/* Batch status */}
           <div className="w-1/4 min-w-0 shrink-0">
-            <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--hub-accent)', letterSpacing: '0.1em' }}>
+            <p className="text-[12px] font-bold uppercase tracking-widest" style={{ color: 'var(--hub-accent)', letterSpacing: '0.1em' }}>
               Batch Status
             </p>
             <div className="mt-2 flex gap-4">
@@ -138,19 +138,19 @@ export default function AgentCommandCentre({ portfolioCoordinator, sites }: Prop
                 <p className="text-xl font-bold" style={{ color: '#34d399' }}>
                   {portfolioCoordinator?.batchStatus.approved ?? 0}
                 </p>
-                <p className="text-[10px]" style={{ color: 'var(--hub-text-3)' }}>Approved</p>
+                <p className="text-[12px]" style={{ color: 'var(--hub-text-3)' }}>Approved</p>
               </div>
               <div className="text-center">
                 <p className="text-xl font-bold" style={{ color: 'var(--hub-text-2)' }}>
                   {portfolioCoordinator?.batchStatus.pending ?? 0}
                 </p>
-                <p className="text-[10px]" style={{ color: 'var(--hub-text-3)' }}>Pending</p>
+                <p className="text-[12px]" style={{ color: 'var(--hub-text-3)' }}>Pending</p>
               </div>
               <div className="text-center">
                 <p className="text-xl font-bold" style={{ color: '#f87171' }}>
                   {portfolioCoordinator?.batchStatus.failed ?? 0}
                 </p>
-                <p className="text-[10px]" style={{ color: 'var(--hub-text-3)' }}>Failed</p>
+                <p className="text-[12px]" style={{ color: 'var(--hub-text-3)' }}>Failed</p>
               </div>
             </div>
             {portfolioCoordinator?.batchStatus.readyForReview && (

@@ -375,7 +375,7 @@ export default function LibraryPage() {
                         )}
                       </div>
                       {row.asset_type && (
-                        <span className={`inline-block mb-2 px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wide ${ASSET_TYPE_BADGE[row.asset_type] ?? 'bg-gray-800 text-gray-300'}`}>
+                        <span className={`inline-block mb-2 px-2 py-0.5 rounded-full text-[12px] uppercase tracking-wide ${ASSET_TYPE_BADGE[row.asset_type] ?? 'bg-gray-800 text-gray-300'}`}>
                           {row.asset_type}{row.creation_tool ? ` · ${row.creation_tool}` : ''}{row.aspect_ratio ? ` · ${row.aspect_ratio}` : ''}
                         </span>
                       )}

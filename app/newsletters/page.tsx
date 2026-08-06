@@ -276,7 +276,7 @@ export default function NewslettersPage() {
           >
             {b.title}
             {b.newsletter && (
-              <span className={`ml-2 rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_PILL[b.newsletter.status] ?? 'bg-gray-700 text-gray-200'}`}>
+              <span className={`ml-2 rounded-full px-2 py-0.5 text-[12px] font-medium ${STATUS_PILL[b.newsletter.status] ?? 'bg-gray-700 text-gray-200'}`}>
                 {STATUS_LABEL[b.newsletter.status] ?? b.newsletter.status}
               </span>
             )}
@@ -296,7 +296,7 @@ export default function NewslettersPage() {
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div className="flex items-center gap-3">
                 <h2 className="text-base font-semibold text-white">{block.title}</h2>
-                <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium ${STATUS_PILL[block.newsletter?.status ?? 'draft'] ?? 'bg-gray-700 text-gray-200'}`}>
+                <span className={`rounded-full px-2.5 py-0.5 text-[13px] font-medium ${STATUS_PILL[block.newsletter?.status ?? 'draft'] ?? 'bg-gray-700 text-gray-200'}`}>
                   {STATUS_LABEL[block.newsletter?.status ?? 'draft'] ?? block.newsletter?.status}
                 </span>
                 {block.newsletter?.sent_at && (
@@ -389,7 +389,7 @@ export default function NewslettersPage() {
                         <div key={brief.id} className="bg-gray-900 border border-gray-700 rounded-xl p-4">
                           <div className="flex items-center gap-2 mb-2">
                             <span className="text-xs font-semibold text-gray-300">{SITE_SHORT[brief.site_id] ?? brief.site_id}</span>
-                            <span className="text-[10px] text-gray-500 uppercase tracking-wide">{brief.source}</span>
+                            <span className="text-[12px] text-gray-500 uppercase tracking-wide">{brief.source}</span>
                           </div>
                           <p className="whitespace-pre-wrap text-sm text-gray-200 leading-relaxed">{brief.brief}</p>
                         </div>
@@ -482,7 +482,7 @@ export default function NewslettersPage() {
                 if (subjects.length === 0) return null;
                 return (
                   <div className="rounded-xl border border-gray-700 bg-gray-900 p-3 space-y-1.5">
-                    <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Subject line options</p>
+                    <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-500">Subject line options</p>
                     {subjects.map((s, i) => (
                       <button
                         key={i}

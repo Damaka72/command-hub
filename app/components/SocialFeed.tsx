@@ -21,7 +21,7 @@ function PlatformBadge({ platform }: { platform: string }) {
     label: platform,
   };
   return (
-    <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${s.bg} ${s.text}`}>
+    <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-[12px] font-semibold uppercase tracking-wide ${s.bg} ${s.text}`}>
       {s.label}
     </span>
   );
@@ -63,12 +63,12 @@ function PostCard({ post }: { post: BlotatoPost }) {
         <div className="flex items-center gap-1.5 flex-wrap">
           <PlatformBadge platform={post.platform} />
           {isScheduled && (
-            <span className="inline-flex items-center rounded-md bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+            <span className="inline-flex items-center rounded-md bg-amber-100 px-1.5 py-0.5 text-[12px] font-semibold uppercase tracking-wide text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
               Scheduled
             </span>
           )}
         </div>
-        <span className="shrink-0 text-[10px] text-zinc-400 dark:text-zinc-500">{timeLabel}</span>
+        <span className="shrink-0 text-[12px] text-zinc-400 dark:text-zinc-500">{timeLabel}</span>
       </div>
 
       {/* post text */}
@@ -89,7 +89,7 @@ function PostCard({ post }: { post: BlotatoPost }) {
             />
           ))}
           {post.mediaUrls.length > 3 && (
-            <div className="flex h-12 w-12 items-center justify-center rounded-md bg-zinc-200 text-[10px] font-medium text-zinc-500 dark:bg-zinc-700 dark:text-zinc-400">
+            <div className="flex h-12 w-12 items-center justify-center rounded-md bg-zinc-200 text-[12px] font-medium text-zinc-500 dark:bg-zinc-700 dark:text-zinc-400">
               +{post.mediaUrls.length - 3}
             </div>
           )}
@@ -102,7 +102,7 @@ function PostCard({ post }: { post: BlotatoPost }) {
           href={post.state.postUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="self-start text-[10px] font-medium text-zinc-500 underline underline-offset-2 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+          className="self-start text-[12px] font-medium text-zinc-500 underline underline-offset-2 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
         >
           View post ↗
         </a>
@@ -110,7 +110,7 @@ function PostCard({ post }: { post: BlotatoPost }) {
 
       {/* error message */}
       {post.state.type === 'failed' && post.state.errorMessage && (
-        <p className="rounded-md bg-red-50 px-2 py-1 text-[10px] text-red-600 dark:bg-red-900/20 dark:text-red-400">
+        <p className="rounded-md bg-red-50 px-2 py-1 text-[12px] text-red-600 dark:bg-red-900/20 dark:text-red-400">
           {post.state.errorMessage}
         </p>
       )}
@@ -190,7 +190,7 @@ export default function SocialFeed({ siteId }: { siteId: string }) {
       {/* Scheduled posts */}
       {scheduled.length > 0 && (
         <div className="flex flex-col gap-2">
-          <span className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+          <span className="text-[12px] font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
             Scheduled
           </span>
           {scheduled.map(post => <PostCard key={post.id} post={post} />)}
@@ -200,7 +200,7 @@ export default function SocialFeed({ siteId }: { siteId: string }) {
       {/* Published posts */}
       {published.length > 0 && (
         <div className="flex flex-col gap-2">
-          <span className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+          <span className="text-[12px] font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
             Published
           </span>
           {published.map(post => <PostCard key={post.id} post={post} />)}

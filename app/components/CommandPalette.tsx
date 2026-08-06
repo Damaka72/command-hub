@@ -212,7 +212,7 @@ export default function CommandPalette() {
                 >
                   <span>{c.label}</span>
                   {c.shortcut && (
-                    <span className="mono-num text-[10px]" style={{ color: 'var(--fg-3)' }}>{c.shortcut}</span>
+                    <span className="mono-num text-[12px]" style={{ color: 'var(--fg-3)' }}>{c.shortcut}</span>
                   )}
                 </button>
               ))}
@@ -264,11 +264,11 @@ export default function CommandPalette() {
               style={{ background: 'var(--panel-2)', border: '1px solid var(--line)', color: 'var(--fg)' }}
             />
             {busyMsg && <p className="text-xs" style={{ color: 'var(--fg-2)' }}>{busyMsg}</p>}
-            <p className="text-[11px]" style={{ color: 'var(--fg-3)' }}>Enter to save · Escape to cancel</p>
+            <p className="text-[13px]" style={{ color: 'var(--fg-3)' }}>Enter to save · Escape to cancel</p>
           </div>
         )}
 
-        <div className="flex items-center justify-between px-4 py-2 text-[10px]" style={{ borderTop: '1px solid var(--line)', color: 'var(--fg-3)' }}>
+        <div className="flex items-center justify-between px-4 py-2 text-[12px]" style={{ borderTop: '1px solid var(--line)', color: 'var(--fg-3)' }}>
           <span>↑↓ navigate · ↵ run · esc close</span>
           <span className="mono-num">⌘K</span>
         </div>

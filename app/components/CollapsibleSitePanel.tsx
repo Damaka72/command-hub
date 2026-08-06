@@ -17,7 +17,7 @@ import type { HomeSiteStat } from '../api/home/route';
 function MetricTile({ label, value, color }: { label: string; value: React.ReactNode; color?: string }) {
   return (
     <div className="flex flex-col gap-0.5 rounded-lg px-3 py-2" style={{ background: 'var(--panel-2)', border: '1px solid var(--line)' }}>
-      <span className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--fg-3)' }}>{label}</span>
+      <span className="text-[12px] uppercase tracking-wide" style={{ color: 'var(--fg-3)' }}>{label}</span>
       <span className="mono-num text-sm font-semibold" style={{ color: color ?? 'var(--fg)' }}>{value}</span>
     </div>
   );

@@ -36,7 +36,7 @@ export default function QuotePanel() {
         &ldquo;{quote.text}&rdquo;
       </p>
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--fg-3)' }}>
+        <span className="text-[12px] font-semibold uppercase tracking-widest" style={{ color: 'var(--fg-3)' }}>
           {quote.attribution}
         </span>
         <button

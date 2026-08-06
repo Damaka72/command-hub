@@ -23,7 +23,7 @@ function relativeNextOut(iso: string | null): string {
 function Stat({ label, value, valueColor }: { label: string; value: React.ReactNode; valueColor?: string }) {
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--fg-3)' }}>{label}</span>
+      <span className="text-[12px] font-semibold uppercase tracking-widest" style={{ color: 'var(--fg-3)' }}>{label}</span>
       <span className="mono-num text-lg font-semibold" style={{ color: valueColor ?? 'var(--fg)' }}>{value}</span>
     </div>
   );
@@ -44,7 +44,7 @@ export default function StatRail({ week, home }: { week: string; home: HomeRespo
       <div className="flex items-baseline gap-3">
         <h1 className="text-xl font-semibold" style={{ color: 'var(--fg)' }}>{greetingText}, Didi</h1>
         <span
-          className="mono-num rounded-full px-2.5 py-1 text-[11px] font-medium"
+          className="mono-num rounded-full px-2.5 py-1 text-[13px] font-medium"
           style={{ background: 'var(--panel-2)', border: '1px solid var(--line)', color: 'var(--fg-2)' }}
         >
           {formatWeekChip(week)}
@@ -65,7 +65,7 @@ export default function StatRail({ week, home }: { week: string; home: HomeRespo
         />
         <Stat label="Next out" value={home ? relativeNextOut(home.nextOut) : '—'} />
         <div className="flex flex-col gap-1">
-          <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--fg-3)' }}>Last 8 weeks</span>
+          <span className="text-[12px] font-semibold uppercase tracking-widest" style={{ color: 'var(--fg-3)' }}>Last 8 weeks</span>
           {home ? <Sparkline data={home.sparkline} /> : <span className="text-lg" style={{ color: 'var(--fg-3)' }}>—</span>}
         </div>
       </div>

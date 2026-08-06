@@ -24,7 +24,7 @@ export default function StatusPill({
   const bg    = tint ? tint.tint   : `color-mix(in srgb, ${COLOR[tone]} 16%, transparent)`;
   return (
     <span
-      className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium"
+      className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[13px] font-medium"
       style={{ background: bg, color, border: `1px solid ${tint ? tint.accent + '40' : color + '40'}` }}
     >
       <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: color }} aria-hidden="true" />
