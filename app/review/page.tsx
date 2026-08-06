@@ -78,6 +78,81 @@ function MediaPreview({ row }: { row: Row }) {
 // accounts.ts). Used only for UI hinting here.
 const MEDIA_PLATFORMS = new Set(['Instagram', 'TikTok', 'Pinterest', 'YouTube']);
 
+// Mirrors PushResult / the summary shape from /api/review/push. Unlike media
+// creation, pushing is synchronous — the whole batch completes within one
+// request — so there's no polling here, just an in-flight state while the
+// request is out, then the real per-row results the API already computes but
+// the UI used to throw away.
+interface PushResultRow {
+  id:       string;
+  siteId:   string;
+  platform: string;
+  day:      string;
+  status:   'pushed' | 'failed' | 'skipped';
+  error?:   string;
+}
+interface PushSummary {
+  pushed:  number;
+  failed:  number;
+  skipped: number;
+  results: PushResultRow[];
+}
+
+function PushStatusBanner({
+  busy, total, summary, onDismiss,
+}: {
+  busy:    boolean;
+  total:   number | undefined;
+  summary: PushSummary | undefined;
+  onDismiss: () => void;
+}) {
+  if (busy) {
+    return (
+      <div className="rounded-lg border border-blue-700 bg-blue-900/20 px-4 py-3 space-y-1">
+        <div className="flex items-center gap-2">
+          <span className="h-2 w-2 rounded-full bg-blue-400 animate-pulse" />
+          <p className="text-blue-200 text-xs font-semibold uppercase tracking-wide">
+            Pushing to Blotato{total !== undefined ? ` — ${total} item${total === 1 ? '' : 's'}` : '…'}
+          </p>
+        </div>
+        <p className="text-blue-100/60 text-[11px]">Scheduling and calling Blotato for each post — can take a few seconds per item.</p>
+      </div>
+    );
+  }
+  if (!summary) return null;
+
+  const { pushed, failed, skipped, results } = summary;
+  const failedRows  = results.filter(r => r.status === 'failed');
+  const skippedRows = results.filter(r => r.status === 'skipped');
+  const allGood = failed === 0 && skipped === 0;
+
+  return (
+    <div className={`rounded-lg border px-4 py-3 space-y-2 ${allGood ? 'border-green-700 bg-green-900/20' : 'border-amber-700 bg-amber-900/20'}`}>
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <p className={`text-xs font-semibold uppercase tracking-wide ${allGood ? 'text-green-200' : 'text-amber-200'}`}>
+          {allGood ? '✓' : '⚠'} {pushed} pushed{failed > 0 ? ` · ${failed} failed` : ''}{skipped > 0 ? ` · ${skipped} skipped` : ''}
+        </p>
+        <button
+          onClick={onDismiss}
+          className={`text-[11px] shrink-0 ${allGood ? 'text-green-300/70 hover:text-green-200' : 'text-amber-300/70 hover:text-amber-200'}`}
+        >
+          Dismiss
+        </button>
+      </div>
+      {(failedRows.length > 0 || skippedRows.length > 0) && (
+        <div className="space-y-1">
+          {failedRows.map(r => (
+            <p key={r.id} className="text-[11px] text-red-300">✗ {r.day} {r.platform} — {r.error ?? 'failed'}</p>
+          ))}
+          {skippedRows.map(r => (
+            <p key={r.id} className="text-[11px] text-amber-300/80">– {r.day} {r.platform} — {r.error ?? 'skipped'}</p>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Parse a textarea's worth of URLs (one per line, or comma-separated) into a
 // clean array; and render an array back into that textarea form.
 function parseMediaUrls(raw: string): string[] {
@@ -125,6 +200,13 @@ export default function ReviewPage() {
   const [creatingIds, setCreatingIds]     = useState<Record<string, string[]>>({});
   const [justCompleted, setJustCompleted] = useState<Record<string, Row[]>>({});
   const creatingIdsRef = useRef<Record<string, string[]>>({});
+
+  // Push status, keyed by the same busy label ('push-all' or `push-${siteId}`).
+  // pushTotal is captured at click time (from current rows) so the in-flight
+  // banner can show a count immediately, before the synchronous request
+  // returns; pushSummary holds the real per-row results once it does.
+  const [pushTotal, setPushTotal]     = useState<Record<string, number>>({});
+  const [pushSummary, setPushSummary] = useState<Record<string, PushSummary>>({});
 
   // Given a fresh row set: seed any newly-pending (requested, no media yet)
   // rows into the tracked batches, and move any batch that's now fully done
@@ -238,6 +320,10 @@ export default function ReviewPage() {
   async function push(siteId: string | undefined, label: string) {
     setBusy(label);
     setError('');
+    const eligible = rows.filter(r =>
+      (!siteId || r.site_id === siteId) && (r.status === 'approved' || r.status === 'approved_needs_media'));
+    setPushTotal(prev => ({ ...prev, [label]: eligible.length }));
+    setPushSummary(prev => { const next = { ...prev }; delete next[label]; return next; });
     try {
       const res = await fetch('/api/review/push', {
         method: 'POST',
@@ -246,6 +332,10 @@ export default function ReviewPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Push failed');
+      setPushSummary(prev => ({
+        ...prev,
+        [label]: { pushed: data.pushed, failed: data.failed, skipped: data.skipped, results: data.results ?? [] },
+      }));
       load(week);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -279,6 +369,12 @@ export default function ReviewPage() {
         {error && (
           <div className="bg-red-900/30 border border-red-700 rounded-lg p-4 text-red-300 text-sm">{error}</div>
         )}
+        <PushStatusBanner
+          busy={busy === 'push-all'}
+          total={pushTotal['push-all']}
+          summary={pushSummary['push-all']}
+          onDismiss={() => setPushSummary(prev => { const next = { ...prev }; delete next['push-all']; return next; })}
+        />
         {loading && <p className="text-gray-400 text-sm">Loading…</p>}
         {!loading && bySite.length === 0 && (
           <p className="text-gray-400 text-sm">No content in the library for week commencing {week}. Run the pipeline for this week, then refresh.</p>
@@ -328,6 +424,13 @@ export default function ReviewPage() {
                   </button>
                 </div>
               </div>
+
+              <PushStatusBanner
+                busy={busy === `push-${siteId}`}
+                total={pushTotal[`push-${siteId}`]}
+                summary={pushSummary[`push-${siteId}`]}
+                onDismiss={() => setPushSummary(prev => { const next = { ...prev }; delete next[`push-${siteId}`]; return next; })}
+              />
 
               {/* In-flight creation progress — appears the moment Create all is
                   clicked and survives a page reload while it's still running. */}
