@@ -7,11 +7,15 @@
 // of the row it belongs to.
 //
 // Resolves the target row by id, or — if the caller doesn't have the row id
-// handy — by the same (site_id, week_commencing, day_name, platform) unique key
-// the review queue already keys rows by. Builds the Blotato-facing media_urls
-// entry from the Drive file id via the direct-download bridge (see lib/drive.ts
-// for the accepted trade-off there), and clears approved_needs_media to
-// approved the same way a manually-pasted URL does in /api/review.
+// handy — by (site_id, week_commencing, day_name, platform). That combination
+// used to be unique; it no longer is (a site/day/platform can now carry more
+// than one post), so this fallback only works when it resolves to exactly one
+// row — otherwise the caller must pass id explicitly rather than have this
+// route guess which post to attach the asset to. Builds the Blotato-facing
+// media_urls entry from the Drive file id via the direct-download bridge (see
+// lib/drive.ts for the accepted trade-off there), and clears
+// approved_needs_media to approved the same way a manually-pasted URL does in
+// /api/review.
 
 import { NextResponse } from 'next/server';
 import { getSupabase } from '@/app/lib/supabase';
@@ -53,11 +57,18 @@ export async function POST(request: Request) {
         .eq('site_id', siteId)
         .eq('week_commencing', week)
         .eq('day_name', day)
-        .eq('platform', platform)
-        .maybeSingle();
+        .eq('platform', platform);
       if (findErr) throw findErr;
-      if (!found) return NextResponse.json({ error: 'No content_library row matches that site/week/day/platform' }, { status: 404 });
-      targetId = found.id;
+      if (!found || found.length === 0) {
+        return NextResponse.json({ error: 'No content_library row matches that site/week/day/platform' }, { status: 404 });
+      }
+      if (found.length > 1) {
+        return NextResponse.json({
+          error: `${found.length} rows match that site/week/day/platform — pass id explicitly to disambiguate`,
+          matchingIds: found.map(r => r.id),
+        }, { status: 409 });
+      }
+      targetId = found[0].id;
     }
 
     const { data: current, error: curErr } = await supabase
