@@ -9,6 +9,7 @@ import ResearchPanel from "./components/ResearchPanel";
 import SundayView from "./components/SundayView";
 import PipelineRunner from "./components/PipelineRunner";
 import ActivityFeed from "./components/ActivityFeed";
+import OldOakTownAdmin from "./components/OldOakTownAdmin";
 import HeroDial from "./components/HeroDial";
 import StatRail from "./components/StatRail";
 import QuotePanel from "./components/QuotePanel";
@@ -483,6 +484,11 @@ export default function Home() {
                 <div className="mb-6 grid gap-5 lg:grid-cols-2">
                   <PipelineRunner />
                   <ActivityFeed />
+                </div>
+
+                {/* Old Oak Town admin: pending approvals + business promotion */}
+                <div className="mb-6">
+                  <OldOakTownAdmin />
                 </div>
 
                 {/* ── Collapsible site panels (UX spec §3.4) ── */}

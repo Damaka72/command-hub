@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { StatusResponse } from "../api/status/route";
 import type { CoordinatorStatusData, SiteCoordinatorStatus } from "../api/coordinator-status/route";
 import type { ActionLogEntry, ActionsResponse } from "../api/actions/route";
+import type { OldOakTownStatus } from "../api/oldoaktown/route";
 import { SITE_SHORT } from "../lib/siteConstants";
 
 interface FocusItem {
@@ -126,9 +127,51 @@ function buildSystemItems(statusMap: StatusResponse): FocusItem[] {
   return items;
 }
 
+// Old Oak Town's own admin dashboard (separate site/repo) — approvals waiting
+// there, plus newly-approved businesses not yet drafted for social/newsletter.
+// See app/api/oldoaktown/route.ts and app/components/OldOakTownAdmin.tsx (the
+// full panel with the "Promote" action lives on the main dashboard; this just
+// surfaces it as a notification here).
+function buildOldOakTownItems(data: OldOakTownStatus | null): FocusItem[] {
+  if (!data) return [];
+  const items: FocusItem[] = [];
+
+  const pendingBusinesses = data.businesses.pending?.length ?? 0;
+  if (pendingBusinesses > 0) {
+    items.push({
+      id: "oot-pending-businesses",
+      dot: "red",
+      text: `${pendingBusinesses} new business${pendingBusinesses === 1 ? "" : "es"} awaiting approval`,
+      tag: "OOT · Admin",
+    });
+  }
+
+  const pendingEvents = data.events.pending?.length ?? 0;
+  if (pendingEvents > 0) {
+    items.push({
+      id: "oot-pending-events",
+      dot: "red",
+      text: `${pendingEvents} new event${pendingEvents === 1 ? "" : "s"} awaiting approval`,
+      tag: "OOT · Admin",
+    });
+  }
+
+  if (data.readyToPromote > 0) {
+    items.push({
+      id: "oot-ready-to-promote",
+      dot: "amber",
+      text: `${data.readyToPromote} approved business${data.readyToPromote === 1 ? "" : "es"} ready to spotlight`,
+      tag: "OOT · Promote",
+    });
+  }
+
+  return items;
+}
+
 export default function DailyBriefing({ statusMap }: { statusMap: StatusResponse }) {
   const [open,       setOpen]       = useState(true);
   const [taskItems,  setTaskItems]  = useState<FocusItem[]>([]);
+  const [oldOakTown, setOldOakTown] = useState<OldOakTownStatus | null>(null);
   const [coordData,  setCoordData]  = useState<CoordinatorStatusData | null>(null);
   const [updateOpen, setUpdateOpen] = useState(false);
   const [formSites,  setFormSites]  = useState<CoordinatorStatusData["sites"] | null>(null);
@@ -154,9 +197,14 @@ export default function DailyBriefing({ statusMap }: { statusMap: StatusResponse
         setFormSites(JSON.parse(JSON.stringify(data.sites)) as CoordinatorStatusData["sites"]);
       })
       .catch(() => {});
+
+    fetch("/api/oldoaktown")
+      .then(r => r.ok ? r.json() : null)
+      .then((data: OldOakTownStatus | null) => setOldOakTown(data))
+      .catch(() => {});
   }, []);
 
-  const systemItems = buildSystemItems(statusMap);
+  const systemItems = [...buildOldOakTownItems(oldOakTown), ...buildSystemItems(statusMap)];
   const allItems = [...taskItems, ...systemItems].slice(0, 7);
   const urgentCount = allItems.filter(i => i.dot === "red").length;
 
