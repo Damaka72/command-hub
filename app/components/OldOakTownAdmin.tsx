@@ -3,8 +3,13 @@
 // ── Old Oak Town admin notifications + promotion ─────────────────────────────
 // Surfaces businesses/events awaiting approval on oldoaktown.co.uk's own admin
 // dashboard, and lets Didi kick off drafting a spotlight post for any newly
-// approved business. Drafts land in the normal Review Queue (/review) — this
-// never publishes anything by itself.
+// approved business. Drafts land in the normal Review Queue (/review). A new
+// business approved on oldoaktown.co.uk also triggers this automatically via
+// the webhook at /api/oldoaktown/webhook — this button is for catching up on
+// anything approved before the webhook was configured, or re-running by hand.
+// Facebook/LinkedIn captions auto-publish only when
+// OLDOAKTOWN_AUTO_PUBLISH_SPOTLIGHTS=true is set; otherwise everything (incl.
+// Instagram, which always needs a human to attach media) waits in the queue.
 
 import { useCallback, useEffect, useState } from "react";
 import type { OldOakTownStatus } from "../api/oldoaktown/route";
@@ -13,6 +18,7 @@ interface PromoteResult {
   businessId: string;
   businessName: string;
   platforms: string[];
+  published: string[];
   error?: string;
 }
 
@@ -207,7 +213,9 @@ export default function OldOakTownAdmin() {
                   <p key={r.businessId} className="text-[12px]" style={{ color: r.error ? "#f87171" : "#34d399" }}>
                     {r.error
                       ? `${r.businessName} — failed: ${r.error}`
-                      : `${r.businessName} — drafted for ${r.platforms.join(", ")}`}
+                      : r.published.length > 0
+                        ? `${r.businessName} — drafted for ${r.platforms.join(", ")} (published: ${r.published.join(", ")})`
+                        : `${r.businessName} — drafted for ${r.platforms.join(", ")}`}
                   </p>
                 ))}
                 <a href="/review" className="mt-1 text-[12px] font-medium hover:brightness-125" style={{ color: "var(--hub-accent)" }}>

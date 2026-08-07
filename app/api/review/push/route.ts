@@ -22,10 +22,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabase } from '@/app/lib/supabase';
 import { ACCOUNT_MAP, MEDIA_REQUIRED_PLATFORMS, isVideoUrl } from '@/agents/accounts';
+import { callBlotato } from '@/app/lib/blotato';
 
 export const dynamic = 'force-dynamic';
-
-const BLOTATO_URL = 'https://backend.blotato.com/v2/posts';
 
 const DAY_OFFSET: Record<string, number> = {
   Monday: 0, Tuesday: 1, Wednesday: 2, Thursday: 3, Friday: 4,
@@ -92,35 +91,6 @@ function buildTarget(platform: string, baseTarget: Record<string, unknown>, medi
     target.mediaType = 'reel';
   }
   return target;
-}
-
-async function callBlotato(
-  apiKey: string,
-  accountId: string,
-  platform: string,
-  text: string,
-  target: Record<string, unknown>,
-  mediaUrls: string[],
-  scheduledTime: string,
-): Promise<{ postSubmissionId?: string; error?: string }> {
-  const body = {
-    post: {
-      accountId,
-      content: { text, mediaUrls, platform },
-      target,
-    },
-    scheduledTime,
-  };
-  const res = await fetch(BLOTATO_URL, {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/json', 'blotato-api-key': apiKey },
-    body:    JSON.stringify(body),
-  });
-  const json = (await res.json().catch(() => ({}))) as Record<string, unknown>;
-  if (!res.ok) {
-    return { error: (json?.message as string) || (json?.error as string) || res.statusText };
-  }
-  return { postSubmissionId: json?.postSubmissionId as string | undefined };
 }
 
 export async function POST(request: NextRequest) {
