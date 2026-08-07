@@ -200,11 +200,16 @@ export async function promoteOldOakTownBusinesses(
         }
       }
 
-      await supabase.from('oldoaktown_business_promotions').insert({
+      // If this insert fails, don't report the business as promoted — a
+      // silent failure here means dedup never sticks and the next run
+      // re-drafts the same business (this exact bug happened once already:
+      // the column type was wrong, see migration 20260807170000).
+      const { error: promoErr } = await supabase.from('oldoaktown_business_promotions').insert({
         business_id:         business.id,
         business_name:       business.business_name,
         content_library_id: inserted?.[0]?.id ?? null,
       });
+      if (promoErr) throw promoErr;
 
       results.push({
         businessId: business.id,
