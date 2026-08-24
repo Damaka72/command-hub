@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import DailyBriefing from "./components/DailyBriefing";
 import AutomationStatus from "./components/AutomationStatus";
+import TodayFocus from "./components/TodayFocus";
 import SidebarTasks from "./components/SidebarTasks";
 import CollapsibleSitePanel from "./components/CollapsibleSitePanel";
 import { useWeek } from "./context/WeekContext";
@@ -11,6 +12,22 @@ import type { HomeResponse } from "./api/home/route";
 import { PIPELINE_SITE_COUNT } from "@/agents/site-configs";
 
 const OPEN_PANELS_KEY = "hub:sitePanelsOpen";
+
+// Header nav, in the order the weekly rhythm actually runs (Sat → Fri) —
+// each chip carries a day hint so the nav itself says when it's used, not
+// just what it's called. Library and Ops Guide aren't tied to a day, so
+// they sit apart as reference/utility links rather than mixed into the flow.
+const RHYTHM_NAV = [
+  { href: "/plan",        label: "Weekly Plan",  hint: "Sat–Sun", bg: "rgba(34,211,238,0.1)",  color: "var(--hub-cyan)", border: "rgba(34,211,238,0.3)" },
+  { href: "/review",      label: "Review",       hint: "Sun",     bg: "var(--hub-accent-dim)", color: "#a5b4fc",         border: "var(--hub-border-hi)" },
+  { href: "/newsletters", label: "Newsletters",  hint: "Sun",     bg: "rgba(245,158,11,0.1)",  color: "var(--hub-gold)", border: "rgba(245,158,11,0.3)" },
+  { href: "/friday",      label: "Friday",       hint: "Fri",     bg: "rgba(16,185,129,0.1)",  color: "#34d399",         border: "rgba(16,185,129,0.3)" },
+] as const;
+
+const UTILITY_NAV = [
+  { href: "/library", label: "Library" },
+  { href: "/guide",   label: "Ops Guide" },
+] as const;
 
 const sites = [
   {
@@ -335,56 +352,40 @@ export default function Home() {
               </p>
             </div>
             <div className="flex items-center gap-2.5">
-              <a
-                href="/review"
-                className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:brightness-125"
-                style={{ background: 'var(--hub-accent-dim)', color: '#a5b4fc', border: '1px solid var(--hub-border-hi)' }}
-              >
-                Review
-              </a>
-              <a
-                href="/plan"
-                className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:brightness-125"
-                style={{ background: 'rgba(34,211,238,0.1)', color: 'var(--hub-cyan)', border: '1px solid rgba(34,211,238,0.25)' }}
-              >
-                Weekly Plan
-              </a>
-              <a
-                href="/newsletters"
-                className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:brightness-125"
-                style={{ background: 'rgba(245,158,11,0.1)', color: 'var(--hub-gold)', border: '1px solid rgba(245,158,11,0.25)' }}
-              >
-                Newsletters
-              </a>
-              <a
-                href="/friday"
-                className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:brightness-125"
-                style={{ background: 'rgba(16,185,129,0.1)', color: '#34d399', border: '1px solid rgba(16,185,129,0.25)' }}
-              >
-                Friday
-              </a>
-              <a
-                href="/library"
-                className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:brightness-125"
-                style={{ background: 'rgba(168,85,247,0.1)', color: '#c4b5fd', border: '1px solid rgba(168,85,247,0.25)' }}
-              >
-                Library
-              </a>
-              <a
-                href="/guide"
-                className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:brightness-125"
-                style={{ background: 'var(--hub-surface-2)', color: 'var(--hub-text-2)', border: '1px solid var(--hub-border)' }}
-              >
-                Ops Guide
-              </a>
+              {/* Weekly-rhythm pages, in the order the week runs — each chip says when it's used */}
+              {RHYTHM_NAV.map(link => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className="flex flex-col items-center gap-0 rounded-lg px-3 py-1 text-xs font-medium transition-all hover:brightness-125"
+                  style={{ background: link.bg, color: link.color, border: `1px solid ${link.border}` }}
+                >
+                  <span>{link.label}</span>
+                  <span className="text-[10px] font-normal uppercase tracking-wide opacity-70">{link.hint}</span>
+                </a>
+              ))}
+
+              <span className="mx-0.5 h-6 w-px" style={{ background: 'var(--hub-border)' }} aria-hidden="true" />
+
+              {/* Reference / utility — not tied to a day */}
+              {UTILITY_NAV.map(link => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:brightness-125"
+                  style={{ background: 'var(--hub-surface-2)', color: 'var(--hub-text-3)', border: '1px solid var(--hub-border)' }}
+                >
+                  {link.label}
+                </a>
+              ))}
               <a
                 href="https://drive.google.com/drive/folders/1VQFSQuwQyATw_voZanV0rQ_Z6TRvE7rk"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:brightness-125"
-                style={{ background: 'var(--hub-surface-2)', color: 'var(--hub-text-2)', border: '1px solid var(--hub-border)' }}
+                style={{ background: 'var(--hub-surface-2)', color: 'var(--hub-text-3)', border: '1px solid var(--hub-border)' }}
               >
-                Content Library
+                Drive Folder ↗
               </a>
               <button
                 onClick={loadStatus}
@@ -444,6 +445,11 @@ export default function Home() {
           )}
 
           <main className="flex-1 px-6 py-8">
+            {/* What today's job is, and where the whole week sits — first thing a newcomer sees */}
+            <div className="mb-6">
+              <TodayFocus />
+            </div>
+
             {/* Is the automation working: coordinator, subagents, pipeline run, activity */}
             {statusMap && (
               <div className="mb-6">
