@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useWeek } from '../context/WeekContext';
 import WeekSelector from '../components/WeekSelector';
+import SundayChecklist from '../components/SundayChecklist';
 
 interface Row {
   id:                    string;
@@ -183,6 +184,7 @@ const STATUS_LABEL: Record<string, string> = {
 
 export default function ReviewPage() {
   const { week }             = useWeek();
+  const [sundayOpen, setSundayOpen] = useState(false);
   const [rows, setRows]     = useState<Row[]>([]);
   const [edits, setEdits]   = useState<Record<string, string>>({});
   const [mediaEdits, setMediaEdits] = useState<Record<string, string>>({});
@@ -356,6 +358,14 @@ export default function ReviewPage() {
         <div className="flex items-center gap-3">
           <WeekSelector />
           <button
+            onClick={() => setSundayOpen(o => !o)}
+            className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-colors ${
+              sundayOpen ? 'bg-zinc-700 text-white' : 'bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700'
+            }`}
+          >
+            {sundayOpen ? '▲ Sunday checklist' : '▼ Sunday checklist'}
+          </button>
+          <button
             onClick={() => push(undefined, 'push-all')}
             disabled={busy !== null}
             className="rounded-lg bg-blue-600 hover:bg-blue-500 text-white px-4 py-1.5 text-sm font-medium disabled:opacity-50"
@@ -366,6 +376,7 @@ export default function ReviewPage() {
       </div>
 
       <div className="max-w-4xl mx-auto px-6 py-8 space-y-8">
+        {sundayOpen && <SundayChecklist />}
         {error && (
           <div className="bg-red-900/30 border border-red-700 rounded-lg p-4 text-red-300 text-sm">{error}</div>
         )}

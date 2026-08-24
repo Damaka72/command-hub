@@ -2,17 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import DailyBriefing from "./components/DailyBriefing";
-import AgentCommandCentre from "./components/AgentCommandCentre";
+import AutomationStatus from "./components/AutomationStatus";
 import SidebarTasks from "./components/SidebarTasks";
-import DiPipeline from "./components/DiPipeline";
-import ResearchPanel from "./components/ResearchPanel";
-import SundayView from "./components/SundayView";
-import PipelineRunner from "./components/PipelineRunner";
-import ActivityFeed from "./components/ActivityFeed";
-import OldOakTownAdmin from "./components/OldOakTownAdmin";
-import HeroDial from "./components/HeroDial";
-import StatRail from "./components/StatRail";
-import QuotePanel from "./components/QuotePanel";
 import CollapsibleSitePanel from "./components/CollapsibleSitePanel";
 import { useWeek } from "./context/WeekContext";
 import type { SiteDetail, StatusResponse, DraftItem, WeekReview } from "./api/status/route";
@@ -258,7 +249,6 @@ export default function Home() {
   const { week } = useWeek();
   const [statusMap,   setStatusMap]   = useState<StatusResponse | null>(null);
   const [homeData,    setHomeData]    = useState<HomeResponse | null>(null);
-  const [showSunday,  setShowSunday]  = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [refreshing,  setRefreshing]  = useState(false);
   const [, setTick]   = useState(0);
@@ -345,16 +335,6 @@ export default function Home() {
               </p>
             </div>
             <div className="flex items-center gap-2.5">
-              <button
-                onClick={() => setShowSunday(s => !s)}
-                className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all"
-                style={showSunday
-                  ? { background: 'var(--hub-accent)', color: '#fff', border: '1px solid var(--hub-accent)' }
-                  : { background: 'var(--hub-surface-2)', color: 'var(--hub-text-2)', border: '1px solid var(--hub-border)' }
-                }
-              >
-                Sunday
-              </button>
               <a
                 href="/review"
                 className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:brightness-125"
@@ -459,67 +439,46 @@ export default function Home() {
         {/* Right main area */}
         <div className="flex flex-1 min-w-0 flex-col overflow-y-auto">
 
-          {showSunday ? (
-            <SundayView />
-          ) : (
-            <>
-              {statusMap && Object.keys(statusMap.sites).length > 0 && (
-                <PortfolioBar statusMap={statusMap.sites} reviewQueue={statusMap.reviewQueue} weekReview={statusMap.weekReview} />
-              )}
+          {statusMap && Object.keys(statusMap.sites).length > 0 && (
+            <PortfolioBar statusMap={statusMap.sites} reviewQueue={statusMap.reviewQueue} weekReview={statusMap.weekReview} />
+          )}
 
-              {statusMap && (
-                <AgentCommandCentre
+          <main className="flex-1 px-6 py-8">
+            {/* Is the automation working: coordinator, subagents, pipeline run, activity */}
+            {statusMap && (
+              <div className="mb-6">
+                <AutomationStatus
                   portfolioCoordinator={statusMap.portfolioCoordinator}
                   sites={statusMap.sites}
                 />
-              )}
+              </div>
+            )}
 
-              <main className="flex-1 px-6 py-8">
-                {/* Research: ground next week's content before running the pipeline */}
-                <div className="mb-6">
-                  <ResearchPanel />
-                </div>
+            {/* ── Collapsible site panels (UX spec §3.4) ── */}
+            <div className="flex flex-col gap-3">
+              {sites.map((site) => (
+                <CollapsibleSitePanel
+                  key={site.id}
+                  site={site}
+                  status={statusMap?.sites[site.id]}
+                  homeStat={homeData?.sites[site.id]}
+                  reviewQueue={statusMap?.reviewQueue ?? []}
+                  week={week}
+                  open={openPanels.has(site.id)}
+                  onToggle={() => togglePanel(site.id)}
+                />
+              ))}
+            </div>
+          </main>
 
-                {/* Live control + history: what's happening now / what has happened */}
-                <div className="mb-6 grid gap-5 lg:grid-cols-2">
-                  <PipelineRunner />
-                  <ActivityFeed />
-                </div>
-
-                {/* Old Oak Town admin: pending approvals + business promotion */}
-                <div className="mb-6">
-                  <OldOakTownAdmin />
-                </div>
-
-                {/* ── Collapsible site panels (UX spec §3.4) ── */}
-                <div className="flex flex-col gap-3">
-                  {sites.map((site) => (
-                    <CollapsibleSitePanel
-                      key={site.id}
-                      site={site}
-                      status={statusMap?.sites[site.id]}
-                      homeStat={homeData?.sites[site.id]}
-                      reviewQueue={statusMap?.reviewQueue ?? []}
-                      week={week}
-                      open={openPanels.has(site.id)}
-                      onToggle={() => togglePanel(site.id)}
-                    />
-                  ))}
-                </div>
-
-                <DiPipeline />
-              </main>
-
-              <footer
-                className="shrink-0 py-5"
-                style={{ borderTop: '1px solid var(--hub-border)', background: 'var(--hub-surface)' }}
-              >
-                <p className="text-center text-xs" style={{ color: 'var(--hub-text-3)' }}>
-                  Tasks saved in repo · Live · auto-refreshes every 30s
-                </p>
-              </footer>
-            </>
-          )}
+          <footer
+            className="shrink-0 py-5"
+            style={{ borderTop: '1px solid var(--hub-border)', background: 'var(--hub-surface)' }}
+          >
+            <p className="text-center text-xs" style={{ color: 'var(--hub-text-3)' }}>
+              Tasks saved in repo · Live · auto-refreshes every 30s
+            </p>
+          </footer>
 
         </div>
       </div>

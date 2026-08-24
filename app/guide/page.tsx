@@ -73,7 +73,8 @@ const RHYTHM: {
       <>
         On <Code>/review</Code>, edit, approve, or reject each draft. Approved <em>text</em> posts push
         straight to Blotato at the correct per-platform London times. Media posts (Instagram / TikTok /
-        Pinterest / YouTube) are handled from the Sunday view&rsquo;s Cowork brief instead.
+        Pinterest / YouTube) are handled from the Sunday checklist&rsquo;s Cowork brief instead —
+        expand it from the <Code>▼ Sunday checklist</Code> button at the top of <Code>/review</Code>.
       </>
     ),
   },
@@ -129,9 +130,9 @@ const RHYTHM: {
 // ── Pages reference ───────────────────────────────────────────────────────────
 
 const PAGES: { path: string; name: string; what: string }[] = [
-  { path: "/",            name: "Dashboard",      what: "Monitoring + control: site status, deploys, the pipeline runner, tasks, activity, and the Portfolio bar. Sunday toggle opens the checklist and Cowork brief." },
-  { path: "/plan",        name: "Weekly Plan",    what: "Set each pipeline site's pillar, theme, and notes for a week. Saving here is what the pipeline reads." },
-  { path: "/review",      name: "Review Queue",   what: "Edit / approve / reject this week's drafts, then push approved text posts to Blotato." },
+  { path: "/",            name: "Dashboard",      what: "Monitoring + control: site status, deploys, the automation panel (coordinator, pipeline runner, activity), tasks, and the Portfolio bar. Each site's own panel holds its research, admin, and site-specific tools." },
+  { path: "/plan",        name: "Weekly Plan",    what: "Set each pipeline site's pillar, theme, and notes for a week, and generate/save each site's Saturday research brief. Saving here is what the pipeline reads." },
+  { path: "/review",      name: "Review Queue",   what: "Edit / approve / reject this week's drafts, then push approved text posts to Blotato. The Sunday checklist (YouTube rotation, coordinator links, Cowork brief) collapses in here too." },
   { path: "/newsletters", name: "Newsletters",    what: "Draft the three publications from repurposed content and finalise them for a Beehiiv paste-send." },
   { path: "/friday",      name: "Friday Report",  what: "End-of-week retrospective: planned vs published, newsletter status, Gumroad, subscriber log." },
   { path: "/library",     name: "Content Library",what: "Browse and repurpose all past content across every week." },
@@ -335,9 +336,10 @@ export default function GuidePage() {
             <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 mb-1">Media posts — via the Sunday Cowork brief</p>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
               Instagram, TikTok, Pinterest, and YouTube need media attached, so they aren&rsquo;t pushed
-              from Review. The Sunday view holds a ready-made Cowork brief that posts those to Blotato
-              with their own scheduling rules. Rows that need media are flagged in Review as
-              &ldquo;Needs media&rdquo; and held back from the text push.
+              from Review directly. The Sunday checklist (expand it from <Code>/review</Code>) holds a
+              ready-made Cowork brief that posts those to Blotato with their own scheduling rules. Rows
+              that need media are flagged in Review as &ldquo;Needs media&rdquo; and held back from the
+              text push.
             </p>
           </div>
         </Section>
