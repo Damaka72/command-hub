@@ -1,5 +1,13 @@
 "use client";
 
+// ── Sunday checklist ─────────────────────────────────────────────────────
+// Lives inside /review (the real Sunday work surface) as a collapsible
+// section, rather than as a second "what do I do on Sunday" page that
+// replaced the whole Home view. YouTube rotation, the weekly checklist,
+// coordinator quick links, and the Cowork media-post brief — everything
+// SundayView used to show, minus the "Open Review queue" link that made
+// sense standalone but not from inside /review itself.
+
 import { useState, useEffect } from "react";
 
 const COORDINATOR_LINKS = [
@@ -80,8 +88,8 @@ function formatWeekRange(monday: Date): string {
   return `${start} – ${end}`;
 }
 
-export default function SundayView() {
-  const today      = new Date();
+export default function SundayChecklist() {
+  const today       = new Date();
   const currentWeek = getISOWeek(today);
   const storageKey  = `sunday-checklist-${currentWeek}`;
 
@@ -125,87 +133,40 @@ export default function SundayView() {
   const completedCount = checked.filter(Boolean).length;
   const progressPct    = Math.round((completedCount / CHECKLIST_ITEMS.length) * 100);
 
-  const dateLabel = today.toLocaleDateString("en-GB", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-
   return (
-    <div className="flex-1 overflow-y-auto px-6 py-8">
-      <div className="mx-auto flex max-w-3xl flex-col gap-8">
-
-        {/* Header */}
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-            Sunday Briefing
-          </h2>
-          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{dateLabel}</p>
-        </div>
+    <div className="rounded-2xl border border-zinc-700 bg-gray-900 px-6 py-6">
+      <div className="flex flex-col gap-8">
 
         {/* ── Section 1 — YouTube rotation ── */}
         <section className="flex flex-col gap-3">
-          <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
-            YouTube Rotation
-          </h3>
-          <div className="overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-700">
+          <h3 className="text-sm font-semibold text-zinc-300">YouTube Rotation</h3>
+          <div className="overflow-hidden rounded-xl border border-zinc-700">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800/50">
-                  <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-                    Week
-                  </th>
-                  <th className="px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-                    AIVVP YouTube
-                  </th>
-                  <th className="px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-                    MYCP YouTube
-                  </th>
-                  <th className="px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-                    TCC YouTube
-                  </th>
+                <tr className="border-b border-zinc-700 bg-zinc-800/50">
+                  <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-zinc-400">Week</th>
+                  <th className="px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-zinc-400">AIVVP YouTube</th>
+                  <th className="px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-zinc-400">MYCP YouTube</th>
+                  <th className="px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-zinc-400">TCC YouTube</th>
                 </tr>
               </thead>
               <tbody>
                 {weeks.map((w) => (
                   <tr
                     key={w.weekNum}
-                    className={`border-b border-zinc-100 last:border-0 dark:border-zinc-800 ${
-                      w.isCurrent
-                        ? "bg-zinc-100 dark:bg-zinc-800"
-                        : "bg-white dark:bg-zinc-900"
-                    }`}
+                    className={`border-b border-zinc-800 last:border-0 ${w.isCurrent ? "bg-zinc-800" : "bg-zinc-900"}`}
                   >
-                    <td className="px-4 py-2.5 text-xs text-zinc-700 dark:text-zinc-300">
+                    <td className="px-4 py-2.5 text-xs text-zinc-300">
                       {w.label}
                       {w.isCurrent && (
-                        <span className="ml-2 rounded-full bg-zinc-800 px-1.5 py-0.5 text-[12px] font-medium text-white dark:bg-zinc-200 dark:text-zinc-900">
+                        <span className="ml-2 rounded-full bg-zinc-200 px-1.5 py-0.5 text-[12px] font-medium text-zinc-900">
                           this week
                         </span>
                       )}
                     </td>
-                    <td className={`px-4 py-2.5 text-center text-xs font-semibold ${
-                      w.aivvp === "Yes"
-                        ? "text-emerald-600 dark:text-emerald-400"
-                        : "text-zinc-400 dark:text-zinc-500"
-                    }`}>
-                      {w.aivvp}
-                    </td>
-                    <td className={`px-4 py-2.5 text-center text-xs font-semibold ${
-                      w.mycp === "Yes"
-                        ? "text-emerald-600 dark:text-emerald-400"
-                        : "text-zinc-400 dark:text-zinc-500"
-                    }`}>
-                      {w.mycp}
-                    </td>
-                    <td className={`px-4 py-2.5 text-center text-xs font-semibold ${
-                      w.tcc === "Yes"
-                        ? "text-emerald-600 dark:text-emerald-400"
-                        : "text-zinc-400 dark:text-zinc-500"
-                    }`}>
-                      {w.tcc}
-                    </td>
+                    <td className={`px-4 py-2.5 text-center text-xs font-semibold ${w.aivvp === "Yes" ? "text-emerald-400" : "text-zinc-500"}`}>{w.aivvp}</td>
+                    <td className={`px-4 py-2.5 text-center text-xs font-semibold ${w.mycp === "Yes" ? "text-emerald-400" : "text-zinc-500"}`}>{w.mycp}</td>
+                    <td className={`px-4 py-2.5 text-center text-xs font-semibold ${w.tcc === "Yes" ? "text-emerald-400" : "text-zinc-500"}`}>{w.tcc}</td>
                   </tr>
                 ))}
               </tbody>
@@ -216,48 +177,32 @@ export default function SundayView() {
         {/* ── Section 2 — Sunday checklist ── */}
         <section className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
-              Sunday Checklist
-            </h3>
-            <span className="text-xs text-zinc-500 dark:text-zinc-400">
-              {completedCount} of {CHECKLIST_ITEMS.length} complete
-            </span>
+            <h3 className="text-sm font-semibold text-zinc-300">Sunday Checklist</h3>
+            <span className="text-xs text-zinc-400">{completedCount} of {CHECKLIST_ITEMS.length} complete</span>
           </div>
 
-          {/* Progress bar */}
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700">
-            <div
-              className="h-full rounded-full bg-emerald-500 transition-all duration-300"
-              style={{ width: `${progressPct}%` }}
-            />
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-700">
+            <div className="h-full rounded-full bg-emerald-500 transition-all duration-300" style={{ width: `${progressPct}%` }} />
           </div>
 
-          {/* Items */}
           <div className="flex flex-col gap-0.5">
             {CHECKLIST_ITEMS.map((item, i) => (
-              <div
-                key={i}
-                className="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-zinc-50 dark:hover:bg-zinc-800/60"
-              >
+              <div key={i} className="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-zinc-800/60">
                 <label className="flex flex-1 cursor-pointer items-center gap-3">
                   <input
                     type="checkbox"
                     checked={checked[i] ?? false}
                     onChange={() => toggleCheck(i)}
-                    className="h-4 w-4 flex-shrink-0 rounded border-zinc-300 accent-emerald-500 dark:border-zinc-600"
+                    className="h-4 w-4 flex-shrink-0 rounded border-zinc-600 accent-emerald-500"
                   />
-                  <span className={`text-sm ${
-                    checked[i]
-                      ? "text-zinc-400 line-through dark:text-zinc-500"
-                      : "text-zinc-700 dark:text-zinc-300"
-                  }`}>
+                  <span className={`text-sm ${checked[i] ? "text-zinc-500 line-through" : "text-zinc-300"}`}>
                     {item}
                   </span>
                 </label>
                 {NEWSLETTER_LINKS[i] && (
                   <a
                     href={`/newsletters?pub=${NEWSLETTER_LINKS[i]}`}
-                    className="flex-shrink-0 rounded-lg border border-zinc-300 bg-white px-2.5 py-1 text-xs font-medium text-zinc-700 transition-colors hover:border-zinc-500 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-400 dark:hover:bg-zinc-800"
+                    className="flex-shrink-0 rounded-lg border border-zinc-600 bg-zinc-900 px-2.5 py-1 text-xs font-medium text-zinc-300 transition-colors hover:border-zinc-400 hover:bg-zinc-800"
                   >
                     Open →
                   </a>
@@ -265,20 +210,11 @@ export default function SundayView() {
               </div>
             ))}
           </div>
-
-          <a
-            href="/review"
-            className="self-start rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-500 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-400 dark:hover:bg-zinc-800"
-          >
-            Open Review queue →
-          </a>
         </section>
 
         {/* ── Section 3 — Quick links ── */}
         <section className="flex flex-col gap-3">
-          <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
-            Open Coordinators
-          </h3>
+          <h3 className="text-sm font-semibold text-zinc-300">Open Coordinators</h3>
           <div className="flex flex-wrap gap-2">
             {COORDINATOR_LINKS.map(({ key, label, url }) => (
               <a
@@ -286,7 +222,7 @@ export default function SundayView() {
                 href={url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-500 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-400 dark:hover:bg-zinc-800"
+                className="rounded-lg border border-zinc-600 bg-zinc-900 px-4 py-2 text-sm font-medium text-zinc-300 transition-colors hover:border-zinc-400 hover:bg-zinc-800"
               >
                 Open {label} Coordinator →
               </a>
@@ -298,16 +234,16 @@ export default function SundayView() {
         <section>
           <button
             onClick={() => setBriefOpen(o => !o)}
-            className={`flex w-full items-center justify-between border border-zinc-200 bg-zinc-50 px-4 py-3 text-left text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-zinc-400 dark:hover:bg-zinc-800 ${
+            className={`flex w-full items-center justify-between border border-zinc-700 bg-zinc-800/50 px-4 py-3 text-left text-sm font-medium text-zinc-400 transition-colors hover:bg-zinc-800 ${
               briefOpen ? "rounded-t-xl" : "rounded-xl"
             }`}
           >
             <span>Cowork brief — media posts only (Instagram / TikTok / Pinterest / YouTube)</span>
-            <span className="text-xs text-zinc-400">{briefOpen ? "▲" : "▼"}</span>
+            <span className="text-xs text-zinc-500">{briefOpen ? "▲" : "▼"}</span>
           </button>
           {briefOpen && (
-            <div className="rounded-b-xl border border-t-0 border-zinc-200 bg-white px-5 py-4 dark:border-zinc-700 dark:bg-zinc-900">
-              <pre className="whitespace-pre-wrap font-sans text-xs leading-relaxed text-zinc-600 dark:text-zinc-400">
+            <div className="rounded-b-xl border border-t-0 border-zinc-700 bg-zinc-900 px-5 py-4">
+              <pre className="whitespace-pre-wrap font-sans text-xs leading-relaxed text-zinc-400">
                 {COWORK_BRIEF}
               </pre>
             </div>

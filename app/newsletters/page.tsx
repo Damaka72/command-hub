@@ -74,7 +74,7 @@ export default function NewslettersPage() {
   const [busy, setBusy]         = useState<string | null>(null);
   const [copied, setCopied]     = useState<string | null>(null);
 
-  // Deep link: /newsletters?pub=the-pathway preselects a tab (used by SundayView).
+  // Deep link: /newsletters?pub=the-pathway preselects a tab (used by /review's Sunday checklist).
   useEffect(() => {
     const pub = new URLSearchParams(window.location.search).get('pub');
     if (pub === 'the-prompt-ly' || pub === 'the-pathway' || pub === 'the-oak') setActive(pub);
