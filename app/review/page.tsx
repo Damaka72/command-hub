@@ -563,7 +563,7 @@ export default function ReviewPage() {
                           Media URLs {MEDIA_PLATFORMS.has(row.platform)
                             ? <span className="text-amber-400">· required for {row.platform}</span>
                             : <span className="text-gray-500">· optional image/video</span>}
-                          <span className="text-gray-500"> · generate with Higgsfield, Blotato, or HyperFrames</span>
+                          <span className="text-gray-500"> · generate with Media Gen, Higgsfield, Blotato, or HyperFrames</span>
                         </label>
                         {MEDIA_PLATFORMS.has(row.platform) && !(row.media_urls?.length) && (
                           row.creation_requested_at ? (
