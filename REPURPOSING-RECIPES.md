@@ -66,11 +66,15 @@ specific trim. Do not restate the whole script; the source is one hop away via
 
 1. **Source is a Higgsfield master** → `reframe` to 9:16. Cheapest, fastest,
    no re-render.
-2. **Source is a HyperFrames master** → re-render the same composition at
+2. **Source is a Media Gen master** (Fal.ai, `~/.claude/skills/media-gen`) →
+   re-run `generate.py video` from a same-scene still at 9:16, since Media Gen
+   has no reframe step of its own — don't assume Higgsfield's `reframe` will
+   accept a non-Higgsfield file.
+3. **Source is a HyperFrames master** → re-render the same composition at
    `data-width="1080" data-height="1920"` (it's HTML, not a video file to
    reframe — see `hyperframes-core`). This is the `mycp-skool-explainer` case:
    the Aug 2026 build rendered landscape for YouTube and still owes this cut.
-3. **Source is a Blotato Visuals master** → regenerate with a 9:16-sized
+4. **Source is a Blotato Visuals master** → regenerate with a 9:16-sized
    template rather than reframing (Blotato Visuals doesn't expose a reframe
    step); pick the closest matching template to the original.
 
@@ -82,7 +86,7 @@ POST /api/library/asset
   "id": "<new row id>",
   "driveFileId": "<Drive file id of the finished 9:16 cut>",
   "assetType": "video",
-  "creationTool": "hyperframes" | "higgsfield" | "blotato_visuals",
+  "creationTool": "hyperframes" | "higgsfield" | "media_gen" | "blotato_visuals",
   "assetDurationS": 27,
   "aspectRatio": "9:16"
 }
