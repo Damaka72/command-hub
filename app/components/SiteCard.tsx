@@ -4,6 +4,7 @@ import { useState } from "react";
 import TaskList from "./TaskList";
 import RevenueFlow from "./RevenueFlow";
 import SocialFeed from "./SocialFeed";
+import OldOakTownAdmin from "./OldOakTownAdmin";
 import type { SiteDetail, DraftItem } from "../api/status/route";
 import { getSitePillars } from "@/agents/site-configs";
 
@@ -383,6 +384,9 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
             Visit →
           </a>
         </div>
+
+        {/* ── Old Oak Town admin: pending approvals + business promotion (OOT only) ── */}
+        {site.id === "oldoaktown" && <OldOakTownAdmin />}
 
         {/* ── Task list ── */}
         <TaskList siteId={site.id} />
