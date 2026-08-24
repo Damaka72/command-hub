@@ -5,6 +5,7 @@ import TaskList from "./TaskList";
 import RevenueFlow from "./RevenueFlow";
 import SocialFeed from "./SocialFeed";
 import OldOakTownAdmin from "./OldOakTownAdmin";
+import DiPipeline from "./DiPipeline";
 import type { SiteDetail, DraftItem } from "../api/status/route";
 import { getSitePillars } from "@/agents/site-configs";
 
@@ -390,6 +391,9 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
 
         {/* ── Task list ── */}
         <TaskList siteId={site.id} />
+
+        {/* ── Didi's consulting deal pipeline (didianolue.co.uk only — not content operations) ── */}
+        {site.id === "didianolue" && <DiPipeline />}
       </div>
 
       {/* ── Technical section ── */}

@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from "react";
 import DailyBriefing from "./components/DailyBriefing";
 import AutomationStatus from "./components/AutomationStatus";
 import SidebarTasks from "./components/SidebarTasks";
-import DiPipeline from "./components/DiPipeline";
 import SundayView from "./components/SundayView";
 import CollapsibleSitePanel from "./components/CollapsibleSitePanel";
 import { useWeek } from "./context/WeekContext";
@@ -486,8 +485,6 @@ export default function Home() {
                     />
                   ))}
                 </div>
-
-                <DiPipeline />
               </main>
 
               <footer
