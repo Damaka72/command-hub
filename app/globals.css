@@ -2,16 +2,17 @@
 
 :root {
   /* ── UX spec §2.3 — surfaces, type, semantics ──
-     Palette lifted from GitHub/Linear dark-theme conventions (near-black,
-     not pure-black canvas; muted text kept at or above 4.5:1 contrast). */
-  --bg:      #0d1117;
-  --panel:   #161b22;
-  --panel-2: #1c2129;
-  --line:    rgba(255, 255, 255, .10);
-  --line-2:  rgba(255, 255, 255, .18);
-  --fg:      #f0f4fa;
-  --fg-2:    #adb8cc;
-  --fg-3:    #838fa6;
+     Warm-neutral dark canvas (near Anthropic's own #141413/#e8e6dc brand
+     tones) rather than the blue-black of typical dev-tool dark themes —
+     muted text kept at or above 4.5:1 contrast. */
+  --bg:      #141311;
+  --panel:   #1c1a17;
+  --panel-2: #242119;
+  --line:    rgba(232, 228, 216, .09);
+  --line-2:  rgba(232, 228, 216, .16);
+  --fg:      #f2efe6;
+  --fg-2:    #b0aea5;
+  --fg-3:    #8a8779;
   --mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 
   /* Semantic colours (§2.2) — status only, never a site accent */
@@ -23,16 +24,21 @@
   --radius-card:    12px;
 
   /* Command Hub palette — mapped onto the spec surfaces so every existing
-     component (which reads these) picks up the new design language. */
+     component (which reads these) picks up the new design language.
+     One primary accent (Anthropic's terracotta) for all interactive/brand
+     chrome, one secondary tint (Anthropic's dusty blue) reserved for
+     "happening right now" live indicators — not a different hue per page. */
   --hub-bg:         var(--bg);
   --hub-surface:    var(--panel);
   --hub-surface-2:  var(--panel-2);
-  --hub-surface-3:  #232a35;
+  --hub-surface-3:  #2c2820;
   --hub-border:     var(--line);
   --hub-border-hi:  var(--line-2);
-  --hub-accent:     #6366f1;
-  --hub-accent-dim: rgba(99, 102, 241, 0.18);
-  --hub-cyan:       #22d3ee;
+  --hub-accent:      #d97757;
+  --hub-accent-dim:  rgba(217, 119, 87, 0.18);
+  --hub-accent-text: #f0a984;
+  --hub-accent-ink:  #171512;
+  --hub-cyan:       #6a9bcc;
   --hub-gold:       #f59e0b;
   --hub-text-1:     var(--fg);
   --hub-text-2:     var(--fg-2);
@@ -74,22 +80,15 @@ body {
 /* Thin accent scrollbar */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.25); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.5); }
+::-webkit-scrollbar-thumb { background: rgba(217, 119, 87, 0.25); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(217, 119, 87, 0.5); }
 
-/* Glow utilities */
-@utility glow-indigo {
-  box-shadow: 0 0 24px rgba(99, 102, 241, 0.18), 0 1px 4px rgba(0,0,0,0.5);
-}
-
-@utility glow-emerald {
-  box-shadow: 0 0 10px rgba(16, 185, 129, 0.35);
-}
-
-/* Live pulse — for running agents */
+/* Live pulse — for running agents, tinted to the "live" secondary blue
+   (var(--hub-cyan)) rather than the primary accent, matching every element
+   that actually uses this animation (all "happening right now" indicators). */
 @keyframes hub-pulse {
-  0%, 100% { opacity: 1; box-shadow: 0 0 6px rgba(99,102,241,0.6); }
-  50%       { opacity: 0.65; box-shadow: 0 0 14px rgba(99,102,241,0.9); }
+  0%, 100% { opacity: 1; box-shadow: 0 0 6px rgba(106,155,204,0.6); }
+  50%       { opacity: 0.65; box-shadow: 0 0 14px rgba(106,155,204,0.9); }
 }
 @utility animate-hub-pulse {
   animation: hub-pulse 2s ease-in-out infinite;
@@ -103,15 +102,16 @@ body {
 }
 
 /* The two very-low-opacity radial washes — the only gradient permitted
-   outside the hero dial (UX spec §2.3). Sits behind everything at z-index 0. */
+   outside the hero dial (UX spec §2.3). Sits behind everything at z-index 0.
+   Accent + live-blue, matching the app's two-hue system. */
 @utility hub-radial-wash {
   position: fixed;
   inset: 0;
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 900px 600px at 0% 0%, rgba(59,130,246,0.10), transparent 60%),
-    radial-gradient(ellipse 900px 600px at 100% 0%, rgba(168,85,247,0.10), transparent 60%);
+    radial-gradient(ellipse 900px 600px at 0% 0%, rgba(217,119,87,0.08), transparent 60%),
+    radial-gradient(ellipse 900px 600px at 100% 0%, rgba(106,155,204,0.08), transparent 60%);
 }
 
 /* Collapsible panels animate max-height to an auto-sized value via grid

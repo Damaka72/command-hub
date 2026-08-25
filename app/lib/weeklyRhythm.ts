@@ -37,9 +37,9 @@ export const WEEKLY_RHYTHM: RhythmDay[] = [
     title: "Research this week, then set the plan",
     description: "Generate each site's research brief and pick a content pillar and theme for the week on Weekly Plan — that's what the pipeline reads when you run it.",
     primary: { label: 'Open Weekly Plan', href: '/plan' },
-    accent: 'var(--hub-cyan)',
-    accentBg: 'rgba(34,211,238,0.1)',
-    accentBorder: 'rgba(34,211,238,0.3)',
+    accent: 'var(--hub-accent-text)',
+    accentBg: 'var(--hub-accent-dim)',
+    accentBorder: 'var(--hub-accent)',
   },
   {
     dayOfWeek: 0,
@@ -52,9 +52,9 @@ export const WEEKLY_RHYTHM: RhythmDay[] = [
     description: "Edit and approve this week's drafts in the Review Queue, then push. Use the Sunday checklist in there for media posts, and finish off the newsletters.",
     primary: { label: 'Open Review Queue', href: '/review' },
     secondary: { label: 'Newsletters', href: '/newsletters' },
-    accent: '#a5b4fc',
+    accent: 'var(--hub-accent-text)',
     accentBg: 'var(--hub-accent-dim)',
-    accentBorder: 'var(--hub-border-hi)',
+    accentBorder: 'var(--hub-accent)',
   },
   {
     dayOfWeek: 1,
@@ -118,9 +118,9 @@ export const WEEKLY_RHYTHM: RhythmDay[] = [
     title: "Today's post goes out — then review how the week went",
     description: 'Once the last of this week’s content publishes, check planned vs published, revenue, and subscriber counts before Saturday’s research starts again.',
     primary: { label: 'Open Friday Report', href: '/friday' },
-    accent: 'var(--hub-gold)',
-    accentBg: 'rgba(245,158,11,0.1)',
-    accentBorder: 'rgba(245,158,11,0.3)',
+    accent: 'var(--hub-accent-text)',
+    accentBg: 'var(--hub-accent-dim)',
+    accentBorder: 'var(--hub-accent)',
   },
 ];
 

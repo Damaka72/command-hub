@@ -393,7 +393,7 @@ export default function DailyBriefing({ statusMap }: { statusMap: StatusResponse
                   onClick={handleSave}
                   disabled={saving}
                   className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:brightness-125 disabled:opacity-50"
-                  style={{ background: 'var(--hub-accent)', color: '#fff' }}
+                  style={{ background: 'var(--hub-accent)', color: 'var(--hub-accent-ink)' }}
                 >
                   {saving ? "Saving…" : "Save all"}
                 </button>
@@ -434,7 +434,7 @@ export default function DailyBriefing({ statusMap }: { statusMap: StatusResponse
                     </span>
                     <span
                       className="ml-2 flex-shrink-0 rounded px-1.5 py-0.5 text-[12px] font-medium"
-                      style={{ background: 'var(--hub-accent-dim)', color: '#a5b4fc' }}
+                      style={{ background: 'var(--hub-accent-dim)', color: 'var(--hub-accent-text)' }}
                     >
                       {item.tag}
                     </span>

@@ -59,7 +59,7 @@ function conclusionLabel(c: RunConclusion): { text: string; color: string } {
 function StepRow({ step }: { step: WorkflowStep }) {
   let icon = '○';
   let color = 'var(--hub-text-3)';
-  if (step.status === 'in_progress') { icon = '◐'; color = '#22d3ee'; }
+  if (step.status === 'in_progress') { icon = '◐'; color = 'var(--hub-cyan)'; }
   else if (step.status === 'completed') {
     if (step.conclusion === 'success') { icon = '✓'; color = '#34d399'; }
     else if (step.conclusion === 'skipped') { icon = '–'; color = 'var(--hub-text-3)'; }
@@ -77,7 +77,7 @@ const ACTIVITY_LEVEL_DOT: Record<ActivityLevel, string> = {
   success: '#34d399',
   warning: '#fbbf24',
   error:   '#f87171',
-  running: '#22d3ee',
+  running: '#6a9bcc',
   info:    '#94a3b8',
 };
 
@@ -274,7 +274,7 @@ function PipelineControl({ pipeline }: { pipeline: ReturnType<typeof usePipeline
       ) : activeRun ? (
         <span
           className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium"
-          style={{ background: 'rgba(34,211,238,0.12)', color: 'var(--hub-cyan)', border: '1px solid rgba(34,211,238,0.3)' }}
+          style={{ background: 'rgba(106,155,204,0.12)', color: 'var(--hub-cyan)', border: '1px solid rgba(106,155,204,0.3)' }}
         >
           <span className="h-2 w-2 animate-hub-pulse rounded-full" style={{ background: 'var(--hub-cyan)' }} />
           Running…
@@ -286,7 +286,7 @@ function PipelineControl({ pipeline }: { pipeline: ReturnType<typeof usePipeline
             onClick={trigger}
             disabled={triggering}
             className="rounded-lg px-3 py-1.5 text-xs font-semibold transition-all hover:brightness-110 disabled:opacity-50"
-            style={{ background: 'var(--hub-accent)', color: '#fff', border: '1px solid var(--hub-accent)' }}
+            style={{ background: 'var(--hub-accent)', color: 'var(--hub-accent-ink)', border: '1px solid var(--hub-accent)' }}
           >
             {triggering ? 'Starting…' : 'Yes, run it'}
           </button>
@@ -302,7 +302,7 @@ function PipelineControl({ pipeline }: { pipeline: ReturnType<typeof usePipeline
         <button
           onClick={() => { setConfirming(true); setMessage(null); }}
           className="rounded-lg px-3 py-1.5 text-xs font-semibold transition-all hover:brightness-110"
-          style={{ background: 'var(--hub-accent-dim)', color: '#a5b4fc', border: '1px solid var(--hub-border-hi)' }}
+          style={{ background: 'var(--hub-accent-dim)', color: 'var(--hub-accent-text)', border: '1px solid var(--hub-border-hi)' }}
         >
           ▶ Run pipeline
         </button>

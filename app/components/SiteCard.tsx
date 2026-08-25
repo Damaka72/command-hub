@@ -380,7 +380,7 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
             target="_blank"
             rel="noopener noreferrer"
             className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:brightness-125"
-            style={{ background: 'var(--hub-accent-dim)', color: '#a5b4fc', border: '1px solid var(--hub-border-hi)' }}
+            style={{ background: 'var(--hub-accent-dim)', color: 'var(--hub-accent-text)', border: '1px solid var(--hub-border-hi)' }}
           >
             Visit →
           </a>
@@ -462,7 +462,7 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
                 onClick={() => setActiveTab(i)}
                 className="whitespace-nowrap px-3 py-2.5 text-xs font-medium transition-all"
                 style={activeTab === i
-                  ? { borderBottom: '2px solid var(--hub-accent)', color: '#a5b4fc', marginBottom: '-1px' }
+                  ? { borderBottom: '2px solid var(--hub-accent)', color: 'var(--hub-accent-text)', marginBottom: '-1px' }
                   : { color: 'var(--hub-text-3)' }
                 }
               >

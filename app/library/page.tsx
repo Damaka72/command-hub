@@ -109,7 +109,7 @@ function ViewSegment({ view, onChange }: { view: View; onChange: (v: View) => vo
           onClick={() => onChange(o.key)}
           className="rounded-md px-3 py-1.5 text-xs font-medium transition-all"
           style={view === o.key
-            ? { background: 'var(--hub-accent)', color: '#fff' }
+            ? { background: 'var(--hub-accent)', color: 'var(--hub-accent-ink)' }
             : { color: 'var(--fg-2)' }
           }
         >

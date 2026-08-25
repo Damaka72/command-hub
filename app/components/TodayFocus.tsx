@@ -86,7 +86,7 @@ export default function TodayFocus() {
             <a
               href={today.primary.href}
               className="rounded-lg px-4 py-2 text-sm font-semibold transition-all hover:brightness-110"
-              style={{ background: today.accent, color: '#0a1020' }}
+              style={{ background: today.accent, color: 'var(--hub-accent-ink)' }}
             >
               {today.primary.label} →
             </a>
