@@ -16,7 +16,7 @@
 // rhythm, research happens before the theme is set.
 
 import { NextResponse } from 'next/server';
-import Anthropic from '@anthropic-ai/sdk';
+import Anthropic, { APIError } from '@anthropic-ai/sdk';
 import { getSupabase } from '@/app/lib/supabase';
 import { SITE_CONFIGS, getSitePillars } from '@/agents/site-configs';
 
@@ -24,6 +24,101 @@ export const dynamic = 'force-dynamic';
 
 const MODEL = 'claude-sonnet-4-6';
 const MAX_SEARCHES = 5;
+
+// ── Research fallbacks ───────────────────────────────────────────────────────
+// Used only when the Anthropic call fails specifically because the API key's
+// credit balance is exhausted. Tried in order — each is a completely separate
+// credit pool from ANTHROPIC_API_KEY, so research keeps working when that
+// balance hits zero:
+//   1. Blotato's own Perplexity-query source resolution (uses Blotato's
+//      credits). See https://help.blotato.com/api/create-source.
+//   2. A direct Perplexity API call (uses a Perplexity account's own credits,
+//      via PERPLEXITY_API_KEY), if Blotato's isn't configured or also fails.
+
+class OutOfCreditsError extends Error {}
+
+function isAnthropicCreditError(err: unknown): boolean {
+  if (!(err instanceof APIError)) return false;
+  return err.status === 400 && /credit balance/i.test(err.message ?? '');
+}
+
+function buildResearchQuery(site: (typeof SITE_CONFIGS)[number], week: string): string {
+  return `Research what is genuinely happening right now — real, dated news, data, `
+    + `and developments from roughly the last two weeks — relevant to: ${site.researchFocus}. `
+    + `Audience: ${site.audience}. List concrete, dated facts, stories, or trends with sources, `
+    + `for planning a week of social media content for ${site.name} (${site.url}), week `
+    + `commencing ${week}.`;
+}
+
+const BLOTATO_SOURCES_URL = 'https://backend.blotato.com/v2/source-resolutions-v3';
+
+async function researchViaBlotatoPerplexity(
+  apiKey: string,
+  site: (typeof SITE_CONFIGS)[number],
+  week: string,
+): Promise<string> {
+  const createRes = await fetch(BLOTATO_SOURCES_URL, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', 'blotato-api-key': apiKey },
+    body:    JSON.stringify({ source: { sourceType: 'perplexity-query', text: buildResearchQuery(site, week) } }),
+  });
+  const created = (await createRes.json().catch(() => ({}))) as { id?: string; status?: string; content?: string };
+  if (!createRes.ok || !created.id) {
+    throw new Error(`Blotato source creation failed: ${createRes.status} ${JSON.stringify(created)}`);
+  }
+
+  // Poll until the resolution completes — queued/processing → completed/failed.
+  if (created.status === 'completed' && created.content) return created.content;
+
+  for (let attempt = 0; attempt < 15; attempt++) {
+    await new Promise(r => setTimeout(r, 2_000));
+    const pollRes = await fetch(`${BLOTATO_SOURCES_URL}/${created.id}`, {
+      headers: { 'blotato-api-key': apiKey },
+    });
+    const polled = (await pollRes.json().catch(() => ({}))) as { status?: string; content?: string };
+    if (polled.status === 'completed') {
+      if (!polled.content) throw new Error('Blotato source resolution completed with no content');
+      return polled.content;
+    }
+    if (polled.status === 'failed') {
+      throw new Error('Blotato source resolution failed');
+    }
+    // else: still queued/processing — keep polling
+  }
+  throw new Error('Blotato source resolution timed out after 30s');
+}
+
+const PERPLEXITY_URL = 'https://api.perplexity.ai/chat/completions';
+
+async function researchViaPerplexityDirect(
+  apiKey: string,
+  site: (typeof SITE_CONFIGS)[number],
+  week: string,
+): Promise<string> {
+  const res = await fetch(PERPLEXITY_URL, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+    body:    JSON.stringify({
+      model: 'sonar',
+      messages: [{ role: 'user', content: buildResearchQuery(site, week) }],
+    }),
+  });
+  const json = (await res.json().catch(() => ({}))) as {
+    choices?: { message?: { content?: string } }[];
+    citations?: string[];
+  };
+  if (!res.ok) {
+    throw new Error(`Perplexity API request failed: ${res.status} ${JSON.stringify(json)}`);
+  }
+
+  const content = json.choices?.[0]?.message?.content?.trim();
+  if (!content) throw new Error('Perplexity API returned no content');
+
+  const citations = json.citations ?? [];
+  return citations.length
+    ? `${content}\n\nSources:\n${citations.map(c => `- ${c}`).join('\n')}`
+    : content;
+}
 
 function pillarBlock(siteId: string): string {
   return getSitePillars(siteId).map(p => `- ${p.name} — ${p.description}`).join('\n');
@@ -110,51 +205,97 @@ export async function POST(request: Request) {
     }
 
     // action === 'generate'
-    const claude = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-    const response = await claude.messages.create({
-      model: MODEL,
-      max_tokens: 2048,
-      system: buildSystem(site),
-      tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: MAX_SEARCHES }],
-      messages: [{ role: 'user', content: `Research and write this week's research brief for ${site.name}, week commencing ${week}.` }],
-    });
+    // (initialized rather than left unassigned: TS's flow analysis can't prove
+    // definite assignment across the nested fallback try/catches below, even
+    // though every path that reaches the upsert has actually set it)
+    let brief = '';
+    let source: 'web' | 'blotato_perplexity_fallback' | 'perplexity_api_fallback' = 'web';
 
-    // The response interleaves narration ("I'll search for...") with tool calls
-    // before the actual brief. Only the text blocks after the LAST tool round
-    // trip are the final answer — take those, not every text block in the
-    // response. Join with '' (not '\n\n'): a single sentence with a web-search
-    // citation comes back as several adjacent text blocks, one per cited
-    // segment, and forcing a paragraph break between them fragments the prose.
-    const lastToolIndex = response.content.reduce(
-      (last, b, i) => (b.type === 'server_tool_use' || b.type === 'web_search_tool_result') ? i : last,
-      -1,
-    );
-    const brief = response.content
-      .slice(lastToolIndex + 1)
-      .filter((b): b is Anthropic.TextBlock => b.type === 'text')
-      .map(b => b.text)
-      .join('')
-      .trim();
+    try {
+      const claude = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+      const response = await claude.messages.create({
+        model: MODEL,
+        max_tokens: 2048,
+        system: buildSystem(site),
+        tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: MAX_SEARCHES }],
+        messages: [{ role: 'user', content: `Research and write this week's research brief for ${site.name}, week commencing ${week}.` }],
+      });
 
-    if (!brief) {
-      return NextResponse.json({ error: 'The model returned an empty brief' }, { status: 502 });
+      // The response interleaves narration ("I'll search for...") with tool calls
+      // before the actual brief. Only the text blocks after the LAST tool round
+      // trip are the final answer — take those, not every text block in the
+      // response. Join with '' (not '\n\n'): a single sentence with a web-search
+      // citation comes back as several adjacent text blocks, one per cited
+      // segment, and forcing a paragraph break between them fragments the prose.
+      const lastToolIndex = response.content.reduce(
+        (last, b, i) => (b.type === 'server_tool_use' || b.type === 'web_search_tool_result') ? i : last,
+        -1,
+      );
+      brief = response.content
+        .slice(lastToolIndex + 1)
+        .filter((b): b is Anthropic.TextBlock => b.type === 'text')
+        .map(b => b.text)
+        .join('')
+        .trim();
+
+      if (!brief) {
+        return NextResponse.json({ error: 'The model returned an empty brief' }, { status: 502 });
+      }
+    } catch (err) {
+      // Anthropic's credit balance is a separate pool from Blotato's and from a
+      // standalone Perplexity account's — if it's specifically that, work
+      // through the configured fallbacks in order rather than failing the
+      // whole Saturday research step.
+      if (!isAnthropicCreditError(err)) throw err;
+
+      const fallbackErrors: string[] = [];
+
+      if (process.env.BLOTATO_API_KEY) {
+        try {
+          brief = await researchViaBlotatoPerplexity(process.env.BLOTATO_API_KEY, site, week);
+          source = 'blotato_perplexity_fallback';
+        } catch (blotatoErr) {
+          fallbackErrors.push(`Blotato: ${String(blotatoErr)}`);
+        }
+      }
+
+      if (source === 'web' && process.env.PERPLEXITY_API_KEY) {
+        try {
+          brief = await researchViaPerplexityDirect(process.env.PERPLEXITY_API_KEY, site, week);
+          source = 'perplexity_api_fallback';
+        } catch (perplexityErr) {
+          fallbackErrors.push(`Perplexity: ${String(perplexityErr)}`);
+        }
+      }
+
+      if (source === 'web') {
+        throw new OutOfCreditsError(
+          fallbackErrors.length
+            ? `Anthropic credit balance is too low, and every fallback failed too: ${fallbackErrors.join('; ')}`
+            : 'Anthropic credit balance is too low, and no fallback (BLOTATO_API_KEY / PERPLEXITY_API_KEY) is configured',
+        );
+      }
     }
 
     const { data, error } = await supabase
       .from('research_briefs')
       .upsert(
-        { site_id: siteId, week_commencing: week, brief, source: 'web' },
+        { site_id: siteId, week_commencing: week, brief, source },
         { onConflict: 'site_id,week_commencing' },
       )
       .select()
       .single();
     if (error) throw error;
 
-    return NextResponse.json({ ok: true, brief: data.brief, siteId });
+    return NextResponse.json({ ok: true, brief: data.brief, siteId, source });
   } catch (err) {
+    const outOfCredits = isAnthropicCreditError(err) || err instanceof OutOfCreditsError;
     return NextResponse.json(
-      { error: 'Could not generate research brief', detail: String(err) },
-      { status: 500 },
+      {
+        error: outOfCredits ? 'out_of_credits' : 'Could not generate research brief',
+        detail: String(err),
+      },
+      { status: outOfCredits ? 402 : 500 },
     );
   }
 }
