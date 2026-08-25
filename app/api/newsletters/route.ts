@@ -36,6 +36,7 @@ interface NewsletterRow {
   edited_content:   string | null;
   repurposed_from:  string[] | null;
   sent_at:          string | null;
+  drive_link:       string | null;
 }
 
 export async function GET(request: Request) {
@@ -49,7 +50,7 @@ export async function GET(request: Request) {
     const [nl, briefs, library] = await Promise.all([
       supabase
         .from('newsletters')
-        .select('id, publication, week_commencing, status, subject_options, research_brief, draft_content, edited_content, repurposed_from, sent_at')
+        .select('id, publication, week_commencing, status, subject_options, research_brief, draft_content, edited_content, repurposed_from, sent_at, drive_link')
         .eq('week_commencing', week),
       supabase
         .from('research_briefs')
@@ -103,6 +104,7 @@ export async function PATCH(request: Request) {
     if ('researchBrief'  in body) fields.research_brief  = body.researchBrief ?? null;
     if ('subjectOptions' in body) fields.subject_options = body.subjectOptions ?? null;
     if ('repurposedFrom' in body) fields.repurposed_from = Array.isArray(body.repurposedFrom) ? body.repurposedFrom : null;
+    if ('driveLink'      in body) fields.drive_link      = (body.driveLink ?? '').trim() || null;
 
     const supabase = getSupabase();
     const { data, error } = await supabase

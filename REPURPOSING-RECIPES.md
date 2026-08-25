@@ -39,6 +39,13 @@ Per-site folders, already there:
 | `theconcurrentcontractor`   | `04 TCC`         |
 | `didianolue`                 | `05 Didi Anolue` |
 
+Cross-site (not per-site) folders in the same root:
+
+| Folder              | For |
+| -------------------- | --- |
+| `90 Social Prompts`  | Prompts used to generate social media content — shared across all five sites, not filed under any one site folder. |
+| `99 Brand Assets`    | Shared brand assets. |
+
 Each site folder already has content-type subfolders (`newsletters`,
 `evergreen`, monthly folders). Save a new asset into a `videos/` subfolder
 inside the matching site folder — create that subfolder the first time a
