@@ -25,35 +25,42 @@ export const dynamic = 'force-dynamic';
 const MODEL = 'claude-sonnet-4-6';
 const MAX_SEARCHES = 5;
 
-// ── Blotato/Perplexity fallback ─────────────────────────────────────────────
+// ── Research fallbacks ───────────────────────────────────────────────────────
 // Used only when the Anthropic call fails specifically because the API key's
-// credit balance is exhausted. Runs the research through Blotato's own
-// Perplexity-query source resolution instead — a completely separate credit
-// pool from ANTHROPIC_API_KEY, so it still works when that balance hits zero.
-// See https://help.blotato.com/api/create-source.
+// credit balance is exhausted. Tried in order — each is a completely separate
+// credit pool from ANTHROPIC_API_KEY, so research keeps working when that
+// balance hits zero:
+//   1. Blotato's own Perplexity-query source resolution (uses Blotato's
+//      credits). See https://help.blotato.com/api/create-source.
+//   2. A direct Perplexity API call (uses a Perplexity account's own credits,
+//      via PERPLEXITY_API_KEY), if Blotato's isn't configured or also fails.
 
-const BLOTATO_SOURCES_URL = 'https://backend.blotato.com/v2/source-resolutions-v3';
+class OutOfCreditsError extends Error {}
 
 function isAnthropicCreditError(err: unknown): boolean {
   if (!(err instanceof APIError)) return false;
   return err.status === 400 && /credit balance/i.test(err.message ?? '');
 }
 
+function buildResearchQuery(site: (typeof SITE_CONFIGS)[number], week: string): string {
+  return `Research what is genuinely happening right now — real, dated news, data, `
+    + `and developments from roughly the last two weeks — relevant to: ${site.researchFocus}. `
+    + `Audience: ${site.audience}. List concrete, dated facts, stories, or trends with sources, `
+    + `for planning a week of social media content for ${site.name} (${site.url}), week `
+    + `commencing ${week}.`;
+}
+
+const BLOTATO_SOURCES_URL = 'https://backend.blotato.com/v2/source-resolutions-v3';
+
 async function researchViaBlotatoPerplexity(
   apiKey: string,
   site: (typeof SITE_CONFIGS)[number],
   week: string,
 ): Promise<string> {
-  const query = `Research what is genuinely happening right now — real, dated news, data, `
-    + `and developments from roughly the last two weeks — relevant to: ${site.researchFocus}. `
-    + `Audience: ${site.audience}. List concrete, dated facts, stories, or trends with sources, `
-    + `for planning a week of social media content for ${site.name} (${site.url}), week `
-    + `commencing ${week}.`;
-
   const createRes = await fetch(BLOTATO_SOURCES_URL, {
     method:  'POST',
     headers: { 'Content-Type': 'application/json', 'blotato-api-key': apiKey },
-    body:    JSON.stringify({ source: { sourceType: 'perplexity-query', text: query } }),
+    body:    JSON.stringify({ source: { sourceType: 'perplexity-query', text: buildResearchQuery(site, week) } }),
   });
   const created = (await createRes.json().catch(() => ({}))) as { id?: string; status?: string; content?: string };
   if (!createRes.ok || !created.id) {
@@ -79,6 +86,38 @@ async function researchViaBlotatoPerplexity(
     // else: still queued/processing — keep polling
   }
   throw new Error('Blotato source resolution timed out after 30s');
+}
+
+const PERPLEXITY_URL = 'https://api.perplexity.ai/chat/completions';
+
+async function researchViaPerplexityDirect(
+  apiKey: string,
+  site: (typeof SITE_CONFIGS)[number],
+  week: string,
+): Promise<string> {
+  const res = await fetch(PERPLEXITY_URL, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+    body:    JSON.stringify({
+      model: 'sonar',
+      messages: [{ role: 'user', content: buildResearchQuery(site, week) }],
+    }),
+  });
+  const json = (await res.json().catch(() => ({}))) as {
+    choices?: { message?: { content?: string } }[];
+    citations?: string[];
+  };
+  if (!res.ok) {
+    throw new Error(`Perplexity API request failed: ${res.status} ${JSON.stringify(json)}`);
+  }
+
+  const content = json.choices?.[0]?.message?.content?.trim();
+  if (!content) throw new Error('Perplexity API returned no content');
+
+  const citations = json.citations ?? [];
+  return citations.length
+    ? `${content}\n\nSources:\n${citations.map(c => `- ${c}`).join('\n')}`
+    : content;
 }
 
 function pillarBlock(siteId: string): string {
@@ -166,8 +205,11 @@ export async function POST(request: Request) {
     }
 
     // action === 'generate'
-    let brief: string;
-    let source: 'web' | 'blotato_perplexity_fallback' = 'web';
+    // (initialized rather than left unassigned: TS's flow analysis can't prove
+    // definite assignment across the nested fallback try/catches below, even
+    // though every path that reaches the upsert has actually set it)
+    let brief = '';
+    let source: 'web' | 'blotato_perplexity_fallback' | 'perplexity_api_fallback' = 'web';
 
     try {
       const claude = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -200,12 +242,39 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'The model returned an empty brief' }, { status: 502 });
       }
     } catch (err) {
-      // Anthropic's credit balance is a separate pool from Blotato's — if it's
-      // specifically that, fall back to Blotato's own Perplexity-query research
-      // rather than failing the whole Saturday research step.
-      if (!isAnthropicCreditError(err) || !process.env.BLOTATO_API_KEY) throw err;
-      brief = await researchViaBlotatoPerplexity(process.env.BLOTATO_API_KEY, site, week);
-      source = 'blotato_perplexity_fallback';
+      // Anthropic's credit balance is a separate pool from Blotato's and from a
+      // standalone Perplexity account's — if it's specifically that, work
+      // through the configured fallbacks in order rather than failing the
+      // whole Saturday research step.
+      if (!isAnthropicCreditError(err)) throw err;
+
+      const fallbackErrors: string[] = [];
+
+      if (process.env.BLOTATO_API_KEY) {
+        try {
+          brief = await researchViaBlotatoPerplexity(process.env.BLOTATO_API_KEY, site, week);
+          source = 'blotato_perplexity_fallback';
+        } catch (blotatoErr) {
+          fallbackErrors.push(`Blotato: ${String(blotatoErr)}`);
+        }
+      }
+
+      if (source === 'web' && process.env.PERPLEXITY_API_KEY) {
+        try {
+          brief = await researchViaPerplexityDirect(process.env.PERPLEXITY_API_KEY, site, week);
+          source = 'perplexity_api_fallback';
+        } catch (perplexityErr) {
+          fallbackErrors.push(`Perplexity: ${String(perplexityErr)}`);
+        }
+      }
+
+      if (source === 'web') {
+        throw new OutOfCreditsError(
+          fallbackErrors.length
+            ? `Anthropic credit balance is too low, and every fallback failed too: ${fallbackErrors.join('; ')}`
+            : 'Anthropic credit balance is too low, and no fallback (BLOTATO_API_KEY / PERPLEXITY_API_KEY) is configured',
+        );
+      }
     }
 
     const { data, error } = await supabase
@@ -220,7 +289,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ ok: true, brief: data.brief, siteId, source });
   } catch (err) {
-    const outOfCredits = isAnthropicCreditError(err);
+    const outOfCredits = isAnthropicCreditError(err) || err instanceof OutOfCreditsError;
     return NextResponse.json(
       {
         error: outOfCredits ? 'out_of_credits' : 'Could not generate research brief',

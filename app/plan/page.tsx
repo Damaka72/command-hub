@@ -146,17 +146,16 @@ export default function PlanPage() {
       const data = await res.json();
       if (!res.ok) {
         if (data.error === 'out_of_credits') {
-          throw new Error("Out of Anthropic credits, and the Blotato fallback couldn't complete either — write the brief yourself below, or paste research from another tool (ChatGPT, Perplexity, Gemini).");
+          throw new Error("Out of Anthropic credits, and the Blotato and Perplexity fallbacks couldn't complete either — write the brief yourself below, or paste research from another tool (ChatGPT, Perplexity, Gemini).");
         }
         throw new Error(data.error || 'Research generation failed');
       }
       setBriefs(prev => ({ ...prev, [siteId]: data.brief ?? '' }));
-      setResearchNote(prev => ({
-        ...prev,
-        [siteId]: data.source === 'blotato_perplexity_fallback'
-          ? "Generated via Blotato's Perplexity research — Anthropic credits were unavailable. Worth a skim before relying on it."
-          : '',
-      }));
+      const fallbackNote: Record<string, string> = {
+        blotato_perplexity_fallback: "Generated via Blotato's Perplexity research — Anthropic credits were unavailable. Worth a skim before relying on it.",
+        perplexity_api_fallback: "Generated via the Perplexity API fallback — Anthropic and Blotato credits were unavailable. Worth a skim before relying on it.",
+      };
+      setResearchNote(prev => ({ ...prev, [siteId]: fallbackNote[data.source] ?? '' }));
     } catch (err) {
       setResearchError(prev => ({ ...prev, [siteId]: err instanceof Error ? err.message : String(err) }));
     } finally {
