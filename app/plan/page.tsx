@@ -48,6 +48,7 @@ export default function PlanPage() {
   const [errorMsg, setErrorMsg]                 = useState('');
   const [busy, setBusy]                         = useState<string | null>(null);
   const [researchError, setResearchError]       = useState<Record<string, string>>({});
+  const [researchNote, setResearchNote]         = useState<Record<string, string>>({});
 
   // Reload the plan, pillars and research briefs whenever the shared week
   // changes (WeekContext — UX spec §5). The API falls back to the latest
@@ -135,6 +136,7 @@ export default function PlanPage() {
     }
     setBusy(`research-${siteId}`);
     setResearchError(prev => ({ ...prev, [siteId]: '' }));
+    setResearchNote(prev => ({ ...prev, [siteId]: '' }));
     try {
       const res = await fetch('/api/research', {
         method:  'POST',
@@ -142,8 +144,19 @@ export default function PlanPage() {
         body:    JSON.stringify({ siteId, week, action: 'generate' }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Research generation failed');
+      if (!res.ok) {
+        if (data.error === 'out_of_credits') {
+          throw new Error("Out of Anthropic credits, and the Blotato fallback couldn't complete either — write the brief yourself below, or paste research from another tool (ChatGPT, Perplexity, Gemini).");
+        }
+        throw new Error(data.error || 'Research generation failed');
+      }
       setBriefs(prev => ({ ...prev, [siteId]: data.brief ?? '' }));
+      setResearchNote(prev => ({
+        ...prev,
+        [siteId]: data.source === 'blotato_perplexity_fallback'
+          ? "Generated via Blotato's Perplexity research — Anthropic credits were unavailable. Worth a skim before relying on it."
+          : '',
+      }));
     } catch (err) {
       setResearchError(prev => ({ ...prev, [siteId]: err instanceof Error ? err.message : String(err) }));
     } finally {
@@ -273,6 +286,9 @@ export default function PlanPage() {
                 />
                 {researchError[siteId] && (
                   <p className="text-xs text-red-400">{researchError[siteId]}</p>
+                )}
+                {researchNote[siteId] && (
+                  <p className="text-xs text-amber-400">{researchNote[siteId]}</p>
                 )}
               </div>
 
