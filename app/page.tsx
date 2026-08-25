@@ -17,11 +17,13 @@ const OPEN_PANELS_KEY = "hub:sitePanelsOpen";
 // each chip carries a day hint so the nav itself says when it's used, not
 // just what it's called. Library and Ops Guide aren't tied to a day, so
 // they sit apart as reference/utility links rather than mixed into the flow.
+// All four share one accent treatment (not a different hue per page) — the
+// day hint is what tells them apart, not color.
 const RHYTHM_NAV = [
-  { href: "/plan",        label: "Weekly Plan",  hint: "Sat–Sun", bg: "rgba(34,211,238,0.1)",  color: "var(--hub-cyan)", border: "rgba(34,211,238,0.3)" },
-  { href: "/review",      label: "Review",       hint: "Sun",     bg: "var(--hub-accent-dim)", color: "#a5b4fc",         border: "var(--hub-border-hi)" },
-  { href: "/newsletters", label: "Newsletters",  hint: "Sun",     bg: "rgba(245,158,11,0.1)",  color: "var(--hub-gold)", border: "rgba(245,158,11,0.3)" },
-  { href: "/friday",      label: "Friday",       hint: "Fri",     bg: "rgba(16,185,129,0.1)",  color: "#34d399",         border: "rgba(16,185,129,0.3)" },
+  { href: "/plan",        label: "Weekly Plan",  hint: "Sat–Sun" },
+  { href: "/review",      label: "Review",       hint: "Sun" },
+  { href: "/newsletters", label: "Newsletters",  hint: "Sun" },
+  { href: "/friday",      label: "Friday",       hint: "Fri" },
 ] as const;
 
 const UTILITY_NAV = [
@@ -328,9 +330,9 @@ export default function Home() {
       <header
         className="shrink-0"
         style={{
-          background: 'linear-gradient(135deg, #0e1525 0%, #0a1020 60%, var(--hub-bg) 100%)',
+          background: 'linear-gradient(135deg, #1c1712 0%, #14110d 60%, var(--hub-bg) 100%)',
           borderBottom: '1px solid var(--hub-border-hi)',
-          boxShadow: '0 1px 20px rgba(99,102,241,0.08)',
+          boxShadow: '0 1px 20px rgba(217,119,87,0.08)',
         }}
       >
         <div className="mx-auto max-w-6xl px-6 py-5">
@@ -339,7 +341,7 @@ export default function Home() {
               <h1
                 className="text-2xl font-bold tracking-tight"
                 style={{
-                  background: 'linear-gradient(90deg, #e2e8f0 30%, #818cf8 100%)',
+                  background: 'linear-gradient(90deg, #e8e6dc 30%, #d97757 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text',
@@ -358,7 +360,7 @@ export default function Home() {
                   key={link.href}
                   href={link.href}
                   className="flex flex-col items-center gap-0 rounded-lg px-3 py-1 text-xs font-medium transition-all hover:brightness-125"
-                  style={{ background: link.bg, color: link.color, border: `1px solid ${link.border}` }}
+                  style={{ background: 'var(--hub-accent-dim)', color: 'var(--hub-accent-text)', border: '1px solid var(--hub-border-hi)' }}
                 >
                   <span>{link.label}</span>
                   <span className="text-[10px] font-normal uppercase tracking-wide opacity-70">{link.hint}</span>

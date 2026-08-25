@@ -16,7 +16,7 @@ export default function SiteFilterChips({ siteIds }: { siteIds: string[] }) {
         onClick={() => setSiteId('')}
         className="rounded-full px-3 py-1 text-xs font-medium transition-all"
         style={siteId === ''
-          ? { background: 'var(--hub-accent-dim)', color: '#a5b4fc', border: '1px solid var(--line-2)' }
+          ? { background: 'var(--hub-accent-dim)', color: 'var(--hub-accent-text)', border: '1px solid var(--line-2)' }
           : { background: 'var(--panel-2)', color: 'var(--fg-2)', border: '1px solid var(--line)' }
         }
       >

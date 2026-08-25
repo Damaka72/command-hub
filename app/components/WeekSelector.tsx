@@ -42,7 +42,7 @@ export default function WeekSelector() {
           type="button"
           onClick={() => setWeek(mondayOf())}
           className="rounded-md px-2.5 py-1.5 text-xs font-medium transition-all hover:brightness-125"
-          style={{ background: 'var(--hub-accent-dim)', color: '#a5b4fc', border: '1px solid var(--line-2)' }}
+          style={{ background: 'var(--hub-accent-dim)', color: 'var(--hub-accent-text)', border: '1px solid var(--line-2)' }}
         >
           Today
         </button>

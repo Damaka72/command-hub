@@ -208,7 +208,7 @@ export default function CommandPalette() {
                   onClick={() => c.run()}
                   onMouseEnter={() => setSelected(i)}
                   className="flex w-full items-center justify-between px-4 py-2 text-left text-sm"
-                  style={i === selected ? { background: 'var(--hub-accent-dim)', color: '#a5b4fc' } : { color: 'var(--fg-2)' }}
+                  style={i === selected ? { background: 'var(--hub-accent-dim)', color: 'var(--hub-accent-text)' } : { color: 'var(--fg-2)' }}
                 >
                   <span>{c.label}</span>
                   {c.shortcut && (
@@ -236,7 +236,7 @@ export default function CommandPalette() {
                   onClick={mode === 'confirm-pipeline' ? runPipeline : runPush}
                   onKeyDown={e => e.key === 'Enter' && (mode === 'confirm-pipeline' ? runPipeline() : runPush())}
                   className="rounded-lg px-3 py-1.5 text-xs font-semibold"
-                  style={{ background: 'var(--hub-accent)', color: '#fff' }}
+                  style={{ background: 'var(--hub-accent)', color: 'var(--hub-accent-ink)' }}
                 >
                   Yes, go
                 </button>

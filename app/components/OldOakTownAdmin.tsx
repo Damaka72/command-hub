@@ -197,7 +197,7 @@ export default function OldOakTownAdmin() {
                 onClick={handlePromote}
                 disabled={promoting || readyToPromote === 0}
                 className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:brightness-125 disabled:opacity-40"
-                style={{ background: "var(--hub-accent)", color: "#fff" }}
+                style={{ background: "var(--hub-accent)", color: "var(--hub-accent-ink)" }}
               >
                 {promoting ? "Drafting…" : "Promote new businesses"}
               </button>
