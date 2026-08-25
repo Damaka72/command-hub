@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { SITE_SHORT } from '@/app/lib/siteConstants';
+import { formatWeekChip } from '@/app/lib/weekDates';
 
 interface BriefRow {
   id:              number;
@@ -44,6 +45,14 @@ interface PublicationBlock {
   library:    LibraryRow[];
 }
 
+interface QueueWeek {
+  week:           string;
+  status:         string | null;
+  driveLink:      string | null;
+  subjectOptions: string[] | null;
+  sentAt:         string | null;
+}
+
 const STATUS_PILL: Record<string, string> = {
   draft:     'bg-gray-700 text-gray-200',
   finalised: 'bg-amber-800 text-amber-100',
@@ -73,6 +82,15 @@ export default function NewslettersPage() {
   const [error, setError]       = useState('');
   const [busy, setBusy]         = useState<string | null>(null);
   const [copied, setCopied]     = useState<string | null>(null);
+
+  // Draft queue — several weeks ahead, each with a Google Drive link, so
+  // newsletters can be drafted in Docs and queued up before the pipeline
+  // would otherwise generate that week's content.
+  const [queue, setQueue]             = useState<QueueWeek[]>([]);
+  const [queueLoading, setQueueLoading] = useState(false);
+  const [queueDrafts, setQueueDrafts] = useState<Record<string, string>>({}); // week -> in-progress link text
+  const [queueBusy, setQueueBusy]     = useState<string | null>(null);
+  const [queueOpen, setQueueOpen]     = useState(true);
 
   // Deep link: /newsletters?pub=the-pathway preselects a tab (used by /review's Sunday checklist).
   useEffect(() => {
@@ -107,6 +125,40 @@ export default function NewslettersPage() {
   }, []);
 
   useEffect(() => { load(week); }, [week, load]);
+
+  const loadQueue = useCallback((pub: string) => {
+    setQueueLoading(true);
+    fetch(`/api/newsletters/queue?publication=${pub}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.error) throw new Error(data.error);
+        const weeks: QueueWeek[] = data.weeks ?? [];
+        setQueue(weeks);
+        setQueueDrafts(Object.fromEntries(weeks.map(w => [w.week, w.driveLink ?? ''])));
+      })
+      .catch(() => setQueue([]))
+      .finally(() => setQueueLoading(false));
+  }, []);
+
+  useEffect(() => { loadQueue(active); }, [active, loadQueue]);
+
+  async function saveQueueLink(pub: string, w: string) {
+    setQueueBusy(w);
+    try {
+      const res = await fetch('/api/newsletters', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ publication: pub, week: w, driveLink: queueDrafts[w] ?? '' }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Save failed');
+      loadQueue(pub);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setQueueBusy(null);
+    }
+  }
 
   const block = useMemo(() => blocks.find(b => b.slug === active), [blocks, active]);
 
@@ -288,6 +340,67 @@ export default function NewslettersPage() {
         {error && (
           <div className="bg-red-900/30 border border-red-700 rounded-lg p-4 text-red-300 text-sm">{error}</div>
         )}
+
+        {/* Draft queue — Google Drive links for several weeks ahead, so drafts
+            written in Docs (based on themes, things happening) can be queued
+            up before the pipeline would otherwise generate that week. */}
+        <section className="rounded-xl border border-gray-700 bg-gray-900">
+          <button
+            onClick={() => setQueueOpen(o => !o)}
+            className="flex w-full items-center justify-between px-4 py-3 text-left"
+          >
+            <span className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+              Draft queue — next {queue.length || 12} weeks
+            </span>
+            <span className="text-xs text-gray-500">{queueOpen ? '▲' : '▼'}</span>
+          </button>
+          {queueOpen && (
+            <div className="border-t border-gray-800 divide-y divide-gray-800">
+              {queueLoading && <p className="px-4 py-3 text-gray-500 text-sm">Loading…</p>}
+              {!queueLoading && queue.map(w => (
+                <div key={w.week} className="flex items-center gap-3 px-4 py-2.5 flex-wrap">
+                  <button
+                    onClick={() => setWeek(w.week)}
+                    className={`shrink-0 w-36 text-left text-xs font-medium hover:underline ${w.week === week ? 'text-blue-400' : 'text-gray-300'}`}
+                    title="Open this week in the editor below"
+                  >
+                    {formatWeekChip(w.week)}
+                  </button>
+                  {w.status && (
+                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-[12px] font-medium ${STATUS_PILL[w.status] ?? 'bg-gray-700 text-gray-200'}`}>
+                      {STATUS_LABEL[w.status] ?? w.status}
+                    </span>
+                  )}
+                  <input
+                    type="text"
+                    value={queueDrafts[w.week] ?? ''}
+                    onChange={e => setQueueDrafts(prev => ({ ...prev, [w.week]: e.target.value }))}
+                    placeholder="Paste the Google Drive link for this week's draft…"
+                    className="flex-1 min-w-[220px] bg-gray-800 border border-gray-600 rounded-lg px-2.5 py-1 text-gray-100 text-xs focus:outline-none focus:border-blue-500"
+                  />
+                  {w.driveLink && (
+                    <a
+                      href={w.driveLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="shrink-0 text-xs text-blue-400 hover:underline"
+                    >
+                      Open ↗
+                    </a>
+                  )}
+                  <button
+                    onClick={() => saveQueueLink(active, w.week)}
+                    disabled={queueBusy !== null || (queueDrafts[w.week] ?? '') === (w.driveLink ?? '')}
+                    className="shrink-0 rounded-lg bg-gray-700 hover:bg-gray-600 text-white px-2.5 py-1 text-[12px] font-medium disabled:opacity-40"
+                  >
+                    {queueBusy === w.week ? 'Saving…' : 'Save'}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
         {loading && <p className="text-gray-400 text-sm">Loading…</p>}
 
         {!loading && block && (
