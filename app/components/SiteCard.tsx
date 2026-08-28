@@ -416,6 +416,7 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
               {[
                 site.github && { href: site.github, label: 'GitHub' },
                 site.admin  && { href: site.admin,  label: 'Admin' },
+                { href: `/social#${site.id}`, label: 'Socials →' },
                 site.socialAgent && { href: site.socialAgent, label: 'Legacy Agent', muted: true },
               ].filter(Boolean).map((link: any) => (
                 <a
