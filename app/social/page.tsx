@@ -1,10 +1,15 @@
 import { SITES } from '../lib/sites';
 import { SITE_SOCIAL_ACCOUNTS, UNMAPPED_ACCOUNTS, type SocialAccountEntry } from '../lib/socialAccounts';
+import SocialFeed from '../components/SocialFeed';
 
 // ── Social Accounts — one place to see every live account across all five sites ──
 // Direct links to the actual public profile/page for every account connected in
 // Blotato, grouped by site, instead of hunting through devices and apps to check
 // what's posted where. Links go to the real platform, not into Blotato.
+//
+// Each site's section also embeds SocialFeed (the same live-posts component used
+// in the site card's Technical → Posts tab) so scheduled/published posts from the
+// last 7 days are visible here too, not just profile links.
 //
 // Data lives in app/lib/socialAccounts.ts — hand-edit that file as accounts change.
 
@@ -93,6 +98,11 @@ export default function SocialAccountsPage() {
                   ))}
                 </div>
               )}
+
+              <div className="mt-4 border-t border-gray-800 pt-4">
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-gray-500">Recent posts</p>
+                <SocialFeed siteId={site.id} />
+              </div>
             </section>
           );
         })}
