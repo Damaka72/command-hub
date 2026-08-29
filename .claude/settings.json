@@ -29,5 +29,8 @@
         "repo": "anthropics/claude-plugins-community"
       }
     }
+  },
+  "enabledPlugins": {
+    "vercel@claude-community": true
   }
 }
