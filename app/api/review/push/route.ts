@@ -27,7 +27,7 @@ import { callBlotato } from '@/app/lib/blotato';
 export const dynamic = 'force-dynamic';
 
 const DAY_OFFSET: Record<string, number> = {
-  Monday: 0, Tuesday: 1, Wednesday: 2, Thursday: 3, Friday: 4,
+  Monday: 0, Tuesday: 1, Wednesday: 2, Thursday: 3, Friday: 4, Saturday: 5, Sunday: 6,
 };
 
 // London wall-clock posting hour per platform (converted to UTC at push time).

@@ -76,6 +76,7 @@ export const ACCOUNT_MAP: Record<string, Record<string, AccountTarget | null>> =
     'Instagram':   { accountId: '46493', platform: 'instagram', target: {} },                            // @aiviralvideoprompts (needs media)
     'TikTok':      { accountId: '42441', platform: 'tiktok',    target: { ...TIKTOK_DEFAULTS } },        // @aiviralvideoprompts (needs video)
     'Facebook':    { accountId: '31336', platform: 'facebook',  target: { pageId: '889709114216937' } }, // AIVVP Facebook page
+    'Pinterest':   { accountId: '6423',  platform: 'pinterest', target: { boardId: '852235998176375316' } }, // @aiviralvideoprompts, "AI Video Creation" board (needs media)
     'X (Twitter)': null, // not connected
   },
 };
