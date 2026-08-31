@@ -69,7 +69,7 @@ Content pillars:
 ${pillarBlock('masteryourcareerpath')}
 
 Confirmed products (only reference these — do not invent free resources or other products):
-- Skool community: £47/month
+- Skool community: $27/month
 - CV-to-Website package: £197
 - OPERATE standalone: £455
 - Live cohorts: £325, run four times per year

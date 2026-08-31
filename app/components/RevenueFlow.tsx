@@ -29,7 +29,7 @@ const FLOWS: Record<string, FlowConfig> = {
       ['Free Skool'],
       ['Newsletter'],
       ['Webinar'],
-      ['£47/mo or', '£325 course'],
+      ['$27/mo or', '£325 course'],
     ],
   },
   theconcurrentcontractor: {
