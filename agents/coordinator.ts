@@ -26,7 +26,12 @@ procurement-focused and the site is a hyperlocal community platform, find the ge
 angle rather than forcing the theme. If no direct angle exists, default to the site's most
 evergreen content pillar.
 
-Be specific. Generic briefs produce generic content. Return only valid JSON — no markdown fences.`;
+Be specific. Generic briefs produce generic content. Return only valid JSON — no markdown fences.
+
+All sites speak to a corporate/professional-services audience that is UK-first today but global
+in reach. Where a brief's angle, key points, or CTA touches visuals or video involving people,
+note that diverse nationalities and ethnicities should be represented — never default to one
+nationality as the face of the brand.`;
 
 async function generateWeeklyBriefs(
   coordinator: CoordinatorData,
