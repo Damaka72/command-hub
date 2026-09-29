@@ -102,7 +102,7 @@ async function blotatoFetch(path: string, params: Record<string, string> = {}) {
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
   try {
     const res = await fetch(url.toString(), {
-      headers: { Authorization: `Bearer ${BLOTATO_KEY}` },
+      headers: { 'blotato-api-key': BLOTATO_KEY },
       signal: AbortSignal.timeout(8000),
       cache: 'no-store',
     });

@@ -293,8 +293,8 @@ async function resolveMonthlyRevenue(config: RevenueConfig | null): Promise<numb
 async function fetchBlotatoScheduledCounts(): Promise<Record<string, number>> {
   if (!BLOTATO_API_KEY) return {};
   try {
-    const res = await fetch('https://backend.blotato.com/schedules?limit=50', {
-      headers: { Authorization: `Bearer ${BLOTATO_API_KEY}` },
+    const res = await fetch('https://backend.blotato.com/v2/schedules?limit=50', {
+      headers: { 'blotato-api-key': BLOTATO_API_KEY },
       signal: AbortSignal.timeout(6000),
     });
     if (!res.ok) return {};
