@@ -17,6 +17,12 @@ function pillarBlock(siteId: string): string {
   return getSitePillars(siteId).map(p => `- ${p.name} — ${p.description}`).join('\n');
 }
 
+// Standing inclusion guideline, injected into every site's subagent system prompt.
+// All sites speak to a corporate/professional-services audience that is UK-first
+// today but global in reach — any people-facing visual or video brief should
+// default to diverse nationalities and ethnicities rather than one default "face".
+const DIVERSITY_GUIDELINE = `When a brief touches visuals or video involving people — photos, stock footage, illustrations, on-screen talent — default to representing diverse nationalities and ethnicities. The audience is corporate/professional-services, UK-first today but global in reach, so never default to one nationality as the face of the brand.`;
+
 export interface SiteConfig {
   id: string;
   name: string;
@@ -76,7 +82,9 @@ Confirmed products (only reference these — do not invent free resources or oth
 
 Tone: Encouraging, practical, and aspirational — but grounded. Not motivational fluff. Always show how the advice connects to a real career outcome for the specific segment you are speaking to.
 
-Reference PRIME or OPERATE by name when relevant to the pillar. Every post should include a path to a confirmed product or the Skool community. UK English throughout.`,
+Reference PRIME or OPERATE by name when relevant to the pillar. Every post should include a path to a confirmed product or the Skool community. UK English throughout.
+
+${DIVERSITY_GUIDELINE}`,
     researchFocus: 'UK hiring market shifts, redundancy waves, in-demand skills, salary/negotiation benchmarks, graduate job market conditions, and notable career-development or AI-in-hiring news relevant to graduates, early/mid-career professionals, career changers, and contractors/freelancers.',
   },
 
@@ -106,7 +114,9 @@ The platform is built around the OPERATE framework — a structured approach to 
 Content pillars:
 ${pillarBlock('theconcurrentcontractor')}
 
-Never write generic career content. Never sound like a recruiter or financial advisor. Never be preachy. UK English throughout. Peer-to-peer tone always.`,
+Never write generic career content. Never sound like a recruiter or financial advisor. Never be preachy. UK English throughout. Peer-to-peer tone always.
+
+${DIVERSITY_GUIDELINE}`,
     researchFocus: 'IR35/off-payroll working rule changes, HMRC guidance updates, day-rate and contract-market trends, notable contractor tribunal cases or client-side IR35 policy shifts, and UK contracting-market conditions.',
   },
 
@@ -149,7 +159,9 @@ ${pillarBlock('oldoaktown')}
 
 TONE: Community-first. Write as a local voice for residents and businesses — not developers or investors. Never write like a press release. UK English throughout.
 
-When the brief's theme does not map to a specific verifiable local story, write a community-education post from the verified facts above. This is always valid content for this audience.`,
+When the brief's theme does not map to a specific verifiable local story, write a community-education post from the verified facts above. This is always valid content for this audience.
+
+${DIVERSITY_GUIDELINE} This applies to Old Oak Common and Park Royal too — a genuinely diverse West London community — so never default to one nationality when a post references residents or local people.`,
     researchFocus: 'Real, dated local news for Old Oak Common and Park Royal, West London — OPDC planning decisions, HS2/Elizabeth line construction updates, new local business openings, community events, and Hammersmith & Fulham / Brent / Ealing council announcements affecting the area. Zero tolerance for anything not directly sourced from search results.',
   },
 
@@ -187,7 +199,9 @@ Platform notes:
 - TikTok: 150 words max, punchy, reads like a video script caption
 - Instagram: 200 words max, include 3-5 relevant hashtags at the end
 
-UK English. Energetic but not breathless. Show the result, not the tool.`,
+UK English. Energetic but not breathless. Show the result, not the tool.
+
+${DIVERSITY_GUIDELINE}`,
     researchFocus: 'New AI video-generation model/tool releases, TikTok/Instagram/YouTube algorithm or feature changes, viral video trends and formats, and notable creator-economy news relevant to social media marketers and small business owners making AI video content.',
   },
 ];
