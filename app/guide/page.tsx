@@ -136,6 +136,7 @@ const PAGES: { path: string; name: string; what: string }[] = [
   { path: "/newsletters", name: "Newsletters",    what: "Draft the three publications from repurposed content and finalise them for a Beehiiv paste-send." },
   { path: "/friday",      name: "Friday Report",  what: "End-of-week retrospective: planned vs published, newsletter status, Gumroad, subscriber log." },
   { path: "/library",     name: "Content Library",what: "Browse and repurpose all past content across every week." },
+  { path: "/video-studio", name: "Video Studio",   what: "Every video tool (HyperFrames, short-video-maker, Video Brief, Higgsfield, Blotato) with cost, best use, example prompts and the rules the video-producer agent follows to choose." },
   { path: "/guide",       name: "Ops Guide",      what: "This page." },
 ];
 
