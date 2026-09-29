@@ -90,7 +90,7 @@ Unique to this site: `lead-nurture`, `product`.
 - **Lead Nurture agent** exists but admin panel shows raw `claude "Draft a 5-email nurture sequence…"` terminal command rather than an integrated runner
 
 ### Revenue Data Source
-- **Skool:** Referenced in CLAUDE.md (Free tier, £47/mo PRIME, £325 live cohort, £455 OPERATE, £197 CV-to-Website) but no Skool API integration in admin — revenue invisible
+- **Skool:** Referenced in CLAUDE.md (Free tier, $27/mo PRIME, £325 live cohort, £455 OPERATE, £197 CV-to-Website) but no Skool API integration in admin — revenue invisible
 - **Gumroad / Stripe:** ✗ None
 
 ### Admin Hub (`admin/index.html`)
