@@ -5,6 +5,7 @@
 
 import { CoordinatorData, SiteBrief } from './types.js';
 import { SITE_CONFIGS } from './site-configs.js';
+import { getOldOakEditionBrief } from './edition.js';
 import {
   ask, parseJson, getWeeklyPlan, getResearchBriefs,
   MODEL_GENERATION, logOk, logError,
@@ -107,6 +108,14 @@ export async function runCoordinator(siteIds?: string[]): Promise<{
 
   // Research briefs for this week (optional), seeded into each site's prompt.
   const researchBriefs = await getResearchBriefs(coordinator.weekCommencing);
+
+  // Old Oak Town curates real news/events/videos into a weekly Edition. Ground
+  // its posts in that (read-only; skipped if unavailable or stale).
+  const oldOakEdition = await getOldOakEditionBrief();
+  if (oldOakEdition) {
+    researchBriefs.oldoaktown = [researchBriefs.oldoaktown, oldOakEdition].filter(Boolean).join('\n\n');
+    logOk('Old Oak Town — grounded this week in the latest published Edition');
+  }
 
   const allBriefs: SiteBrief[] = [];
 
