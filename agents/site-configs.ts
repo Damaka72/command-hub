@@ -95,9 +95,10 @@ ${pillarBlock('masteryourcareerpath')}
 
 Confirmed products (only reference these — do not invent free resources or other products):
 - PRIME Membership (Master Your Career Path community): £27/month
-- CV-to-Website package: £97
+- OPERATE Membership: £27/month
+- PRIME + OPERATE together: £47/month
 - PRIME one-off (lifetime access): £67
-- OPERATE: included in the £27/month membership (not sold separately)
+- CV-to-Website package: £97
 - PRIME Cohort: £375 (live cohorts, run four times per year)
 
 Tone: Encouraging, practical, and aspirational — but grounded. Not motivational fluff. Always show how the advice connects to a real career outcome for the specific segment you are speaking to.
