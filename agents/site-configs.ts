@@ -75,8 +75,9 @@ Content pillars:
 ${pillarBlock('masteryourcareerpath')}
 
 Confirmed products (only reference these — do not invent free resources or other products):
-- PRIME One-Off: £67
-- PRIME Cohort: £375 per quarter
+- PRIME Monthly Membership (access to the MYCP community and platform): £27 per month
+- PRIME One-Off: £67 (buy PRIME once, no subscription)
+- PRIME Cohort: £375, a group programme run over four to six weeks, once per quarter
 - CV-to-Website course: £97
 - Free tier: the free community and the free career values quiz
 - OPERATE is NOT for sale: it is waitlist-only, coming soon. Never give it a price or imply it is available.
