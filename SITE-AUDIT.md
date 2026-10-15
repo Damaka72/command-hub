@@ -1,3 +1,5 @@
+> Note (Oct 2026): MYCP has left Skool and now runs on its own platform. Prices quoted in this older audit are outdated; current prices are in agents/site-configs.ts.
+
 # Site Audit — Didi Anolue Multi-Site Portfolio
 Generated: 2026-04-23
 
@@ -90,7 +92,7 @@ Unique to this site: `lead-nurture`, `product`.
 - **Lead Nurture agent** exists but admin panel shows raw `claude "Draft a 5-email nurture sequence…"` terminal command rather than an integrated runner
 
 ### Revenue Data Source
-- **Skool:** Referenced in CLAUDE.md (Free tier, $27/mo PRIME, £325 live cohort, £455 OPERATE, £197 CV-to-Website) but no Skool API integration in admin — revenue invisible
+- **MYCP platform (formerly Skool):** Referenced in CLAUDE.md (Free tier, $27/mo PRIME, £325 live cohort, £455 OPERATE, £197 CV-to-Website) but no revenue integration for the MYCP platform in admin — revenue invisible
 - **Gumroad / Stripe:** ✗ None
 
 ### Admin Hub (`admin/index.html`)
@@ -103,7 +105,7 @@ Unique to this site: `lead-nurture`, `product`.
 | Site | SEO Gaps, Site Health, View Site |
 
 ### CLAUDE.md
-- **Present:** ✓ — Documents site purpose (PRIME/OPERATE frameworks), Skool tier pricing, deployment (Vercel, static HTML). Instructs: do not change framework names, do not remove Skool links, do not alter pricing.
+- **Present:** ✓ — Documents site purpose (PRIME/OPERATE frameworks), the (now outdated) tier pricing, deployment (Vercel, static HTML). Instructs: do not change framework names, do not remove Skool links, do not alter pricing.
 
 ---
 
@@ -313,7 +315,7 @@ The CHAOS Assessment captures leads into `localStorage` only. `demo-dashboard/pa
 
 ### CONFLICT 5 — Revenue data invisible for MYCP and AIVVP
 
-MYCP earns via Skool (subscriptions, cohorts, courses) but the admin shows no Skool revenue data. AIVVP earns via Gumroad but admin only monitors broken links — no sales figures. Only OOT has live revenue data in admin (via Supabase + Stripe).
+MYCP earns via its own platform (subscriptions, cohorts, courses) but the admin shows no MYCP platform revenue data. AIVVP earns via Gumroad but admin only monitors broken links — no sales figures. Only OOT has live revenue data in admin (via Supabase + Stripe).
 
 ---
 

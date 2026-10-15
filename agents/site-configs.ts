@@ -75,7 +75,6 @@ Content pillars:
 ${pillarBlock('masteryourcareerpath')}
 
 Confirmed products (only reference these — do not invent free resources or other products):
-- PRIME Membership (the community, now on Didi's own platform at masteryourcareerpath.com rather than Skool): £27/month
 - PRIME One-Off: £67
 - PRIME Cohort: £375 per quarter
 - CV-to-Website course: £97

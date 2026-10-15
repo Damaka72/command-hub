@@ -15,7 +15,7 @@ Stack: Next.js 16, React 19, TypeScript, Tailwind CSS v4, Vercel.
 |----|------|---------|---------------|
 | `oldoaktown` | oldoaktown.co.uk | Hyperlocal media — Old Oak Common regeneration | Stripe + Supabase directory listings |
 | `theconcurrentcontractor` | theconcurrentcontractor.com | UK IT contractors, IR35 content | SaaS £97/mo (not yet wired) |
-| `masteryourcareerpath` | masteryourcareerpath.com | Career coaching — Skool community, PRIME/OPERATE | Skool subscriptions + cohorts |
+| `masteryourcareerpath` | masteryourcareerpath.com | Career coaching — MYCP platform, PRIME/OPERATE | MYCP platform subscriptions + cohorts |
 | `aiviralvideoprompts` | aiviralvideoprompts.com | AI prompt packs sold via Gumroad | Gumroad digital sales |
 | `didianolue` | didianolue.co.uk | Personal consulting brand | Consulting pipeline |
 
@@ -86,7 +86,7 @@ command-hub/
 ### Revenue data gaps
 5. **AIVVP Gumroad revenue invisible** — `GUMROAD_API_KEY` env var exists in
    `status/route.ts` but key not set in Vercel. Revenue shows `—`.
-6. **MYCP Skool revenue invisible** — no Skool API integration. Revenue shows `—`.
+6. **MYCP platform revenue invisible** — no MYCP platform API integration. Revenue shows `—`.
 7. **Didi pipeline agents never run** — scout, outreach, enquiry all `never_run`.
 
 ### Architecture
@@ -191,7 +191,7 @@ Work through these in order unless Didi says otherwise:
 1. ~~Fix OOT contamination in the four social-agent.html files~~ **DONE (May 2026)**
 2. ~~Replace Buffer with Blotato~~ **DONE (May 2026)**
 3. ~~Daily briefing, agent assessment, cross-device tasks~~ **DONE (May 2026)**
-4. **Move TCC workshops to MYCP Skool** — CHAOS + Concurrent Contractor workshops. See WORKSHOP-MIGRATION.md
+4. **Move TCC workshops to MYCP platform** — CHAOS + Concurrent Contractor workshops. See WORKSHOP-MIGRATION.md
 5. ~~Add `GUMROAD_API_KEY` to Vercel~~ **DONE (May 2026)**
 6. ~~Add `GITHUB_TOKEN` to Vercel~~ **DONE (May 2026)**
 7. **Add `CLAUDE.md`** to Didi, TCC, and AIVVP repos (3 of 5 missing)
