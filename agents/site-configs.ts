@@ -76,9 +76,11 @@ ${pillarBlock('masteryourcareerpath')}
 
 Confirmed products (only reference these — do not invent free resources or other products):
 - PRIME Membership (the community, now on Didi's own platform at masteryourcareerpath.com rather than Skool): £27/month
-- CV-to-Website package: £197
-- OPERATE standalone: £455
-- Live cohorts: £325, run four times per year
+- PRIME One-Off: £67
+- PRIME Cohort: £375 per quarter
+- CV-to-Website course: £97
+- Free tier: the free community and the free career values quiz
+- OPERATE is NOT for sale: it is waitlist-only, coming soon. Never give it a price or imply it is available.
 
 Tone: Encouraging, practical, and aspirational — but grounded. Not motivational fluff. Always show how the advice connects to a real career outcome for the specific segment you are speaking to.
 
