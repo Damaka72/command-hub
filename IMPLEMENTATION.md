@@ -309,7 +309,7 @@ didianolue:
 masteryourcareerpath:
   ✓ Reinforces or references PRIME or OPERATE frameworks
   ✓ Speaks to professionals seeking career transformation
-  ✓ Includes a path to Skool community, course, or cohort
+  ✓ Includes a path to MYCP platform, course, or cohort
   ✗ Fails if frameworks are absent or unnamed
 
 theconcurrentcontractor:
@@ -398,7 +398,7 @@ Delete the loop that generates `agent-{name}-{siteId}` work items (the `for (con
 From `STATIC_ITEMS`, remove:
 - `s4` ("Add CLAUDE.md to Didi, TCC, AIVVP repos") — outdated, no longer relevant
 - `s5` ("Plan first curator + health agent run") — wrong agents, superseded by new architecture
-- Keep `s6` ("Move TCC workshops to MYCP Skool") — still a live revenue action
+- Keep `s6` ("Move TCC workshops to MYCP platform") — still a live revenue action
 
 ### Step 4c — Update the prop to accept StatusResponse
 

@@ -55,13 +55,13 @@ export const SITE_CONFIGS: SiteConfig[] = [
     passChecks: [
       'Speaks clearly to at least one of the four audience segments',
       'Delivers a practical, actionable insight — not vague inspiration',
-      'Drives toward a product, the Skool community, or a framework by name (PRIME or OPERATE)',
+      'Drives toward a product, the PRIME membership community, or a framework by name (PRIME, or OPERATE as coming soon)',
     ],
     failCheck: 'Fails if purely motivational with no practical content, or if it invents products not in the confirmed list',
     subagentSystemPrompt: `You are writing content for Master Your Career Path, a career development platform.
 
 The platform is built around two proprietary frameworks:
-- PRIME: helps professionals clarify their positioning and value (relevant for graduates, early/mid-career, career changers)
+- PRIME: Profile, Research, Interview mindset, Money mastery, Engage. It is for everyone, at every career stage and in every working arrangement (employees, contractors, temps, freelancers), because anyone looking for a job or a new contract is going through these steps. Never position PRIME as only for early-career people.
 - OPERATE: helps professionals build sustainable income as contractors or freelancers (relevant for contractors and freelancers)
 
 The audience has four distinct segments — each post should speak clearly to at least one:
@@ -75,17 +75,19 @@ Content pillars:
 ${pillarBlock('masteryourcareerpath')}
 
 Confirmed products (only reference these — do not invent free resources or other products):
-- Skool community: $27/month
-- CV-to-Website package: £197
-- OPERATE standalone: £455
-- Live cohorts: £325, run four times per year
+- PRIME Monthly Membership (access to the MYCP community and platform): £27 per month
+- PRIME One-Off: £67 (buy PRIME once, no subscription)
+- PRIME Cohort: £375, a group programme run over four to six weeks, once per quarter
+- CV-to-Website course: £97
+- Free tier: the free community and the free career values quiz
+- OPERATE is NOT for sale: it is waitlist-only, coming soon. Never give it a price or imply it is available.
 
 Tone: Encouraging, practical, and aspirational — but grounded. Not motivational fluff. Always show how the advice connects to a real career outcome for the specific segment you are speaking to.
 
-Reference PRIME or OPERATE by name when relevant to the pillar. Every post should include a path to a confirmed product or the Skool community. UK English throughout.
+Reference PRIME or OPERATE by name when relevant to the pillar. Every post should include a path to a confirmed product or the PRIME membership community. UK English throughout.
 
 ${DIVERSITY_GUIDELINE}`,
-    researchFocus: 'UK hiring market shifts, redundancy waves, in-demand skills, salary/negotiation benchmarks, graduate job market conditions, and notable career-development or AI-in-hiring news relevant to graduates, early/mid-career professionals, career changers, and contractors/freelancers.',
+    researchFocus: 'Weekly, timely research across BOTH the hard and the soft side of careers, and for ALL working arrangements (permanent employees, contractors, temps and freelancers, not just permanent staff). Hard side: UK hiring market shifts, redundancy waves, in-demand skills, graduate job market conditions, AI-in-hiring news. Soft side, mapped to the PRIME elements: Profile and positioning (CVs, LinkedIn, personal brand), Research (job search and market research), Interview mindset (confidence, preparation, performance), Money mastery (salary, rates and negotiation benchmarks), and Engage (networking, visibility, relationships, workplace culture, wellbeing and burnout). Include contractor, temp and freelancer news every week (rates, IR35, agency and umbrella changes, demand for interim and temp work).',
   },
 
   {
@@ -148,10 +150,11 @@ VERIFIED FACTS YOU CAN ALWAYS USE:
 - OPDC (Old Oak and Park Royal Development Corporation) is a Mayoral Development Corporation overseeing the regeneration
 - The regeneration covers approximately 650 hectares across Old Oak Common and Park Royal in West London
 - Park Royal is Europe's largest industrial estate, employing approximately 40,000 people
-- The regeneration is expected to deliver around 25,500 new homes and 65,000 jobs over 20+ years
+- The OPDC Local Plan (adopted June 2022, covering 2018 to 2038) targets at least 19,850 new homes and 36,350 new jobs; 25,500 homes and 65,000 jobs are indicative capacity, not targets (say "indicative capacity" if you use them)
+- OPDC's draft 2025-26 accounts report 5,998 homes built or under construction, nearly 7,800 with planning permission (39% affordable), and 1,079 homes approved in 2025-26
+- HS2 services at Old Oak Common are not expected before 2036 and could be as late as 2039 (Government reset, May 2026)
 - OPDC's draft Local Plan has been through public examination
 - The area spans parts of Hammersmith and Fulham, Brent, and Ealing
-- The estimated investment in the area is approximately £1.7bn
 - Residents and businesses can engage with OPDC via opdc.london.gov.uk
 
 Content pillars:
@@ -162,7 +165,7 @@ TONE: Community-first. Write as a local voice for residents and businesses — n
 When the brief's theme does not map to a specific verifiable local story, write a community-education post from the verified facts above. This is always valid content for this audience.
 
 ${DIVERSITY_GUIDELINE} This applies to Old Oak Common and Park Royal too — a genuinely diverse West London community — so never default to one nationality when a post references residents or local people.`,
-    researchFocus: 'Real, dated local news for Old Oak Common and Park Royal, West London — OPDC planning decisions, HS2/Elizabeth line construction updates, new local business openings, community events, and Hammersmith & Fulham / Brent / Ealing council announcements affecting the area. Zero tolerance for anything not directly sourced from search results.',
+    researchFocus: 'Real, dated local news for Old Oak Common and Park Royal, West London — OPDC planning decisions, HS2/Elizabeth line construction updates, and Hammersmith & Fulham / Brent / Ealing council announcements affecting the area. Also, with particular emphasis on COMPANIES: new companies opening, moving into or expanding in the area, local business news (hiring, awards, funding, relocations, closures), and events happening in the area (community events, business and networking events, consultations, open days, markets). Zero tolerance for anything not directly sourced from search results.',
   },
 
   {
@@ -202,7 +205,7 @@ Platform notes:
 UK English. Energetic but not breathless. Show the result, not the tool.
 
 ${DIVERSITY_GUIDELINE}`,
-    researchFocus: 'New AI video-generation model/tool releases, TikTok/Instagram/YouTube algorithm or feature changes, viral video trends and formats, and notable creator-economy news relevant to social media marketers and small business owners making AI video content.',
+    researchFocus: 'What is trending in AI video right now: new AI video-generation model/tool releases, TikTok/Instagram/YouTube algorithm or feature changes, viral video trends and formats, and notable creator-economy news relevant to social media marketers and small business owners making AI video content. Use it to show how the prompt packs tap straight into the trend this week.',
   },
 ];
 

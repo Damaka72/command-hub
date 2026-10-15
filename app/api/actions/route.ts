@@ -35,7 +35,7 @@ const SITE_IDS = [
 export interface ActionLogEntry {
   id: string;
   siteId: string | null;   // one of the five sites, or null for cross-site/general
-  channel: string | null;  // e.g. skool, newsletter, social, blog, consulting
+  channel: string | null;  // e.g. newsletter, social, blog, consulting
   action: string;
   status: ActionStatus;
   source: ActionSource;
