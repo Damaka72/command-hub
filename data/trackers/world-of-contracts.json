@@ -1,0 +1,416 @@
+{
+  "siteId": "world-of-contracts",
+  "name": "World of Contracts",
+  "description": "UK jobs board for commercial, contracts and procurement roles",
+  "repo": "Damaka72/roles-board",
+  "accent": "#E9C46A",
+  "tasks": [
+    {
+      "id": "web-brand-tokens-tidied",
+      "area": "On the website",
+      "title": "Brand tokens tidied",
+      "status": "done",
+      "owner": "claude",
+      "next": false,
+      "order": 10
+    },
+    {
+      "id": "web-role-choice-questions-removed-from-sign-up-and-w",
+      "area": "On the website",
+      "title": "Role-choice questions removed from sign-up and welcome email",
+      "status": "done",
+      "owner": "claude",
+      "next": false,
+      "order": 20
+    },
+    {
+      "id": "web-founding-employer-badge-built",
+      "area": "On the website",
+      "title": "Founding Employer badge built",
+      "status": "done",
+      "owner": "claude",
+      "next": false,
+      "order": 30
+    },
+    {
+      "id": "web-founding-migration-applied-to-the-live-database",
+      "area": "On the website",
+      "title": "Founding migration applied to the live database",
+      "status": "done",
+      "owner": "claude",
+      "next": false,
+      "order": 40
+    },
+    {
+      "id": "web-duplicate-role-card-badges-fixed",
+      "area": "On the website",
+      "title": "Duplicate role-card badges fixed",
+      "status": "done",
+      "owner": "claude",
+      "next": false,
+      "order": 50
+    },
+    {
+      "id": "web-review-a-preview-link-of-the-branch",
+      "area": "On the website",
+      "title": "Review a preview link of the branch",
+      "status": "todo",
+      "owner": "both",
+      "next": true,
+      "order": 60
+    },
+    {
+      "id": "web-confirm-the-vercel-function-count",
+      "area": "On the website",
+      "title": "Confirm the Vercel function count",
+      "status": "todo",
+      "owner": "claude",
+      "next": false,
+      "order": 70
+    },
+    {
+      "id": "web-build-the-for-employers-page",
+      "area": "On the website",
+      "title": "Build the 'For employers' page",
+      "status": "todo",
+      "owner": "claude",
+      "next": false,
+      "order": 80
+    },
+    {
+      "id": "web-add-a-sponsor-slot-to-the-weekly-email-template",
+      "area": "On the website",
+      "title": "Add a sponsor slot to the weekly email template",
+      "status": "todo",
+      "owner": "claude",
+      "next": false,
+      "order": 90
+    },
+    {
+      "id": "web-fix-copy-left-over-from-removing-role-choices",
+      "area": "On the website",
+      "title": "Fix copy left over from removing role choices",
+      "status": "todo",
+      "owner": "claude",
+      "next": false,
+      "order": 100
+    },
+    {
+      "id": "web-decide-what-happens-to-existing-subscribers-save",
+      "area": "On the website",
+      "title": "Decide what happens to existing subscribers' saved preferences",
+      "status": "todo",
+      "owner": "both",
+      "next": false,
+      "order": 110
+    },
+    {
+      "id": "web-add-an-admin-form-to-add-a-founding-employer",
+      "area": "On the website",
+      "title": "Add an admin form to add a founding employer",
+      "status": "todo",
+      "owner": "claude",
+      "next": false,
+      "order": 120
+    },
+    {
+      "id": "web-check-contrast-on-every-new-page-and-the-sponsor",
+      "area": "On the website",
+      "title": "Check contrast on every new page and the sponsor slot",
+      "status": "todo",
+      "owner": "claude",
+      "next": false,
+      "order": 130
+    },
+    {
+      "id": "web-show-places-left-only-from-real-numbers",
+      "area": "On the website",
+      "title": "Show 'places left' only from real numbers",
+      "status": "todo",
+      "owner": "claude",
+      "next": false,
+      "order": 140
+    },
+    {
+      "id": "web-approve-and-merge-to-production",
+      "area": "On the website",
+      "title": "Approve and merge to production",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 150
+    },
+    {
+      "id": "deck-deck-re-themed-to-the-site-palette-and-fonts",
+      "area": "Pitch deck",
+      "title": "Deck re-themed to the site palette and fonts",
+      "status": "done",
+      "owner": "claude",
+      "next": false,
+      "order": 160
+    },
+    {
+      "id": "deck-draft-deck-updated-to-the-agreed-offer",
+      "area": "Pitch deck",
+      "title": "Draft deck updated to the agreed offer",
+      "status": "in_progress",
+      "owner": "claude",
+      "next": false,
+      "order": 170
+    },
+    {
+      "id": "deck-look-through-the-draft-deck-and-say-what-to-chan",
+      "area": "Pitch deck",
+      "title": "Look through the draft deck and say what to change",
+      "status": "todo",
+      "owner": "didi",
+      "next": true,
+      "order": 180
+    },
+    {
+      "id": "deck-add-real-screenshots-of-the-badge-and-sponsor-sl",
+      "area": "Pitch deck",
+      "title": "Add real screenshots of the badge and sponsor slot",
+      "status": "todo",
+      "owner": "claude",
+      "next": false,
+      "order": 190
+    },
+    {
+      "id": "deck-install-fraunces-and-inter-on-the-presenting-com",
+      "area": "Pitch deck",
+      "title": "Install Fraunces and Inter on the presenting computer",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 200
+    },
+    {
+      "id": "onboard-shortlist-five-employers-or-agencies",
+      "area": "Getting the five companies on board",
+      "title": "Shortlist five employers or agencies",
+      "status": "parked",
+      "owner": "didi",
+      "next": false,
+      "order": 210
+    },
+    {
+      "id": "onboard-draft-the-outreach-email",
+      "area": "Getting the five companies on board",
+      "title": "Draft the outreach email",
+      "status": "parked",
+      "owner": "claude",
+      "next": false,
+      "order": 220
+    },
+    {
+      "id": "onboard-write-the-reply-template-for-reservations",
+      "area": "Getting the five companies on board",
+      "title": "Write the reply template for reservations",
+      "status": "parked",
+      "owner": "claude",
+      "next": false,
+      "order": 230
+    },
+    {
+      "id": "onboard-agree-how-payment-is-taken",
+      "area": "Getting the five companies on board",
+      "title": "Agree how payment is taken",
+      "status": "parked",
+      "owner": "both",
+      "next": false,
+      "order": 240
+    },
+    {
+      "id": "onboard-get-each-founder-s-name-exactly-as-shown-on-thei",
+      "area": "Getting the five companies on board",
+      "title": "Get each founder's name exactly as shown on their roles",
+      "status": "parked",
+      "owner": "didi",
+      "next": false,
+      "order": 250
+    },
+    {
+      "id": "onboard-add-each-founding-employer-and-set-featured-date",
+      "area": "Getting the five companies on board",
+      "title": "Add each founding employer and set featured dates",
+      "status": "parked",
+      "owner": "claude",
+      "next": false,
+      "order": 260
+    },
+    {
+      "id": "onboard-review-each-advert-before-it-goes-live",
+      "area": "Getting the five companies on board",
+      "title": "Review each advert before it goes live",
+      "status": "parked",
+      "owner": "didi",
+      "next": false,
+      "order": 270
+    },
+    {
+      "id": "onboard-schedule-each-founder-s-sponsor-issue",
+      "area": "Getting the five companies on board",
+      "title": "Schedule each founder's sponsor issue",
+      "status": "parked",
+      "owner": "both",
+      "next": false,
+      "order": 280
+    },
+    {
+      "id": "onboard-track-places-taken-5-in-total",
+      "area": "Getting the five companies on board",
+      "title": "Track places taken (5 in total)",
+      "status": "parked",
+      "owner": "didi",
+      "next": false,
+      "order": 290
+    },
+    {
+      "id": "onboard-diary-a-renewal-reminder-for-month-11",
+      "area": "Getting the five companies on board",
+      "title": "Diary a renewal reminder for month 11",
+      "status": "parked",
+      "owner": "didi",
+      "next": false,
+      "order": 300
+    },
+    {
+      "id": "terms-founding-offer-agreed",
+      "area": "Terms, payment and compliance",
+      "title": "Founding offer agreed",
+      "status": "done",
+      "owner": "didi",
+      "next": false,
+      "order": 310
+    },
+    {
+      "id": "terms-footer-keeps-the-operator-name",
+      "area": "Terms, payment and compliance",
+      "title": "Footer keeps the operator name",
+      "status": "done",
+      "owner": "didi",
+      "next": false,
+      "order": 320
+    },
+    {
+      "id": "terms-confirm-the-vat-wording-with-an-accountant",
+      "area": "Terms, payment and compliance",
+      "title": "Confirm the VAT wording with an accountant",
+      "status": "todo",
+      "owner": "didi",
+      "next": true,
+      "order": 330
+    },
+    {
+      "id": "terms-update-the-draft-advertiser-terms-for-the-foundi",
+      "area": "Terms, payment and compliance",
+      "title": "Update the draft advertiser terms for the founding offer",
+      "status": "todo",
+      "owner": "claude",
+      "next": false,
+      "order": 340
+    },
+    {
+      "id": "terms-decide-the-refund-policy-for-founding-places",
+      "area": "Terms, payment and compliance",
+      "title": "Decide the refund policy for founding places",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 350
+    },
+    {
+      "id": "terms-set-up-stripe-and-store-test-keys-as-secrets",
+      "area": "Terms, payment and compliance",
+      "title": "Set up Stripe and store test keys as secrets",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 360
+    },
+    {
+      "id": "bec-first-draft-built",
+      "area": "Bid Evaluation Clerk (separate product)",
+      "title": "First draft built",
+      "status": "done",
+      "owner": "claude",
+      "next": false,
+      "order": 370
+    },
+    {
+      "id": "bec-check-contract-and-nda-terms-on-reusing-the-meth",
+      "area": "Bid Evaluation Clerk (separate product)",
+      "title": "Check contract and NDA terms on reusing the methods",
+      "status": "todo",
+      "owner": "didi",
+      "next": true,
+      "order": 380
+    },
+    {
+      "id": "bec-verify-the-8-working-day-standstill-rule",
+      "area": "Bid Evaluation Clerk (separate product)",
+      "title": "Verify the 8 working day standstill rule",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 390
+    },
+    {
+      "id": "bec-test-the-prompts-on-the-dummy-tender",
+      "area": "Bid Evaluation Clerk (separate product)",
+      "title": "Test the prompts on the dummy tender",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 400
+    },
+    {
+      "id": "bec-widen-the-workbook-and-cache-the-values",
+      "area": "Bid Evaluation Clerk (separate product)",
+      "title": "Widen the workbook and cache the values",
+      "status": "todo",
+      "owner": "claude",
+      "next": false,
+      "order": 410
+    },
+    {
+      "id": "bec-decide-name-licence-refund-policy-and-answer-key",
+      "area": "Bid Evaluation Clerk (separate product)",
+      "title": "Decide name, licence, refund policy and answer key",
+      "status": "todo",
+      "owner": "both",
+      "next": false,
+      "order": 420
+    },
+    {
+      "id": "bec-check-the-fictional-names-do-not-match-real-peop",
+      "area": "Bid Evaluation Clerk (separate product)",
+      "title": "Check the fictional names do not match real people or firms",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 430
+    },
+    {
+      "id": "hub-plug-world-of-contracts-into-the-command-hub",
+      "area": "Command hub",
+      "title": "Plug World of Contracts into the command hub",
+      "detail": "Built on branch claude/site-tracker-template; not yet reviewed, merged or deployed.",
+      "status": "done",
+      "owner": "claude",
+      "next": false,
+      "order": 440
+    },
+    {
+      "id": "hub-build-the-same-tracker-template-inside-the-comma",
+      "area": "Command hub",
+      "title": "Build the same tracker template inside the command hub",
+      "detail": "Built on branch claude/site-tracker-template; not yet reviewed, merged or deployed.",
+      "status": "done",
+      "owner": "claude",
+      "next": false,
+      "order": 450
+    }
+  ]
+}
