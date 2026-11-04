@@ -9,7 +9,7 @@ import Link from "next/link";
 // video-producer agent reads the same rules: budget and video type decide the
 // tool, and naming a tool always overrides.
 
-type Cost = "free" | "credits" | "subscription";
+type Cost = "free" | "credits" | "subscription" | "included";
 
 interface Tool {
   id: string;
@@ -81,13 +81,54 @@ const TOOLS: Tool[] = [
   },
 ];
 
+// Claude's own creative tools. They live inside claude.ai, so the hub cannot
+// embed them; it holds the recipes (what to ask for, per site) and the rules.
+// Cost is "included": covered by the Claude plan, no separate credits.
+const CLAUDE_TOOLS: Tool[] = [
+  {
+    id: "claude-design",
+    name: "Claude Design",
+    cost: "included",
+    costNote: "Included with the Claude plan",
+    runsOn: "Inside Claude (claude.ai), kept as an artifact",
+    makes: "Landing pages, UI mockups, posters, flyers, invites, ads and visual social posts on an editable canvas",
+    bestFor: "Anything judged by looking at it: a landing page for a product, a poster for an event, a set of social visuals in one brand style.",
+    avoid: "Old Oak Town, unless built only from real uploaded photos. No AI-generated imagery for that site.",
+    ask: "Use Claude Design to make a LinkedIn quote-card set for [site], three options, brand colours.",
+  },
+  {
+    id: "claude-slides",
+    name: "Claude Slides",
+    cost: "included",
+    costNote: "Included with the Claude plan",
+    runsOn: "Inside Claude (claude.ai), downloads as PowerPoint or PDF",
+    makes: "16:9 presentation decks you can page through, edit and download",
+    bestFor: "Skool community sessions, consulting proposals and talks, and carousels built as slides first.",
+    avoid: "Short vertical video. Use HyperFrames for anything that needs to move.",
+    ask: "Use Claude Slides to make a 10-slide deck on [topic] for [site], with speaker notes.",
+  },
+  {
+    id: "claude-dashboard",
+    name: "Claude Dashboard",
+    cost: "included",
+    costNote: "Included with the Claude plan",
+    runsOn: "Inside Claude (claude.ai), kept as an artifact",
+    makes: "Charts, KPI tiles and tables where every number shows its source",
+    bestFor: "Weekly performance reports per site, and anything where figures must be traceable. Pairs with the Friday and Saturday analysis.",
+    avoid: "Live monitoring. The hub's own home page already does that.",
+    ask: "Use Claude Dashboard to report last week's post performance for [site] from this export, with sources.",
+  },
+];
+
 const COST_STYLE: Record<Cost, string> = {
+  included:     "bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-300",
   free:         "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300",
   credits:      "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300",
   subscription: "bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300",
 };
 
 const COST_LABEL: Record<Cost, string> = {
+  included: "In plan",
   free: "Free",
   credits: "Credits",
   subscription: "Subscription",
@@ -110,6 +151,9 @@ const BY_TYPE: { need: string; free: string; paid: string }[] = [
   { need: "Product ad from a URL", free: "HyperFrames (product-launch style)", paid: "Higgsfield Marketing Studio" },
   { need: "Local area slideshow (Old Oak Town)", free: "HyperFrames with real photos", paid: "Blotato Image Slideshow with real photos" },
   { need: "Reframe 16:9 to 9:16", free: "HyperFrames or ffmpeg", paid: "Higgsfield Reframe" },
+  { need: "Landing page, poster or social visual set", free: "Claude Design (in plan)", paid: "Blotato Visuals" },
+  { need: "Presentation deck (Skool session, proposal, talk)", free: "Claude Slides (in plan)", paid: "None needed" },
+  { need: "Sourced performance report for a site", free: "Claude Dashboard (in plan)", paid: "None needed" },
 ];
 
 const BY_SITE: { site: string; url: string; note: string }[] = [
@@ -128,6 +172,30 @@ function Section({ title, children }: { title: string; children: React.ReactNode
       </h2>
       {children}
     </section>
+  );
+}
+
+function ToolCard({ t, children }: { t: Tool; children?: React.ReactNode }) {
+  return (
+    <article className="flex flex-col gap-3 rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="flex items-start justify-between gap-3">
+        <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-50">{t.name}</h3>
+        <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${COST_STYLE[t.cost]}`}>
+          {COST_LABEL[t.cost]}
+        </span>
+      </div>
+      {children}
+      <dl className="flex flex-col gap-2 text-xs leading-relaxed text-zinc-600 dark:text-zinc-400">
+        <div><dt className="inline font-semibold text-zinc-800 dark:text-zinc-200">Cost: </dt><dd className="inline">{t.costNote}</dd></div>
+        <div><dt className="inline font-semibold text-zinc-800 dark:text-zinc-200">Runs on: </dt><dd className="inline">{t.runsOn}</dd></div>
+        <div><dt className="inline font-semibold text-zinc-800 dark:text-zinc-200">Makes: </dt><dd className="inline">{t.makes}</dd></div>
+        <div><dt className="inline font-semibold text-zinc-800 dark:text-zinc-200">Best for: </dt><dd className="inline">{t.bestFor}</dd></div>
+        <div><dt className="inline font-semibold text-zinc-800 dark:text-zinc-200">Avoid for: </dt><dd className="inline">{t.avoid}</dd></div>
+      </dl>
+      <p className="mt-auto rounded-lg bg-zinc-100 px-3 py-2 text-xs italic text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+        “{t.ask}”
+      </p>
+    </article>
   );
 }
 
@@ -207,25 +275,23 @@ export default function VideoStudioPage() {
         <Section title="The tools">
           <div className="grid gap-4 sm:grid-cols-2">
             {TOOLS.map(t => (
-              <article key={t.id} className="flex flex-col gap-3 rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
-                <div className="flex items-start justify-between gap-3">
-                  <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-50">{t.name}</h3>
-                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${COST_STYLE[t.cost]}`}>
-                    {COST_LABEL[t.cost]}
-                  </span>
-                </div>
+              <ToolCard key={t.id} t={t}>
                 {t.id === "short-video-maker" && <StatusDot up={shortVideoUp} />}
-                <dl className="flex flex-col gap-2 text-xs leading-relaxed text-zinc-600 dark:text-zinc-400">
-                  <div><dt className="inline font-semibold text-zinc-800 dark:text-zinc-200">Cost: </dt><dd className="inline">{t.costNote}</dd></div>
-                  <div><dt className="inline font-semibold text-zinc-800 dark:text-zinc-200">Runs on: </dt><dd className="inline">{t.runsOn}</dd></div>
-                  <div><dt className="inline font-semibold text-zinc-800 dark:text-zinc-200">Makes: </dt><dd className="inline">{t.makes}</dd></div>
-                  <div><dt className="inline font-semibold text-zinc-800 dark:text-zinc-200">Best for: </dt><dd className="inline">{t.bestFor}</dd></div>
-                  <div><dt className="inline font-semibold text-zinc-800 dark:text-zinc-200">Avoid for: </dt><dd className="inline">{t.avoid}</dd></div>
-                </dl>
-                <p className="mt-auto rounded-lg bg-zinc-100 px-3 py-2 text-xs italic text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
-                  “{t.ask}”
-                </p>
-              </article>
+              </ToolCard>
+            ))}
+          </div>
+        </Section>
+
+        <Section title="Claude's own creative tools">
+          <Prose>
+            These run inside Claude, not in this hub, so the hub cannot embed them. Ask for them in Claude or Cowork and
+            the result is kept as an artifact you can edit and share. They are covered by the Claude plan, so there are no
+            extra credits to track. Claude Motion (short animations) is a Team and Enterprise beta only, so it is left
+            out here: HyperFrames above does the same job for free.
+          </Prose>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {CLAUDE_TOOLS.map(t => (
+              <ToolCard key={t.id} t={t} />
             ))}
           </div>
         </Section>
@@ -240,7 +306,7 @@ export default function VideoStudioPage() {
           </ul>
         </Section>
 
-        <Section title="By video type: free or paid">
+        <Section title="By need: free or paid">
           <div className="overflow-x-auto rounded-xl border border-zinc-200 dark:border-zinc-800">
             <table className="w-full text-left text-xs">
               <thead className="bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
