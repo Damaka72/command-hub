@@ -26,10 +26,10 @@ const FLOWS: Record<string, FlowConfig> = {
   masteryourcareerpath: {
     accent: '#F5A623',
     nodes: [
-      ['Free Skool'],
+      ['Free tier'],
       ['Newsletter'],
       ['Webinar'],
-      ['$27/mo or', '£325 course'],
+      ['£27/mo, £67 or', '£375 cohort'],
     ],
   },
   theconcurrentcontractor: {

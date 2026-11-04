@@ -82,7 +82,7 @@ function detectSiteFromContent(platform: string, text: string): string {
   ) return 'theconcurrentcontractor';
 
   if (
-    t.includes('masteryourcareerpath') || t.includes('skool') || t.includes('cv-to-website') ||
+    t.includes('masteryourcareerpath') || t.includes('cv-to-website') ||
     t.includes('career path') || t.includes('operate') || t.includes('prime framework')
   ) return 'masteryourcareerpath';
 
