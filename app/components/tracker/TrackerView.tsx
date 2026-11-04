@@ -145,8 +145,8 @@ export default function TrackerView({ siteId }: { siteId: string }) {
               style={{ background: 'var(--panel-2)', color: 'var(--fg)', border: '1px solid var(--warn)' }}
             >
               <strong style={{ color: 'var(--warn)' }}>Saved on this device only.</strong>{' '}
-              The shared tracker store isn’t set up yet, so changes you make stay in this browser and
-              won’t show on other devices.
+              The shared tracker store couldn’t be reached, so changes you make stay in this browser and
+              won’t show on other devices until it is back.
             </p>
           )}
 

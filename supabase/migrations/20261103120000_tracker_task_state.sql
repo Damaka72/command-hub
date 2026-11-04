@@ -6,8 +6,10 @@
 -- this table only holds the current status of tasks someone has moved on, laid
 -- over the file when a tracker is shown.
 --
--- NOT YET APPLIED. Until it is, the trackers still show (from the repo files)
--- and the Hub says changes are kept on this device only.
+-- APPLIED to the 'The Old Oak Town' Supabase project (the one actions_log lives
+-- in) by the parent session, on Didi's instruction. Do not re-apply it. If the
+-- table cannot be reached, the trackers still show (from the repo files) and the
+-- Hub says changes are kept on this device only.
 --
 -- Written idempotently, matching actions_log: the Hub is gated app-wide by
 -- proxy.ts and reaches Supabase with the anon key, so anon holds read + write.
