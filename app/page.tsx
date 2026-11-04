@@ -6,6 +6,7 @@ import AutomationStatus from "./components/AutomationStatus";
 import TodayFocus from "./components/TodayFocus";
 import SidebarTasks from "./components/SidebarTasks";
 import CollapsibleSitePanel from "./components/CollapsibleSitePanel";
+import TrackerRollup from "./components/TrackerRollup";
 import { useWeek } from "./context/WeekContext";
 import type { SiteDetail, StatusResponse, DraftItem, WeekReview } from "./api/status/route";
 import type { HomeResponse } from "./api/home/route";
@@ -328,6 +329,9 @@ export default function Home() {
                 />
               </div>
             )}
+
+            {/* What is done and what is outstanding, per site — one line each */}
+            <TrackerRollup />
 
             {/* ── Collapsible site panels (UX spec §3.4) ── */}
             <div className="flex flex-col gap-3">
