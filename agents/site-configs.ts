@@ -38,7 +38,26 @@ export interface SiteConfig {
   automateBlotato: boolean;    // false = owner manages posting manually
   blotatoPlatforms: string[];  // platforms to draft + auto-schedule via Blotato
   researchFocus: string;       // what the weekly web-research step should look for
+  // Facts the writer may always use. When set, the grader is shown the same list
+  // (plus the brief's key points) so it can check claims against something real.
+  verifiedFacts?: string[];
+  // 'advisory' = grade once and record the verdict, but never rewrite the draft.
+  // Default 'strict' = grade, then rewrite failures up to MAX_RETRIES times.
+  graderMode?: 'strict' | 'advisory';
 }
+
+// Old Oak Town: the only local facts a draft may state without a source in the brief.
+const OOT_VERIFIED_FACTS = [
+  `Old Oak Common will be the UK's largest new railway station, serving HS2 and the Elizabeth line (Crossrail)`,
+  `OPDC (Old Oak and Park Royal Development Corporation) is a Mayoral Development Corporation overseeing the regeneration`,
+  `The regeneration covers approximately 650 hectares across Old Oak Common and Park Royal in West London`,
+  `Park Royal is Europe's largest industrial estate, employing approximately 40,000 people`,
+  `The regeneration is expected to deliver around 25,500 new homes and 65,000 jobs over 20+ years`,
+  `OPDC's draft Local Plan has been through public examination`,
+  `The area spans parts of Hammersmith and Fulham, Brent, and Ealing`,
+  `The estimated investment in the area is approximately £1.7bn`,
+  `Residents and businesses can engage with OPDC via opdc.london.gov.uk`,
+];
 
 export const SITE_CONFIGS: SiteConfig[] = [
   {
@@ -56,6 +75,7 @@ export const SITE_CONFIGS: SiteConfig[] = [
       'Speaks clearly to at least one of the four audience segments',
       'Delivers a practical, actionable insight — not vague inspiration',
       'Drives toward a product, the PRIME membership community, or a framework by name (PRIME, or OPERATE as coming soon)',
+      'Drives toward a product, the Master Your Career Path community, or a framework by name (PRIME or OPERATE)',
     ],
     failCheck: 'Fails if purely motivational with no practical content, or if it invents products not in the confirmed list',
     subagentSystemPrompt: `You are writing content for Master Your Career Path, a career development platform.
@@ -85,6 +105,16 @@ Confirmed products (only reference these — do not invent free resources or oth
 Tone: Encouraging, practical, and aspirational — but grounded. Not motivational fluff. Always show how the advice connects to a real career outcome for the specific segment you are speaking to.
 
 Reference PRIME or OPERATE by name when relevant to the pillar. Every post should include a path to a confirmed product or the PRIME membership community. UK English throughout.
+- PRIME Membership (Master Your Career Path community): £27/month
+- OPERATE Membership: £27/month
+- PRIME + OPERATE together: £47/month
+- PRIME one-off (lifetime access): £67
+- CV-to-Website package: £97
+- PRIME Cohort: £375 (live cohorts, run four times per year)
+
+Tone: Encouraging, practical, and aspirational — but grounded. Not motivational fluff. Always show how the advice connects to a real career outcome for the specific segment you are speaking to.
+
+Reference PRIME or OPERATE by name when relevant to the pillar. Every post should include a path to a confirmed product or the Master Your Career Path community. UK English throughout.
 
 ${DIVERSITY_GUIDELINE}`,
     researchFocus: 'Weekly, timely research across BOTH the hard and the soft side of careers, and for ALL working arrangements (permanent employees, contractors, temps and freelancers, not just permanent staff). Hard side: UK hiring market shifts, redundancy waves, in-demand skills, graduate job market conditions, AI-in-hiring news. Soft side, mapped to the PRIME elements: Profile and positioning (CVs, LinkedIn, personal brand), Research (job search and market research), Interview mindset (confidence, preparation, performance), Money mastery (salary, rates and negotiation benchmarks), and Engage (networking, visibility, relationships, workplace culture, wellbeing and burnout). Include contractor, temp and freelancer news every week (rates, IR35, agency and umbrella changes, demand for interim and temp work).',
@@ -133,12 +163,14 @@ ${DIVERSITY_GUIDELINE}`,
     audience: 'Current and future residents, local businesses, property investors, and community stakeholders in the Old Oak Common and Park Royal area of West London',
     tone: 'Community-first, factual, local — never corporate',
     rubricName: 'No-fabrication rubric',
+    verifiedFacts: OOT_VERIFIED_FACTS,
+    graderMode: 'advisory',
     passChecks: [
-      'Every factual claim is verifiable — no invented businesses, events, people, or statistics',
+      'Every factual claim appears in the verified facts or the brief key points — no invented businesses, events, people, dates or statistics',
       'Rooted in the Old Oak Common or Park Royal regeneration area',
       'Community-first voice — not a press release or developer pitch',
     ],
-    failCheck: 'Fails on ANY fabricated local detail — zero tolerance',
+    failCheck: 'Fails on ANY specific business, event, person, date or figure that appears in neither the verified facts nor the brief key points — zero tolerance for invention',
     subagentSystemPrompt: `You are writing content for Old Oak Town, a hyperlocal media site covering the Old Oak Common and Park Royal regeneration area in West London.
 
 The audience: current and future residents, local businesses, property investors, and community stakeholders in West London.
@@ -156,6 +188,7 @@ VERIFIED FACTS YOU CAN ALWAYS USE:
 - OPDC's draft Local Plan has been through public examination
 - The area spans parts of Hammersmith and Fulham, Brent, and Ealing
 - Residents and businesses can engage with OPDC via opdc.london.gov.uk
+${OOT_VERIFIED_FACTS.map(f => `- ${f}`).join('\n')}
 
 Content pillars:
 ${pillarBlock('oldoaktown')}
