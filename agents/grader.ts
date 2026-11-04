@@ -22,9 +22,10 @@ const GRADER_USER = (
   passChecks: string[],
   failCheck: string,
   content: string,
+  reference: string,
 ): string => `
 Rubric: ${rubricName} for ${siteName}
-
+${reference}
 Pass criteria (ALL must be met):
 ${passChecks.map((c, i) => `${i + 1}. ${c}`).join('\n')}
 
@@ -76,7 +77,23 @@ Return JSON:
   "content": "The revised post text"
 }`;
 
-async function gradeOnce(draft: Draft): Promise<{
+// Material the writer was allowed to use. Without it the grader has nothing to
+// check factual claims against and fails any post that states a specific.
+function referenceBlock(siteFacts: string[] | undefined, brief: SiteBrief): string {
+  const lines: string[] = [];
+  if (siteFacts?.length) {
+    lines.push('Verified facts (a claim that matches these is verified):');
+    lines.push(...siteFacts.map(f => `- ${f}`));
+  }
+  if (brief.angle || brief.keyPoints.length) {
+    lines.push('Content brief the writer was given (a claim that matches these is verified):');
+    if (brief.angle) lines.push(`Angle: ${brief.angle}`);
+    lines.push(...brief.keyPoints.map(p => `- ${p}`));
+  }
+  return lines.length ? `\nReference material:\n${lines.join('\n')}\n` : '';
+}
+
+async function gradeOnce(draft: Draft, brief: SiteBrief): Promise<{
   verdict: 'pass' | 'fail';
   failedCriterion: string | null;
 }> {
@@ -91,6 +108,7 @@ async function gradeOnce(draft: Draft): Promise<{
       site.passChecks,
       site.failCheck,
       draft.content,
+      referenceBlock(site.verifiedFacts, brief),
     ),
     256,
   );
@@ -137,7 +155,7 @@ async function gradeWithRetry(
   let retryCount = 0;
 
   while (retryCount <= MAX_RETRIES) {
-    const { verdict, failedCriterion } = await gradeOnce(current);
+    const { verdict, failedCriterion } = await gradeOnce(current, brief);
 
     if (verdict === 'pass') {
       const verdictFile: GraderVerdictFile = {
@@ -160,8 +178,9 @@ async function gradeWithRetry(
       };
     }
 
-    // Failed
-    if (retryCount < MAX_RETRIES) {
+    // Failed. Advisory sites keep the original draft and just record the flag, so
+    // the owner reviews it instead of the writer being pushed towards vaguer text.
+    if (site.graderMode !== 'advisory' && retryCount < MAX_RETRIES) {
       logWarn(`${draft.siteId} — fail (retry ${retryCount + 1}/${MAX_RETRIES}): "${failedCriterion}"`);
       current = await rewriteDraft(current, brief, failedCriterion!);
       retryCount++;
