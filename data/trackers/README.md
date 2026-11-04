@@ -31,5 +31,5 @@ roll-up and at `/trackers/<siteId>` — no code changes.
 - The file is validated on load; a mistake gives an error naming the file and task.
 - Status changes made in the Hub are stored in Supabase (`tracker_task_state`, see
   `supabase/migrations/20261103120000_tracker_task_state.sql`) and laid over the file,
-  so the committed `status` is the starting point. Until that migration is applied,
+  so the committed `status` is the starting point. If the table cannot be reached,
   changes are kept in the browser only and the page says so.
