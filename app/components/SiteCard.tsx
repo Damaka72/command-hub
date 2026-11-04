@@ -91,7 +91,7 @@ const SITE_RUBRIC: Record<string, { pass: string[]; fail: string }> = {
     pass: [
       'Reinforces or references PRIME or OPERATE frameworks',
       'Speaks to professionals seeking career transformation',
-      'Includes a path to Skool community, course, or cohort',
+      'Includes a path to the PRIME community, course, or cohort',
     ],
     fail: 'Fails if frameworks are absent or unnamed',
   },

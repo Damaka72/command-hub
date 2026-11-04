@@ -78,7 +78,7 @@ function buildSystemItems(statusMap: StatusResponse): FocusItem[] {
   items.push({
     id: "s-workshops",
     dot: "red",
-    text: "Move TCC workshops to MYCP Skool",
+    text: "Move TCC workshops to the MYCP platform",
     tag: "Revenue",
   });
 

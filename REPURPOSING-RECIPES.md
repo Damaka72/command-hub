@@ -79,7 +79,7 @@ specific trim. Do not restate the whole script; the source is one hop away via
    accept a non-Higgsfield file.
 3. **Source is a HyperFrames master** → re-render the same composition at
    `data-width="1080" data-height="1920"` (it's HTML, not a video file to
-   reframe — see `hyperframes-core`). This is the `mycp-skool-explainer` case:
+   reframe — see `hyperframes-core`). This is the `mycp-platform-explainer` case:
    the Aug 2026 build rendered landscape for YouTube and still owes this cut.
 4. **Source is a Blotato Visuals master** → regenerate with a 9:16-sized
    template rather than reframing (Blotato Visuals doesn't expose a reframe
