@@ -29,7 +29,6 @@ type View = 'week' | 'month' | 'list';
 
 const SITE_LABELS: Record<string, string> = {
   masteryourcareerpath:    'Master Your Career Path',
-  theconcurrentcontractor: 'The Concurrent Contractor',
   oldoaktown:              'Old Oak Town',
   aiviralvideoprompts:     'AI Viral Video Prompts',
   didianolue:              'Didi Anolue',

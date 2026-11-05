@@ -162,11 +162,10 @@ function parseMediaUrls(raw: string): string[] {
 
 const SITE_LABELS: Record<string, string> = {
   masteryourcareerpath:    'Master Your Career Path',
-  theconcurrentcontractor: 'The Concurrent Contractor',
   oldoaktown:              'Old Oak Town',
   aiviralvideoprompts:     'AI Viral Video Prompts',
 };
-const SITE_ORDER = ['masteryourcareerpath', 'theconcurrentcontractor', 'oldoaktown', 'aiviralvideoprompts'];
+const SITE_ORDER = ['masteryourcareerpath', 'oldoaktown', 'aiviralvideoprompts'];
 const DAY_ORDER: Record<string, number> = { Monday: 1, Tuesday: 2, Wednesday: 3, Thursday: 4, Friday: 5 };
 
 const STATUS_PILL: Record<string, string> = {

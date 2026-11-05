@@ -95,14 +95,6 @@ const SITE_RUBRIC: Record<string, { pass: string[]; fail: string }> = {
     ],
     fail: 'Fails if frameworks are absent or unnamed',
   },
-  theconcurrentcontractor: {
-    pass: [
-      'Written through the lens of a practising UK IT contractor',
-      'Addresses IR35, rate strategy, or market intel',
-      'Practical and peer-to-peer in tone — not advisory',
-    ],
-    fail: 'Fails if it reads as generic career or recruitment content',
-  },
   oldoaktown: {
     pass: [
       'Every factual claim is verifiable — no invented businesses or events',

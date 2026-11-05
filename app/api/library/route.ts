@@ -26,7 +26,7 @@ export const dynamic = 'force-dynamic';
 
 // Sites that own content_library rows (repurpose targets). didianolue is handled
 // personally and has no pipeline content.
-const SITE_ORDER = ['masteryourcareerpath', 'theconcurrentcontractor', 'oldoaktown', 'aiviralvideoprompts'];
+const SITE_ORDER = ['masteryourcareerpath', 'oldoaktown', 'aiviralvideoprompts'];
 const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
 const MAX_ROWS = 500;

@@ -160,7 +160,6 @@ const BY_SITE: { site: string; url: string; note: string }[] = [
   { site: "Didi Anolue", url: "didianolue.co.uk", note: "LinkedIn, X. Authority and expertise. Talking-head style and repurposed posts." },
   { site: "Master Your Career Path", url: "masteryourcareerpath.com", note: "LinkedIn, Instagram, TikTok. Tips, product promos (only if a campaign is confirmed), 9:16 talking-head." },
   { site: "Old Oak Town", url: "oldoaktown.co.uk", note: "Real photos only. No AI imagery, no stock footage, no invented events or statistics." },
-  { site: "The Concurrent Contractor", url: "theconcurrentcontractor.com", note: "LinkedIn, X. IR35 explainers, stats infographics, authority video." },
   { site: "AI Viral Video Prompts", url: "aiviralvideoprompts.com", note: "TikTok, Instagram, X. The natural home for showcasing AI video tools." },
 ];
 

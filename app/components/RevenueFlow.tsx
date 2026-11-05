@@ -32,15 +32,6 @@ const FLOWS: Record<string, FlowConfig> = {
       ['£27/mo, £67 or', '£375 cohort'],
     ],
   },
-  theconcurrentcontractor: {
-    accent: '#FFD700',
-    nodes: [
-      ['Article /', 'CHAOS'],
-      ['Newsletter'],
-      ['Workshop'],
-      ['£89'],
-    ],
-  },
   oldoaktown: {
     accent: '#4C8A35',
     nodes: [

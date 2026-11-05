@@ -23,7 +23,6 @@ const DOT_STYLE: Record<FocusItem["dot"], { bg: string; glow?: string }> = {
 const COORDINATOR_SITES: { key: keyof CoordinatorStatusData["sites"]; label: string; newsletter: string }[] = [
   { key: "aivvp", label: "AIVVP",  newsletter: "Prompt-ly" },
   { key: "mycp",  label: "MYCP",   newsletter: "The Pathway" },
-  { key: "tcc",   label: "TCC",    newsletter: "The Consultant" },
   { key: "oot",   label: "OOT",    newsletter: "The Oak" },
 ];
 
@@ -74,13 +73,6 @@ function buildActionItems(actions: ActionLogEntry[]): FocusItem[] {
 function buildSystemItems(statusMap: StatusResponse): FocusItem[] {
   const items: FocusItem[] = [];
   const { sites, portfolioCoordinator } = statusMap;
-
-  items.push({
-    id: "s-workshops",
-    dot: "red",
-    text: "Move TCC workshops to the MYCP platform",
-    tag: "Revenue",
-  });
 
   for (const [siteId, detail] of Object.entries(sites)) {
     if (detail.outstanding.overdueFollowUps > 0) {

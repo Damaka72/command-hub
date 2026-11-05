@@ -58,8 +58,8 @@ const RHYTHM: {
     action: "Set the plan, then run the pipeline",
     detail: (
       <>
-        On <Code>/plan</Code>, pick a content pillar and theme for each of the four pipeline sites
-        (MYCP, TCC, OOT, AIVVP) and save. Then on the dashboard press <Code>▶ Run pipeline</Code> and
+        On <Code>/plan</Code>, pick a content pillar and theme for each of the three pipeline sites
+        (MYCP, OOT, AIVVP) and save. Then on the dashboard press <Code>▶ Run pipeline</Code> and
         confirm. This is a <strong>manual trigger — the pipeline never runs on its own</strong>. It
         generates five drafts per site (one per weekday) into the content library.
       </>
@@ -144,14 +144,13 @@ const PAGES: { path: string; name: string; what: string }[] = [
 
 const PIPELINE_SITES: { site: string; url: string; rubric: string; primary: string }[] = [
   { site: "Master Your Career Path", url: "masteryourcareerpath.com",    rubric: "Career transformation rubric", primary: "LinkedIn" },
-  { site: "The Concurrent Contractor", url: "theconcurrentcontractor.com", rubric: "Contractor lens rubric",       primary: "LinkedIn" },
   { site: "Old Oak Town",            url: "oldoaktown.co.uk",             rubric: "No-fabrication rubric",         primary: "Instagram" },
   { site: "AI Viral Video Prompts",  url: "aiviralvideoprompts.com",      rubric: "Conversion rubric",             primary: "TikTok" },
 ];
 
 const PUBLICATIONS: { title: string; site: string; send: string }[] = [
   { title: "The Prompt-ly", site: "AI Viral Video Prompts",           send: "Wednesday" },
-  { title: "The Pathway",   site: "MYCP + The Concurrent Contractor", send: "Tuesday" },
+  { title: "The Pathway",   site: "MYCP", send: "Tuesday" },
   { title: "The Oak",       site: "Old Oak Town",                     send: "Thursday" },
 ];
 
@@ -197,8 +196,8 @@ export default function GuidePage() {
         <Section title="What the Command Hub is">
           <Prose>
             The Hub is both a monitor and a workspace. It watches all five sites — up/down, deploys,
-            scheduled posts, revenue — and it drives the weekly content pipeline for four of them
-            (MYCP, TCC, OOT, AIVVP). From here you set the week&rsquo;s plan, run the pipeline, review
+            scheduled posts, revenue — and it drives the weekly content pipeline for three of them
+            (MYCP, OOT, AIVVP). From here you set the week&rsquo;s plan, run the pipeline, review
             and edit drafts, push approved posts to Blotato, build the newsletters, and read the Friday
             report. It is not read-only.
           </Prose>
@@ -277,9 +276,9 @@ export default function GuidePage() {
         </Section>
 
         {/* 5. Pipeline sites + Didi */}
-        <Section title="The Four Pipeline Sites (and Didi)">
+        <Section title="The Three Pipeline Sites (and Didi)">
           <Prose>
-            The pipeline drafts, grades, and publishes for these four sites. Each has its own grader
+            The pipeline drafts, grades, and publishes for these three sites. Each has its own grader
             rubric — a draft that fails is flagged in Review with the failing criterion so you can fix
             or reject it.
           </Prose>

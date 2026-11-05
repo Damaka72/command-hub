@@ -26,14 +26,12 @@ type PillarsData = Record<string, Pillar[]>;
 
 const SITE_LABELS: Record<string, string> = {
   masteryourcareerpath:    'Master Your Career Path',
-  theconcurrentcontractor: 'The Concurrent Contractor',
   oldoaktown:              'Old Oak Town',
   aiviralvideoprompts:     'AI Viral Video Prompts',
 };
 
 const SITE_ORDER = [
   'masteryourcareerpath',
-  'theconcurrentcontractor',
   'oldoaktown',
   'aiviralvideoprompts',
 ];

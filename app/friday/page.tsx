@@ -14,11 +14,10 @@ import WeekSelector from '../components/WeekSelector';
 
 const SITE_LABELS: Record<string, string> = {
   masteryourcareerpath:    'Master Your Career Path',
-  theconcurrentcontractor: 'The Concurrent Contractor',
   oldoaktown:              'Old Oak Town',
   aiviralvideoprompts:     'AI Viral Video Prompts',
 };
-const SITE_ORDER = ['masteryourcareerpath', 'theconcurrentcontractor', 'oldoaktown', 'aiviralvideoprompts'];
+const SITE_ORDER = ['masteryourcareerpath', 'oldoaktown', 'aiviralvideoprompts'];
 
 // content_library statuses, in the order shown across the planned-vs-published row.
 const STATUS_KEYS = ['draft', 'approved', 'approved_needs_media', 'rejected', 'pushed', 'failed'] as const;

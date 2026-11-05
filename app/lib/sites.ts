@@ -33,32 +33,6 @@ export const SITES: Site[] = [
     },
   },
   {
-    id: "theconcurrentcontractor",
-    name: "The Concurrent Contractor",
-    url: "theconcurrentcontractor.com",
-    description: "IR35, contracting resources and community",
-    github: "https://github.com/Damaka72/Theconcurrentcontractor",
-    admin: "https://www.theconcurrentcontractor.com/admin",
-    socialAgent: "https://www.theconcurrentcontractor.com/social-agent",
-    brandColor: "#FFD700",
-    initials: "TC",
-    marketingPlan: {
-      blotato: {
-        status: 'active' as const,
-        statusLabel: 'Active',
-        platform: 'Instagram + YouTube',
-        schedule: '1 post/day',
-        nextAction: 'Continue weekly scheduling in Blotato',
-      },
-      beehiiv: {
-        status: 'in_progress' as const,
-        statusLabel: 'Published within The Pathway',
-        cadence: 'The Consultant — published within The Pathway (MYCP Beehiiv)',
-        nextAction: 'Contribute The Consultant section to The Pathway (MYCP Beehiiv)',
-      },
-    },
-  },
-  {
     id: "masteryourcareerpath",
     name: "Master Your Career Path",
     url: "masteryourcareerpath.com",
@@ -114,6 +88,16 @@ export const SITES: Site[] = [
         nextAction: 'Draft this week\'s The Prompt-ly issue in Beehiiv',
       },
     },
+  },
+  {
+    id: "world-of-contracts",
+    name: "World of Contracts",
+    url: "www.worldofcontracts.co.uk",
+    description: "UK jobs board for commercial, contracts and procurement roles",
+    github: "https://github.com/Damaka72/roles-board",
+    brandColor: "#E9C46A",
+    initials: "WC",
+    // Not part of the content pipeline: its work is tracked in data/trackers/world-of-contracts.json.
   },
   {
     id: "didianolue",

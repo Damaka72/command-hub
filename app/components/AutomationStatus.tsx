@@ -15,7 +15,6 @@ import { SITE_SHORT } from "../lib/siteConstants";
 
 const SITE_ORDER = [
   'masteryourcareerpath',
-  'theconcurrentcontractor',
   'oldoaktown',
   'aiviralvideoprompts',
 ] as const;

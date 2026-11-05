@@ -13,7 +13,7 @@ export interface SiteColor {
 
 export const SITE_COLORS: Record<string, SiteColor> = {
   masteryourcareerpath:    { key: 'MYCP',  name: 'Master Your Career Path', accent: '#3b82f6', tint: '#3b82f61f' },
-  theconcurrentcontractor: { key: 'TCC',   name: 'The Concurrent Contractor', accent: '#f59e0b', tint: '#f59e0b1f' },
+  'world-of-contracts':    { key: 'WOC',   name: 'World of Contracts', accent: '#E9C46A', tint: '#E9C46A1f' },
   oldoaktown:              { key: 'OOT',   name: 'Old Oak Town', accent: '#22c55e', tint: '#22c55e1f' },
   aiviralvideoprompts:     { key: 'AIVVP', name: 'AI Viral Video Prompts', accent: '#a855f7', tint: '#a855f71f' },
   didianolue:               { key: 'DIDA',  name: 'didianolue.co.uk', accent: '#ec4899', tint: '#ec48991f' },
@@ -21,9 +21,9 @@ export const SITE_COLORS: Record<string, SiteColor> = {
 
 export const SITE_ORDER_ALL = [
   'masteryourcareerpath',
-  'theconcurrentcontractor',
   'oldoaktown',
   'aiviralvideoprompts',
+  'world-of-contracts',
   'didianolue',
 ];
 
@@ -31,7 +31,6 @@ export const SITE_ORDER_ALL = [
 // didianolue is handled personally and has no pipeline content.
 export const PIPELINE_SITE_ORDER = [
   'masteryourcareerpath',
-  'theconcurrentcontractor',
   'oldoaktown',
   'aiviralvideoprompts',
 ];
