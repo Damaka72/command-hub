@@ -468,7 +468,7 @@
       "id": "hub-replace-the-concurrent-contractor-with-woc",
       "area": "Command hub",
       "title": "Replace The Concurrent Contractor with World of Contracts in the hub",
-      "status": "in_progress",
+      "status": "done",
       "owner": "claude",
       "next": false,
       "order": 520
@@ -477,7 +477,7 @@
       "id": "hub-restyle-and-tidy-the-command-hub",
       "area": "Command hub",
       "title": "Restyle and tidy the command hub in this tracker's look",
-      "status": "in_progress",
+      "status": "done",
       "owner": "claude",
       "next": false,
       "order": 530
