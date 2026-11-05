@@ -8,19 +8,13 @@ import OldOakTownAdmin from "./OldOakTownAdmin";
 import DiPipeline from "./DiPipeline";
 import type { SiteDetail, DraftItem } from "../api/status/route";
 import { getSitePillars } from "@/agents/site-configs";
-
-function getBrandTextOnColor(hex: string): string {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.55 ? '#1c1c1c' : '#ffffff';
-}
+import { alpha, siteColor } from "../lib/siteColors";
 
 function BrandAvatar({ name, color, initials }: { name: string; color: string; initials?: string }) {
   const letters = initials ?? name.split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase();
   return (
     <div
-      style={{ backgroundColor: color, color: getBrandTextOnColor(color) }}
+      style={{ backgroundColor: color, color: 'var(--on-solid)' }}
       className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl text-xs font-bold tracking-wide"
       aria-hidden="true"
     >
@@ -52,30 +46,29 @@ export interface Site {
   github: string;
   admin?: string;
   socialAgent?: string;
-  brandColor?: string;
   initials?: string;
   marketingPlan?: MarketingPlan;
   driveFolders?: { label: string; url: string }[];
 }
 
 const DEPLOY_STYLES: Record<string, { dot: string; label: string }> = {
-  READY:    { dot: 'bg-emerald-400', label: 'READY' },
-  BUILDING: { dot: 'bg-amber-400 animate-pulse', label: 'BUILDING' },
-  ERROR:    { dot: 'bg-red-400', label: 'ERROR' },
+  READY:    { dot: 'bg-ok', label: 'READY' },
+  BUILDING: { dot: 'bg-warn animate-pulse', label: 'BUILDING' },
+  ERROR:    { dot: 'bg-bad', label: 'ERROR' },
 };
 
 const SUBAGENT_PILL: Record<string, string> = {
-  idle:      'bg-zinc-200 text-zinc-600 dark:bg-zinc-700 dark:text-zinc-400',
-  running:   'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 animate-pulse',
-  complete:  'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
-  error:     'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
-  never_run: 'bg-zinc-100 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500',
+  idle:      'bg-panel-3 text-fg-2',
+  running:   'bg-warn/15 text-warn animate-pulse',
+  complete:  'bg-ok/15 text-ok',
+  error:     'bg-bad/15 text-bad',
+  never_run: 'bg-panel-2 text-fg-3',
 };
 
 const GRADER_PILL: Record<string, string> = {
-  pass:  'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
-  fail:  'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
-  retry: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
+  pass:  'bg-ok/15 text-ok',
+  fail:  'bg-bad/15 text-bad',
+  retry: 'bg-warn/15 text-warn',
 };
 
 const SITE_RUBRIC: Record<string, { pass: string[]; fail: string }> = {
@@ -121,9 +114,9 @@ function fmt(n: number | null | undefined, prefix = ''): string {
 }
 
 const MARKETING_STATUS_STYLES = {
-  active:      { dot: 'bg-emerald-400', text: 'text-emerald-700 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
-  in_progress: { dot: 'bg-amber-400',   text: 'text-amber-700 dark:text-amber-400',     bg: 'bg-amber-50 dark:bg-amber-900/20' },
-  not_started: { dot: 'bg-red-400',     text: 'text-red-700 dark:text-red-400',         bg: 'bg-red-50 dark:bg-red-900/20' },
+  active:      { dot: 'bg-ok', text: 'text-ok', bg: 'bg-ok/15' },
+  in_progress: { dot: 'bg-warn',   text: 'text-warn',     bg: 'bg-warn/15' },
+  not_started: { dot: 'bg-bad',     text: 'text-bad',         bg: 'bg-bad/15' },
 } as const;
 
 function MarketingStatusPill({ status, label }: { status: keyof typeof MARKETING_STATUS_STYLES; label: string }) {
@@ -158,10 +151,11 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
     navigator.clipboard.writeText(text).catch(() => {}).finally(() => setCopied(true));
   }
 
+  const brand = siteColor(site.id).accent;
   const siteReviewQueue = reviewQueue.filter(item => item.siteId === site.id);
 
   const deploy         = status?.deploy ?? null;
-  const deployStyle    = deploy ? (DEPLOY_STYLES[deploy.state] ?? { dot: 'bg-zinc-400', label: deploy.state }) : null;
+  const deployStyle    = deploy ? (DEPLOY_STYLES[deploy.state] ?? { dot: 'bg-fg-2', label: deploy.state }) : null;
   const readiness      = status?.readiness ?? [];
   const coordinator    = status?.coordinator ?? null;
 
@@ -169,12 +163,12 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
   const readinessTot  = readiness.length;
 
   const readinessColor = readinessTot === 0
-    ? 'text-zinc-400'
+    ? 'text-fg-2'
     : readinessOk === readinessTot
-      ? 'text-emerald-600 dark:text-emerald-400'
+      ? 'text-ok'
       : readinessOk >= 3
-        ? 'text-amber-600 dark:text-amber-400'
-        : 'text-red-500 dark:text-red-400';
+        ? 'text-warn'
+        : 'text-bad';
 
   return (
     <div
@@ -182,22 +176,20 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
       style={{
         background: 'var(--hub-surface)',
         border: '1px solid var(--hub-border)',
-        boxShadow: '0 2px 16px rgba(0,0,0,0.3)',
+        boxShadow: 'var(--shadow-card)',
       }}
     >
-      {site.brandColor && (
-        <div
-          style={{
-            background: `linear-gradient(90deg, ${site.brandColor}, ${site.brandColor}99)`,
-            height: '2px',
-            borderRadius: '16px 16px 0 0',
-            boxShadow: `0 0 12px ${site.brandColor}60`,
-          }}
-        />
-      )}
+      <div
+        style={{
+          background: `linear-gradient(90deg, ${brand}, ${alpha(brand, 60)})`,
+          height: '2px',
+          borderRadius: '16px 16px 0 0',
+          boxShadow: `0 0 12px ${alpha(brand, 38)}`,
+        }}
+      />
       <div
         className="flex flex-col gap-4 p-6"
-        style={site.brandColor ? { background: `linear-gradient(to bottom, ${site.brandColor}18 0%, transparent 55%)` } : undefined}
+        style={{ background: `linear-gradient(to bottom, ${alpha(brand, 9)} 0%, transparent 55%)` }}
       >
 
         {/* ── Status strip ── */}
@@ -206,15 +198,15 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
             <span
               className="h-2 w-2 rounded-full flex-shrink-0"
               style={{
-                background: status ? (status.up ? '#10b981' : '#f87171') : 'var(--hub-text-3)',
-                boxShadow: status?.up ? '0 0 6px rgba(16,185,129,0.5)' : undefined,
+                background: status ? (status.up ? 'var(--ok)' : 'var(--bad)') : 'var(--hub-text-3)',
+                boxShadow: status?.up ? `0 0 6px ${alpha('var(--ok)', 50)}` : undefined,
               }}
             />
-            <span style={{ color: status?.up ? '#34d399' : status ? '#f87171' : 'var(--hub-text-3)' }}>
+            <span style={{ color: status?.up ? 'var(--ok)' : status ? 'var(--bad)' : 'var(--hub-text-3)' }}>
               {status ? (status.up ? 'Up' : 'Down') : '—'}
             </span>
           </span>
-          <span style={{ color: 'var(--hub-border-hi)' }}>·</span>
+          <span aria-hidden="true" style={{ color: 'var(--fg-3)' }}>·</span>
           {deployStyle ? (
             <span className="flex items-center gap-1.5">
               <span className={`h-2 w-2 rounded-full flex-shrink-0 ${deployStyle.dot}`} />
@@ -236,8 +228,8 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
             style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}
           >
             {[
-              { label: 'Revenue', value: fmt(status.monthlyRevenue, '£'), color: '#34d399' },
-              { label: 'Sched.',  value: String(status.scheduledCount), color: status.scheduledCount > 0 ? '#34d399' : 'var(--hub-text-3)' },
+              { label: 'Revenue', value: fmt(status.monthlyRevenue, '£'), color: 'var(--ok)' },
+              { label: 'Sched.',  value: String(status.scheduledCount), color: status.scheduledCount > 0 ? 'var(--ok)' : 'var(--hub-text-3)' },
             ].map(({ label, value, color }, i) => (
               <div key={label} className="flex flex-col gap-0.5 px-3 py-2" style={{ borderRight: '1px solid var(--hub-border)' }}>
                 <span className="text-[12px] uppercase tracking-wide" style={{ color: 'var(--hub-text-3)' }}>{label}</span>
@@ -259,15 +251,15 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
 
         {/* ── Readiness checklist ── */}
         {showReadiness && readiness.length > 0 && (
-          <div className="divide-y divide-zinc-100 rounded-lg border border-zinc-100 dark:divide-zinc-800 dark:border-zinc-800">
+          <div className="divide-y rounded-lg border divide-line border-line">
             {readiness.map((item, i) => (
               <div key={i} className="flex items-start gap-2 px-3 py-2">
-                <span className={`mt-0.5 flex-shrink-0 text-xs ${item.ok ? 'text-emerald-500' : 'text-zinc-300 dark:text-zinc-600'}`}>
+                <span className={`mt-0.5 flex-shrink-0 text-xs ${item.ok ? 'text-ok' : 'text-fg-3'}`}>
                   {item.ok ? '✓' : '○'}
                 </span>
                 <div>
-                  <p className="text-xs font-medium text-zinc-700 dark:text-zinc-300">{item.label}</p>
-                  <p className="text-xs text-zinc-400 dark:text-zinc-500">{item.reason}</p>
+                  <p className="text-xs font-medium text-fg">{item.label}</p>
+                  <p className="text-xs text-fg-3">{item.reason}</p>
                 </div>
               </div>
             ))}
@@ -276,16 +268,14 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
 
         {/* ── Site name + description ── */}
         <div className="flex items-start gap-3">
-          {site.brandColor && (
-            <BrandAvatar name={site.name} color={site.brandColor} initials={site.initials} />
-          )}
+          <BrandAvatar name={site.name} color={brand} initials={site.initials} />
           <div className="flex min-w-0 flex-col gap-1">
             <div className="flex items-center gap-2">
               <h2 className="text-lg font-semibold" style={{ color: 'var(--hub-text-1)' }}>{site.name}</h2>
               {site.id === "oldoaktown" && (
                 <button
                   onClick={() => setBreakingNewsOpen(true)}
-                  className="flex-shrink-0 rounded-md bg-red-600 px-2 py-0.5 text-[12px] font-semibold uppercase tracking-wide text-white transition-colors hover:bg-red-700"
+                  className="flex-shrink-0 rounded-md bg-bad px-2 py-0.5 text-[12px] font-semibold uppercase tracking-wide text-on-solid transition-colors hover:brightness-125"
                 >
                   Breaking News
                 </button>
@@ -293,7 +283,7 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
             </div>
             <p className="text-sm" style={{ color: 'var(--hub-text-2)' }}>{site.description}</p>
             {deploy?.commitMessage && (
-              <p className="truncate text-xs text-zinc-400 dark:text-zinc-600" title={deploy.commitMessage}>
+              <p className="truncate text-xs text-fg-3" title={deploy.commitMessage}>
                 {deploy.commitMessage}
               </p>
             )}
@@ -303,24 +293,24 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
         {/* ── Breaking News modal (OOT only) ── */}
         {site.id === "oldoaktown" && breakingNewsOpen && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-bg/50 p-4"
             onClick={e => { if (e.target === e.currentTarget) closeBreakingNews(); }}
           >
-            <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-zinc-900">
+            <div className="w-full max-w-md rounded-2xl p-6 shadow-xl bg-panel">
               <div className="mb-5 flex items-center justify-between">
-                <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
+                <h3 className="text-base font-semibold text-fg">
                   Breaking News Brief
                 </h3>
                 <button
                   onClick={closeBreakingNews}
-                  className="text-zinc-400 transition-colors hover:text-zinc-600 dark:hover:text-zinc-300"
+                  className="text-fg-2 transition-colors hover:text-fg"
                 >
                   ✕
                 </button>
               </div>
               <div className="flex flex-col gap-4">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <label className="text-sm font-medium text-fg">
                     Paste the story headline and summary
                   </label>
                   <textarea
@@ -328,11 +318,11 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
                     onChange={e => setStory(e.target.value)}
                     rows={4}
                     placeholder="Story headline and summary…"
-                    className="w-full resize-none rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-700 placeholder-zinc-400 focus:border-zinc-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:placeholder-zinc-500"
+                    className="w-full resize-none rounded-lg border px-3 py-2 text-sm focus:border-line-2 focus:outline-none border-line-2 bg-panel-2 text-fg placeholder-fg-3"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <label className="text-sm font-medium text-fg">
                     Source URL
                   </label>
                   <input
@@ -340,18 +330,18 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
                     value={source}
                     onChange={e => setSource(e.target.value)}
                     placeholder="https://…"
-                    className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-700 placeholder-zinc-400 focus:border-zinc-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:placeholder-zinc-500"
+                    className="w-full rounded-lg border px-3 py-2 text-sm focus:border-line-2 focus:outline-none border-line-2 bg-panel-2 text-fg placeholder-fg-3"
                   />
                 </div>
                 <button
                   onClick={generateBrief}
                   disabled={!story.trim()}
-                  className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-lg bg-bad px-4 py-2 text-sm font-medium text-on-solid transition-colors hover:brightness-125 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Generate brief
                 </button>
                 {copied && (
-                  <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                  <p className="text-sm font-medium text-ok">
                     Brief copied to clipboard — paste into OOT Coordinator now.
                   </p>
                 )}
@@ -472,16 +462,16 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
                 <RevenueFlow siteId={site.id} />
                 {status.revenueConfig && (
                   <div className="flex flex-col gap-0.5 rounded-lg px-3 py-2" style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}>
-                    <span className="text-[12px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Revenue Source</span>
-                    <span className="text-xs font-medium text-zinc-600 dark:text-zinc-300">
+                    <span className="text-[12px] uppercase tracking-wide text-fg-3">Revenue Source</span>
+                    <span className="text-xs font-medium text-fg">
                       {status.revenueConfig.label}
-                      <span className="ml-1 font-normal text-zinc-400 dark:text-zinc-500">· {status.revenueConfig.source.replace(/_/g, ' ')}</span>
+                      <span className="ml-1 font-normal text-fg-3">· {status.revenueConfig.source.replace(/_/g, ' ')}</span>
                       {status.revenueConfig.workshopPrice !== undefined && (
-                        <span className="ml-1 text-emerald-600 dark:text-emerald-400">· £{status.revenueConfig.workshopPrice}/booking</span>
+                        <span className="ml-1 text-ok">· £{status.revenueConfig.workshopPrice}/booking</span>
                       )}
                     </span>
                     {status.revenueConfig.notes && (
-                      <span className="text-xs text-zinc-400 dark:text-zinc-500">{status.revenueConfig.notes}</span>
+                      <span className="text-xs text-fg-3">{status.revenueConfig.notes}</span>
                     )}
                   </div>
                 )}
@@ -495,10 +485,10 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
                 {/* Pipeline Agents */}
                 {(status.subagentStatus || status.graderVerdict) && (
                   <div className="flex flex-col gap-2">
-                    <p className="text-[12px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Pipeline Agents</p>
+                    <p className="text-[12px] font-semibold uppercase tracking-wider text-fg-3">Pipeline Agents</p>
                     {status.subagentStatus && (
                       <div className="flex items-center justify-between rounded-lg px-3 py-2" style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}>
-                        <p className="text-xs font-medium text-zinc-700 dark:text-zinc-300">Subagent</p>
+                        <p className="text-xs font-medium text-fg">Subagent</p>
                         <span className={`rounded-full px-2 py-0.5 text-[12px] font-medium ${SUBAGENT_PILL[status.subagentStatus.status] ?? SUBAGENT_PILL.never_run}`}>
                           {status.subagentStatus.status.replace('_', ' ')}
                         </span>
@@ -506,11 +496,11 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
                     )}
                     {status.graderVerdict && (
                       <div className="flex items-center justify-between rounded-lg px-3 py-2" style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}>
-                        <p className="text-xs font-medium text-zinc-700 dark:text-zinc-300">Grader</p>
+                        <p className="text-xs font-medium text-fg">Grader</p>
                         <span className={`rounded-full px-2 py-0.5 text-[12px] font-medium ${
                           status.graderVerdict.verdict !== 'never_run'
                             ? (GRADER_PILL[status.graderVerdict.verdict] ?? '')
-                            : 'bg-zinc-100 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500'
+                            : 'bg-panel-2 text-fg-3'
                         }`}>
                           {status.graderVerdict.verdict.replace('_', ' ')}
                         </span>
@@ -520,7 +510,7 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
                 )}
 
                 {!status.subagentStatus && !status.graderVerdict && (
-                  <p className="text-xs text-zinc-400 dark:text-zinc-500">No pipeline activity yet — run the pipeline to populate</p>
+                  <p className="text-xs text-fg-3">No pipeline activity yet — run the pipeline to populate</p>
                 )}
 
               </div>
@@ -532,7 +522,7 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
 
                 {/* Section 1 — Subagent */}
                 <div className="flex flex-col gap-2">
-                  <p className="text-[12px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Subagent</p>
+                  <p className="text-[12px] font-semibold uppercase tracking-wider text-fg-3">Subagent</p>
                   {status.subagentStatus ? (
                     <>
                       <span className={`self-start rounded-full px-2.5 py-0.5 text-xs font-medium ${SUBAGENT_PILL[status.subagentStatus.status] ?? SUBAGENT_PILL.never_run}`}>
@@ -540,21 +530,21 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
                       </span>
                       {status.subagentStatus.briefGenerated && status.subagentStatus.briefSummary ? (
                         <div className="rounded-lg px-3 py-2" style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}>
-                          <p className="mb-1 text-[12px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Brief this week</p>
-                          <p className="text-xs text-zinc-600 dark:text-zinc-300">{status.subagentStatus.briefSummary}</p>
+                          <p className="mb-1 text-[12px] font-semibold uppercase tracking-wider text-fg-3">Brief this week</p>
+                          <p className="text-xs text-fg">{status.subagentStatus.briefSummary}</p>
                         </div>
                       ) : (
-                        <p className="text-xs text-zinc-400 dark:text-zinc-500">No brief generated yet — lead coordinator has not run</p>
+                        <p className="text-xs text-fg-3">No brief generated yet — lead coordinator has not run</p>
                       )}
                     </>
                   ) : (
-                    <p className="text-xs text-zinc-400 dark:text-zinc-500">No brief generated yet — lead coordinator has not run</p>
+                    <p className="text-xs text-fg-3">No brief generated yet — lead coordinator has not run</p>
                   )}
                 </div>
 
                 {/* Section 2 — Grader */}
                 <div className="flex flex-col gap-2">
-                  <p className="text-[12px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+                  <p className="text-[12px] font-semibold uppercase tracking-wider text-fg-3">
                     Outcomes Grader{status.graderVerdict ? ` · ${status.graderVerdict.rubricName}` : ''}
                   </p>
                   {status.graderVerdict && status.graderVerdict.verdict !== 'never_run' ? (
@@ -563,27 +553,27 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
                         {status.graderVerdict.verdict}
                       </span>
                       {status.graderVerdict.retryCount > 0 && (
-                        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                        <p className="text-xs text-fg-2">
                           Retried {status.graderVerdict.retryCount} time(s)
                         </p>
                       )}
                       {status.graderVerdict.failedCriterion && (
-                        <div className="rounded-lg bg-red-50 px-3 py-2 dark:bg-red-900/20">
-                          <p className="mb-1 text-[12px] font-semibold uppercase tracking-wider text-red-500 dark:text-red-400">Failed Criterion</p>
-                          <p className="text-xs text-red-700 dark:text-red-300">{status.graderVerdict.failedCriterion}</p>
+                        <div className="rounded-lg px-3 py-2 bg-bad/15">
+                          <p className="mb-1 text-[12px] font-semibold uppercase tracking-wider text-bad">Failed Criterion</p>
+                          <p className="text-xs text-bad">{status.graderVerdict.failedCriterion}</p>
                         </div>
                       )}
                     </>
                   ) : (
-                    <p className="text-xs text-zinc-400 dark:text-zinc-500">Grader has not run yet</p>
+                    <p className="text-xs text-fg-3">Grader has not run yet</p>
                   )}
                 </div>
 
                 {/* Section 3 — Rubric criteria (collapsible) */}
-                <div className="border-t border-zinc-100 pt-3 dark:border-zinc-800">
+                <div className="border-t pt-3 border-line">
                   <button
                     onClick={() => setShowRubric(r => !r)}
-                    className="text-[12px] font-semibold uppercase tracking-wider text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-400"
+                    className="text-[12px] font-semibold uppercase tracking-wider text-fg-3 hover:text-fg-2"
                   >
                     Rubric {showRubric ? '▲' : '▼'}
                   </button>
@@ -591,18 +581,18 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
                     <div className="mt-2 flex flex-col gap-1">
                       {(SITE_RUBRIC[site.id]?.pass ?? []).map((criterion, i) => (
                         <div key={i} className="flex items-start gap-2 text-xs">
-                          <span className="mt-0.5 flex-shrink-0 font-medium text-emerald-500">✓</span>
-                          <span className="text-zinc-600 dark:text-zinc-400">{criterion}</span>
+                          <span className="mt-0.5 flex-shrink-0 font-medium text-ok">✓</span>
+                          <span className="text-fg-2">{criterion}</span>
                         </div>
                       ))}
                       {SITE_RUBRIC[site.id]?.fail && (
                         <div className="flex items-start gap-2 text-xs">
-                          <span className="mt-0.5 flex-shrink-0 font-medium text-red-500">✗</span>
-                          <span className="text-zinc-600 dark:text-zinc-400">{SITE_RUBRIC[site.id].fail}</span>
+                          <span className="mt-0.5 flex-shrink-0 font-medium text-bad">✗</span>
+                          <span className="text-fg-2">{SITE_RUBRIC[site.id].fail}</span>
                         </div>
                       )}
                       {!SITE_RUBRIC[site.id] && (
-                        <p className="text-xs text-zinc-400 dark:text-zinc-500">No rubric defined for this site</p>
+                        <p className="text-xs text-fg-3">No rubric defined for this site</p>
                       )}
                     </div>
                   )}
@@ -616,52 +606,52 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
               <div id="review-queue" className="flex flex-col gap-3">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="rounded-lg px-3 py-3" style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}>
-                    <p className="text-[12px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Overdue Follow-ups</p>
-                    <p className={`mt-1 text-2xl font-bold ${(status.outstanding.overdueFollowUps ?? 0) > 0 ? 'text-red-500' : 'text-zinc-400'}`}>
+                    <p className="text-[12px] uppercase tracking-wide text-fg-3">Overdue Follow-ups</p>
+                    <p className={`mt-1 text-2xl font-bold ${(status.outstanding.overdueFollowUps ?? 0) > 0 ? 'text-bad' : 'text-fg-2'}`}>
                       {status.outstanding.overdueFollowUps}
                     </p>
                   </div>
                   <div className="rounded-lg px-3 py-3" style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}>
-                    <p className="text-[12px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Awaiting Approval</p>
-                    <p className={`mt-1 text-2xl font-bold ${(status.outstanding.awaitingApproval ?? 0) > 0 ? 'text-amber-500' : 'text-zinc-400'}`}>
+                    <p className="text-[12px] uppercase tracking-wide text-fg-3">Awaiting Approval</p>
+                    <p className={`mt-1 text-2xl font-bold ${(status.outstanding.awaitingApproval ?? 0) > 0 ? 'text-warn' : 'text-fg-2'}`}>
                       {status.outstanding.awaitingApproval}
                     </p>
                   </div>
                 </div>
                 {status.outstanding.overdueFollowUps === 0 && status.outstanding.awaitingApproval === 0 && (
-                  <p className="text-center text-xs text-zinc-400 dark:text-zinc-500">
+                  <p className="text-center text-xs text-fg-3">
                     Nothing outstanding — run agents to populate
                   </p>
                 )}
 
                 {/* Review Queue */}
-                <div className="flex flex-col gap-2 border-t border-zinc-100 pt-3 dark:border-zinc-800">
-                  <p className="text-[12px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Review Queue</p>
+                <div className="flex flex-col gap-2 border-t pt-3 border-line">
+                  <p className="text-[12px] font-semibold uppercase tracking-wider text-fg-3">Review Queue</p>
                   {siteReviewQueue.length === 0 ? (
-                    <p className="text-xs text-zinc-400 dark:text-zinc-500">Nothing awaiting review</p>
+                    <p className="text-xs text-fg-3">Nothing awaiting review</p>
                   ) : siteReviewQueue.map((item, i) => (
-                    <div key={i} className="flex flex-col gap-1.5 rounded-lg border border-zinc-100 p-3 dark:border-zinc-800">
+                    <div key={i} className="flex flex-col gap-1.5 rounded-lg border p-3 border-line">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="rounded-full bg-zinc-200 px-2 py-0.5 text-[12px] font-medium text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">
+                        <span className="rounded-full px-2 py-0.5 text-[12px] font-medium bg-panel-3 text-fg">
                           {item.platform}
                         </span>
                         <span className={`rounded-full px-2 py-0.5 text-[12px] font-medium ${GRADER_PILL[item.graderVerdict] ?? ''}`}>
                           {item.graderVerdict}
                         </span>
                         {item.retryCount > 0 && (
-                          <span className="text-xs text-zinc-500 dark:text-zinc-400">Retry ×{item.retryCount}</span>
+                          <span className="text-xs text-fg-2">Retry ×{item.retryCount}</span>
                         )}
                       </div>
                       {item.failedCriterion && (
-                        <div className="rounded-md bg-red-50 px-2 py-1.5 dark:bg-red-900/20">
-                          <p className="text-xs text-red-700 dark:text-red-300">
+                        <div className="rounded-md px-2 py-1.5 bg-bad/15">
+                          <p className="text-xs text-bad">
                             <span className="font-medium">Failed criterion: </span>&ldquo;{item.failedCriterion}&rdquo;
                           </p>
                         </div>
                       )}
                       {item.contentSnippet && (
                         <div className="rounded-md px-2 py-1.5" style={{ background: 'var(--hub-surface-2)' }}>
-                          <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                          <p className="text-xs text-fg-2">
                             <span className="font-medium">Preview: </span>
                             &ldquo;{item.contentSnippet.slice(0, 80)}{item.contentSnippet.length > 80 ? '…' : ''}&rdquo;
                           </p>
@@ -681,99 +671,99 @@ export default function SiteCard({ site, status, reviewQueue = [] }: { site: Sit
                   <>
                     {coordinator.weekCommencing && (
                       <div className="flex flex-col gap-0.5 rounded-lg px-3 py-2" style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}>
-                        <span className="text-[12px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Week Commencing</span>
-                        <span className="text-xs font-medium text-zinc-700 dark:text-zinc-300">{coordinator.weekCommencing}</span>
+                        <span className="text-[12px] uppercase tracking-wide text-fg-3">Week Commencing</span>
+                        <span className="text-xs font-medium text-fg">{coordinator.weekCommencing}</span>
                       </div>
                     )}
                     <div className="flex flex-col gap-0.5 rounded-lg px-3 py-2" style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}>
-                      <span className="text-[12px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Weekly Theme</span>
-                      <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{coordinator.weeklyTheme}</span>
+                      <span className="text-[12px] uppercase tracking-wide text-fg-3">Weekly Theme</span>
+                      <span className="text-sm font-medium text-fg">{coordinator.weeklyTheme}</span>
                     </div>
                     {coordinator.campaignObjective && (
                       <div className="flex flex-col gap-0.5 rounded-lg px-3 py-2" style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}>
-                        <span className="text-[12px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Campaign Objective</span>
-                        <span className="text-xs text-zinc-600 dark:text-zinc-300">{coordinator.campaignObjective}</span>
+                        <span className="text-[12px] uppercase tracking-wide text-fg-3">Campaign Objective</span>
+                        <span className="text-xs text-fg">{coordinator.campaignObjective}</span>
                       </div>
                     )}
                   </>
                 ) : (
-                  <p className="text-xs text-zinc-400 dark:text-zinc-500">
+                  <p className="text-xs text-fg-3">
                     No coordinator data — run the Social Agent to set the weekly theme
                   </p>
                 )}
                 <div className="flex items-center justify-between rounded-lg px-3 py-2" style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}>
-                  <span className="text-xs text-zinc-500 dark:text-zinc-400">Content scheduled this week</span>
-                  <span className={`text-sm font-bold ${status.scheduledCount > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-zinc-400'}`}>
+                  <span className="text-xs text-fg-2">Content scheduled this week</span>
+                  <span className={`text-sm font-bold ${status.scheduledCount > 0 ? 'text-ok' : 'text-fg-2'}`}>
                     {status.scheduledCount}
                   </span>
                 </div>
 
                 {/* ── Marketing Plan (static, read-only) ── */}
                 {site.marketingPlan && (
-                  <div className="flex flex-col gap-3 border-t border-zinc-100 pt-4 dark:border-zinc-800">
-                    <span className="text-[12px] font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+                  <div className="flex flex-col gap-3 border-t pt-4 border-line">
+                    <span className="text-[12px] font-semibold uppercase tracking-wide text-fg-3">
                       Marketing Plan
                     </span>
 
                     {/* Blotato */}
                     <div className="flex flex-col gap-2 rounded-lg p-3" style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}>
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-200">Blotato (Social Media)</span>
+                        <span className="text-xs font-semibold text-fg">Blotato (Social Media)</span>
                         <MarketingStatusPill status={site.marketingPlan.blotato.status} label={site.marketingPlan.blotato.statusLabel} />
                       </div>
                       <div className="grid grid-cols-2 gap-2">
                         {site.marketingPlan.blotato.platform && (
                           <div className="flex flex-col gap-0.5">
-                            <span className="text-[12px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Platform</span>
-                            <span className="text-xs font-medium text-zinc-600 dark:text-zinc-300">{site.marketingPlan.blotato.platform}</span>
+                            <span className="text-[12px] uppercase tracking-wide text-fg-3">Platform</span>
+                            <span className="text-xs font-medium text-fg">{site.marketingPlan.blotato.platform}</span>
                           </div>
                         )}
                         {site.marketingPlan.blotato.schedule && (
                           <div className="flex flex-col gap-0.5">
-                            <span className="text-[12px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Schedule</span>
-                            <span className="text-xs font-medium text-zinc-600 dark:text-zinc-300">{site.marketingPlan.blotato.schedule}</span>
+                            <span className="text-[12px] uppercase tracking-wide text-fg-3">Schedule</span>
+                            <span className="text-xs font-medium text-fg">{site.marketingPlan.blotato.schedule}</span>
                           </div>
                         )}
                       </div>
                       {getSitePillars(site.id).length > 0 && (
                         <div className="flex flex-col gap-1">
-                          <span className="text-[12px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Content Pillars</span>
+                          <span className="text-[12px] uppercase tracking-wide text-fg-3">Content Pillars</span>
                           <div className="flex flex-wrap gap-1">
                             {getSitePillars(site.id).map(pillar => (
-                              <span key={pillar.id} className="rounded-md bg-zinc-200 px-2 py-0.5 text-[12px] font-medium text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">
+                              <span key={pillar.id} className="rounded-md px-2 py-0.5 text-[12px] font-medium bg-panel-3 text-fg">
                                 {pillar.name}
                               </span>
                             ))}
                           </div>
                         </div>
                       )}
-                      <div className="flex flex-col gap-0.5 rounded-md bg-zinc-100 px-2 py-1.5 dark:bg-zinc-700/50">
-                        <span className="text-[12px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Next Action</span>
-                        <span className="text-xs text-zinc-600 dark:text-zinc-300">{site.marketingPlan.blotato.nextAction}</span>
+                      <div className="flex flex-col gap-0.5 rounded-md px-2 py-1.5 bg-panel-3/50">
+                        <span className="text-[12px] uppercase tracking-wide text-fg-3">Next Action</span>
+                        <span className="text-xs text-fg">{site.marketingPlan.blotato.nextAction}</span>
                       </div>
                     </div>
 
                     {/* Beehiiv */}
                     <div className="flex flex-col gap-2 rounded-lg p-3" style={{ background: 'var(--hub-surface-2)', border: '1px solid var(--hub-border)' }}>
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-200">Beehiiv (Email Marketing)</span>
+                        <span className="text-xs font-semibold text-fg">Beehiiv (Email Marketing)</span>
                         <MarketingStatusPill status={site.marketingPlan.beehiiv.status} label={site.marketingPlan.beehiiv.statusLabel} />
                       </div>
                       <div className="grid grid-cols-2 gap-2">
                         {site.marketingPlan.beehiiv.cadence && (
                           <div className="flex flex-col gap-0.5">
-                            <span className="text-[12px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Cadence</span>
-                            <span className="text-xs font-medium text-zinc-600 dark:text-zinc-300">{site.marketingPlan.beehiiv.cadence}</span>
+                            <span className="text-[12px] uppercase tracking-wide text-fg-3">Cadence</span>
+                            <span className="text-xs font-medium text-fg">{site.marketingPlan.beehiiv.cadence}</span>
                           </div>
                         )}
                         <div className="flex flex-col gap-0.5">
-                          <span className="text-[12px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Subscribers</span>
-                          <span className="text-xs font-medium text-zinc-600 dark:text-zinc-300">{site.marketingPlan.beehiiv.subscribers ?? '—'}</span>
+                          <span className="text-[12px] uppercase tracking-wide text-fg-3">Subscribers</span>
+                          <span className="text-xs font-medium text-fg">{site.marketingPlan.beehiiv.subscribers ?? '—'}</span>
                         </div>
                       </div>
-                      <div className="flex flex-col gap-0.5 rounded-md bg-zinc-100 px-2 py-1.5 dark:bg-zinc-700/50">
-                        <span className="text-[12px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Next Action</span>
-                        <span className="text-xs text-zinc-600 dark:text-zinc-300">{site.marketingPlan.beehiiv.nextAction}</span>
+                      <div className="flex flex-col gap-0.5 rounded-md px-2 py-1.5 bg-panel-3/50">
+                        <span className="text-[12px] uppercase tracking-wide text-fg-3">Next Action</span>
+                        <span className="text-xs text-fg">{site.marketingPlan.beehiiv.nextAction}</span>
                       </div>
                     </div>
                   </div>

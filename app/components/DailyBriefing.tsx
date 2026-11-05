@@ -15,9 +15,9 @@ interface FocusItem {
 }
 
 const DOT_STYLE: Record<FocusItem["dot"], { bg: string; glow?: string }> = {
-  red:   { bg: '#f87171', glow: '0 0 6px rgba(248,113,113,0.6)' },
-  amber: { bg: '#fbbf24', glow: '0 0 6px rgba(251,191,36,0.6)' },
-  grey:  { bg: '#475569' },
+  red:   { bg: 'var(--bad)',  glow: '0 0 6px color-mix(in srgb, var(--bad) 60%, transparent)' },
+  amber: { bg: 'var(--warn)', glow: '0 0 6px color-mix(in srgb, var(--warn) 60%, transparent)' },
+  grey:  { bg: 'var(--idle)' },
 };
 
 const COORDINATOR_SITES: { key: keyof CoordinatorStatusData["sites"]; label: string; newsletter: string }[] = [
@@ -275,7 +275,7 @@ export default function DailyBriefing({ statusMap }: { statusMap: StatusResponse
             {!open && urgentCount > 0 && (
               <span
                 className="inline-flex items-center rounded-full px-2 py-0.5 text-[12px] font-medium"
-                style={{ background: 'rgba(248,113,113,0.15)', color: '#f87171', border: '1px solid rgba(248,113,113,0.25)' }}
+                style={{ background: 'color-mix(in srgb, var(--bad) 15%, transparent)', color: 'var(--bad)', border: '1px solid color-mix(in srgb, var(--bad) 25%, transparent)' }}
               >
                 {urgentCount} urgent
               </span>
@@ -295,7 +295,7 @@ export default function DailyBriefing({ statusMap }: { statusMap: StatusResponse
                   <p key={key} className="text-[12px] leading-relaxed" style={{ color: 'var(--hub-text-3)' }}>
                     {allClear ? (
                       <>
-                        <span style={{ color: '#34d399' }}>✓</span>{" "}
+                        <span style={{ color: 'var(--ok)' }}>✓</span>{" "}
                         <span className="font-medium" style={{ color: 'var(--hub-text-2)' }}>{label}</span>
                         {" — All clear"}
                       </>
@@ -390,7 +390,7 @@ export default function DailyBriefing({ statusMap }: { statusMap: StatusResponse
                   {saving ? "Saving…" : "Save all"}
                 </button>
                 {saveMsg && (
-                  <span className="text-xs" style={{ color: saveMsg === "Saved" ? '#34d399' : '#f87171' }}>
+                  <span className="text-xs" style={{ color: saveMsg === "Saved" ? 'var(--ok)' : 'var(--bad)' }}>
                     {saveMsg}
                   </span>
                 )}

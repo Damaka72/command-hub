@@ -14,11 +14,11 @@ interface Deal {
 const STAGES: Stage[] = ["Warm", "Proposal", "Active", "Won", "Lost"];
 
 const STAGE_STYLES: Record<Stage, string> = {
-  Warm:     "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
-  Proposal: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
-  Active:   "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
-  Won:      "bg-emerald-200 text-emerald-800 font-semibold dark:bg-emerald-900/60 dark:text-emerald-200",
-  Lost:     "bg-zinc-100 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500",
+  Warm:     "bg-warn/15 text-warn",
+  Proposal: "bg-accent-dim text-accent-text",
+  Active:   "bg-ok/15 text-ok",
+  Won:      "font-semibold bg-ok/15 text-ok",
+  Lost:     "bg-panel-2 text-fg-3",
 };
 
 const STORAGE_KEY = "hub-didi-pipeline";
@@ -78,21 +78,21 @@ export default function DiPipeline() {
   if (!mounted) return null;
 
   return (
-    <div className="mt-8 rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+    <div className="mt-8 rounded-2xl border shadow-sm border-line-2 bg-panel">
 
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-zinc-100 px-6 py-4 dark:border-zinc-800">
+      <div className="flex items-center justify-between border-b px-6 py-4 border-line">
         <div>
-          <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+          <h2 className="text-sm font-semibold text-fg">
             Revenue Pipeline · Didi Anolue
           </h2>
-          <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+          <p className="mt-0.5 text-xs text-fg-2">
             Manual deal tracker — stored locally
           </p>
         </div>
         <div className="text-right">
-          <p className="text-[12px] uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Pipeline total</p>
-          <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
+          <p className="text-[12px] uppercase tracking-wide text-fg-3">Pipeline total</p>
+          <p className="text-lg font-bold text-ok">
             £{pipelineTotal.toLocaleString("en-GB", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
           </p>
         </div>
@@ -102,7 +102,7 @@ export default function DiPipeline() {
 
         {/* Deal list */}
         {deals.length === 0 ? (
-          <p className="mb-4 text-xs text-zinc-400 dark:text-zinc-500">No deals yet — add one below.</p>
+          <p className="mb-4 text-xs text-fg-3">No deals yet — add one below.</p>
         ) : (
           <ul className="mb-4 flex flex-col gap-2">
             {deals.map(deal => (
@@ -110,12 +110,12 @@ export default function DiPipeline() {
                 key={deal.id}
                 className={`flex items-center gap-3 rounded-lg border px-3 py-2.5 ${
                   deal.stage === "Lost"
-                    ? "border-zinc-100 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-800/40"
-                    : "border-zinc-100 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-800/60"
+                    ? "border-line bg-panel-2/40"
+                    : "border-line bg-panel-2/60"
                 }`}
               >
                 {/* Deal name */}
-                <span className={`flex-1 text-sm ${deal.stage === "Lost" ? "text-zinc-400 line-through dark:text-zinc-600" : "text-zinc-800 dark:text-zinc-200"}`}>
+                <span className={`flex-1 text-sm ${deal.stage === "Lost" ? "line-through text-fg-3" : "text-fg"}`}>
                   {deal.name}
                 </span>
 
@@ -131,14 +131,14 @@ export default function DiPipeline() {
                 </select>
 
                 {/* Value */}
-                <span className={`w-20 text-right text-sm font-semibold tabular-nums ${deal.stage === "Lost" ? "text-zinc-400 dark:text-zinc-600" : "text-zinc-700 dark:text-zinc-300"}`}>
+                <span className={`w-20 text-right text-sm font-semibold tabular-nums ${deal.stage === "Lost" ? "text-fg-3" : "text-fg"}`}>
                   £{deal.value.toLocaleString("en-GB", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                 </span>
 
                 {/* Remove */}
                 <button
                   onClick={() => removeDeal(deal.id)}
-                  className="text-zinc-300 transition-colors hover:text-zinc-500 dark:text-zinc-700 dark:hover:text-zinc-400"
+                  className="transition-colors text-fg-3 hover:text-fg-2"
                   aria-label="Remove deal"
                 >
                   ×
@@ -149,26 +149,26 @@ export default function DiPipeline() {
         )}
 
         {/* Add deal form */}
-        <div className="flex flex-wrap gap-2 border-t border-zinc-100 pt-4 dark:border-zinc-800">
+        <div className="flex flex-wrap gap-2 border-t pt-4 border-line">
           <input
             type="text"
             value={name}
             onChange={e => setName(e.target.value)}
             onKeyDown={e => e.key === "Enter" && addDeal()}
             placeholder="Deal name"
-            className="flex-1 min-w-[160px] rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-1.5 text-sm text-zinc-700 placeholder-zinc-400 outline-none transition-colors focus:border-zinc-400 focus:bg-white dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:placeholder-zinc-600 dark:focus:border-zinc-500 dark:focus:bg-zinc-900"
+            className="flex-1 min-w-[160px] rounded-lg border px-2.5 py-1.5 text-sm outline-none transition-colors border-line-2 bg-panel-2 text-fg placeholder-fg-3 focus:border-line-2 focus:bg-panel"
           />
           <select
             value={stage}
             onChange={e => setStage(e.target.value as Stage)}
-            className="rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-1.5 text-sm text-zinc-700 outline-none transition-colors focus:border-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
+            className="rounded-lg border px-2.5 py-1.5 text-sm outline-none transition-colors focus:border-line-2 border-line-2 bg-panel-2 text-fg"
           >
             {STAGES.map(s => (
               <option key={s} value={s}>{s}</option>
             ))}
           </select>
           <div className="relative">
-            <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-sm text-zinc-400">£</span>
+            <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-sm text-fg-2">£</span>
             <input
               type="number"
               value={value}
@@ -176,13 +176,13 @@ export default function DiPipeline() {
               onKeyDown={e => e.key === "Enter" && addDeal()}
               placeholder="0"
               min="0"
-              className="w-28 rounded-lg border border-zinc-200 bg-zinc-50 pl-6 pr-2.5 py-1.5 text-sm text-zinc-700 placeholder-zinc-400 outline-none transition-colors focus:border-zinc-400 focus:bg-white dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:placeholder-zinc-600 dark:focus:border-zinc-500 dark:focus:bg-zinc-900"
+              className="w-28 rounded-lg border pl-6 pr-2.5 py-1.5 text-sm outline-none transition-colors border-line-2 bg-panel-2 text-fg placeholder-fg-3 focus:border-line-2 focus:bg-panel"
             />
           </div>
           <button
             onClick={addDeal}
             disabled={!name.trim() || !value}
-            className="rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+            className="rounded-lg px-3 py-1.5 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40 bg-fg text-bg hover:brightness-125"
           >
             Add deal
           </button>

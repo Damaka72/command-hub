@@ -108,21 +108,3 @@ export async function computeStreak(
   }
   return streak;
 }
-
-// Earliest future scheduled_for across the given sites (or all, if omitted).
-export async function getNextOut(
-  supabase: SupabaseClient,
-  siteIds?: string[],
-): Promise<string | null> {
-  let query = supabase
-    .from('content_library')
-    .select('scheduled_for')
-    .not('scheduled_for', 'is', null)
-    .gt('scheduled_for', new Date().toISOString())
-    .order('scheduled_for', { ascending: true })
-    .limit(1);
-  if (siteIds) query = query.in('site_id', siteIds);
-  const { data, error } = await query.maybeSingle();
-  if (error) throw error;
-  return (data as { scheduled_for: string } | null)?.scheduled_for ?? null;
-}

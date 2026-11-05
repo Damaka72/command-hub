@@ -1,6 +1,6 @@
 // ── Site metadata — SINGLE SOURCE OF TRUTH ──────────────────────────────────
 // Extracted from app/page.tsx so both the dashboard and /social (and anything
-// else that needs name/url/brand colour per site) share one list instead of
+// else that needs name/url per site (colours live in siteColors.ts / globals.css)) share one list instead of
 // each keeping its own copy.
 
 import type { Site } from "../components/SiteCard";
@@ -14,7 +14,6 @@ export const SITES: Site[] = [
     github: "https://github.com/Damaka72/oldoaktown",
     admin: "https://oldoaktown.co.uk/admin",
     socialAgent: "https://oldoaktown.co.uk/social-agent",
-    brandColor: "#4C8A35",
     initials: "OO",
     marketingPlan: {
       blotato: {
@@ -40,7 +39,6 @@ export const SITES: Site[] = [
     github: "https://github.com/Damaka72/Masteryourcareerpath",
     admin: "https://masteryourcareerpath.com/admin",
     socialAgent: "https://masteryourcareerpath.com/social-agent",
-    brandColor: "#F5A623",
     initials: "MY",
     driveFolders: [
       { label: "Drive: MYCP Root", url: "https://drive.google.com/drive/folders/1-MQvh4R896EVtO5NucFDvtctppSOaiqd" },
@@ -71,7 +69,6 @@ export const SITES: Site[] = [
     github: "https://github.com/Damaka72/ai-viral-video-prompts",
     admin: "https://aiviralvideoprompts.com/admin",
     socialAgent: "https://aiviralvideoprompts.com/social-agent",
-    brandColor: "#4ECDC4",
     initials: "AI",
     marketingPlan: {
       blotato: {
@@ -95,7 +92,6 @@ export const SITES: Site[] = [
     url: "www.worldofcontracts.co.uk",
     description: "UK jobs board for commercial, contracts and procurement roles",
     github: "https://github.com/Damaka72/roles-board",
-    brandColor: "#E9C46A",
     initials: "WC",
     // Not part of the content pipeline: its work is tracked in data/trackers/world-of-contracts.json.
   },
@@ -107,7 +103,6 @@ export const SITES: Site[] = [
     github: "https://github.com/Damaka72/didi-anolue-landing-page",
     admin: "https://didianolue.co.uk/admin",
     socialAgent: "https://didianolue.co.uk/social-agent",
-    brandColor: "#4A7FC1",
     initials: "DA",
     marketingPlan: {
       blotato: {

@@ -47,12 +47,12 @@ export default function WeekView({
               className="flex flex-col gap-2 rounded-xl p-2"
               style={{
                 minHeight: 190,
-                background: isToday ? 'rgba(59,130,246,0.05)' : 'var(--panel)',
-                border: isToday ? '1px solid #3b82f6' : '1px solid var(--line)',
+                background: isToday ? 'color-mix(in srgb, var(--info) 5%, transparent)' : 'var(--panel)',
+                border: isToday ? '1px solid var(--info)' : '1px solid var(--line)',
               }}
             >
               <div className="flex items-baseline gap-1.5 px-1">
-                <span className="mono-num text-lg font-semibold" style={{ color: isToday ? '#3b82f6' : 'var(--fg)' }}>
+                <span className="mono-num text-lg font-semibold" style={{ color: isToday ? 'var(--info)' : 'var(--fg)' }}>
                   {String(dayOfMonth(date)).padStart(2, '0')}
                 </span>
                 <span className="text-[12px] font-semibold uppercase tracking-wide" style={{ color: 'var(--fg-3)' }}>
@@ -74,7 +74,7 @@ export default function WeekView({
                         className="flex flex-col gap-1 rounded-md px-2 py-1.5 text-left transition-transform hover:translate-x-0.5"
                         style={{ borderLeft: `2.5px solid ${c.accent}`, background: c.tint }}
                       >
-                        <span className="mono-num text-[11px] font-semibold uppercase tracking-wide" style={{ color: c.accent }}>
+                        <span className="mono-num text-[11px] font-semibold uppercase tracking-wide" style={{ color: c.text }}>
                           {c.key} · {row.platform}
                         </span>
                         <span className="text-xs leading-snug" style={{ color: 'var(--fg-2)' }}>

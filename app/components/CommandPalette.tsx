@@ -177,12 +177,12 @@ export default function CommandPalette() {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 pt-[15vh]"
+      className="fixed inset-0 z-50 flex items-start justify-center bg-bg/60 pt-[15vh]"
       onClick={e => { if (e.target === e.currentTarget) close(); }}
     >
       <div
         className="w-full max-w-lg overflow-hidden rounded-xl"
-        style={{ background: 'var(--panel)', border: '1px solid var(--line-2)', boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}
+        style={{ background: 'var(--panel)', border: '1px solid var(--line-2)', boxShadow: 'var(--shadow-overlay)' }}
         role="dialog"
         aria-modal="true"
         aria-label="Command palette"

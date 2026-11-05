@@ -1,5 +1,7 @@
 "use client";
 
+import { alpha, siteColor } from "../lib/siteColors";
+
 const NODE_W  = 96;
 const NODE_H  = 40;
 const ARROW_W = 20;
@@ -8,13 +10,11 @@ const VIEW_H  = 60;
 type Lines = string[];
 
 interface FlowConfig {
-  accent: string;
   nodes: Lines[];
 }
 
 const FLOWS: Record<string, FlowConfig> = {
   didianolue: {
-    accent: '#4A7FC1',
     nodes: [
       ['Content /', 'LinkedIn'],
       ['Enquiry', 'form'],
@@ -24,7 +24,6 @@ const FLOWS: Record<string, FlowConfig> = {
     ],
   },
   masteryourcareerpath: {
-    accent: '#F5A623',
     nodes: [
       ['Free tier'],
       ['Newsletter'],
@@ -33,7 +32,6 @@ const FLOWS: Record<string, FlowConfig> = {
     ],
   },
   oldoaktown: {
-    accent: '#4C8A35',
     nodes: [
       ['Local', 'content'],
       ['Followers'],
@@ -43,7 +41,6 @@ const FLOWS: Record<string, FlowConfig> = {
     ],
   },
   aiviralvideoprompts: {
-    accent: '#4ecdc4',
     nodes: [
       ['Social post'],
       ['Gumroad', 'page'],
@@ -57,8 +54,8 @@ const FLOWS: Record<string, FlowConfig> = {
 function NodeBox({
   x, y, lines, accent, isLast,
 }: { x: number; y: number; lines: Lines; accent: string; isLast: boolean }) {
-  const fill      = isLast ? accent : `${accent}1a`;
-  const textColor = isLast ? '#fff' : accent;
+  const fill      = isLast ? accent : alpha(accent, 10);
+  const textColor = isLast ? 'var(--on-solid)' : accent;
   const midY      = y + NODE_H / 2;
   const weight    = isLast ? '600' : '400';
 
@@ -107,7 +104,8 @@ export default function RevenueFlow({ siteId }: { siteId: string }) {
   const flow = FLOWS[siteId];
   if (!flow) return null;
 
-  const { accent, nodes } = flow;
+  const { nodes } = flow;
+  const accent = siteColor(siteId).accent;
   const padX   = 4;
   const totalW = nodes.length * NODE_W + (nodes.length - 1) * ARROW_W;
   const viewW  = totalW + 2 * padX;

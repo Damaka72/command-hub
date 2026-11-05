@@ -1,7 +1,7 @@
 'use client';
 
 import { useSiteFilter } from '../context/SiteFilterContext';
-import { siteColor } from '../lib/siteColors';
+import { alpha, siteColor } from '../lib/siteColors';
 
 // All + one per site, each with a colour dot (UX spec §4.1). Backed by
 // SiteFilterContext so a site chosen here carries into other pages.
@@ -33,8 +33,8 @@ export default function SiteFilterChips({ siteIds }: { siteIds: string[] }) {
             className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-all"
             style={{
               background: active ? c.tint : 'var(--panel-2)',
-              color: active ? c.accent : 'var(--fg-2)',
-              border: `1px solid ${active ? c.accent + '60' : 'var(--line)'}`,
+              color: active ? c.text : 'var(--fg-2)',
+              border: `1px solid ${active ? alpha(c.accent, 38) : 'var(--line)'}`,
             }}
           >
             <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: c.accent }} aria-hidden="true" />

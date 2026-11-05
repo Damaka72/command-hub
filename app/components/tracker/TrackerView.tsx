@@ -4,10 +4,13 @@ import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { TrackerResponse } from '@/app/api/trackers/[siteId]/route';
 import {
-  STATUS_LABEL, countTasks, groupByArea, isOpenNextStep, percentDone,
-  type TaskStatus, type TrackerSite,
+  STATUS_LABEL, countTasks, groupByArea, isOpenNextStep, matchesFilter, siteLink,
+  type TaskFilter, type TaskStatus, type TrackerSite,
 } from '@/app/lib/trackerLogic';
-import ProgressMeter from './ProgressMeter';
+import AreaCard from './AreaCard';
+import FilterChips from './FilterChips';
+import NextStepsPanel from './NextStepsPanel';
+import SummaryBand from './SummaryBand';
 import TaskRow from './TaskRow';
 
 // The per-site "what is done and what is outstanding" view. Everything it shows
@@ -31,6 +34,7 @@ export default function TrackerView({ siteId }: { siteId: string }) {
   const [state, setState] = useState<'loading' | 'ready' | 'missing' | 'error'>('loading');
   const [deviceOnly, setDeviceOnly] = useState(false);
   const [announce, setAnnounce] = useState('');
+  const [filter, setFilter] = useState<TaskFilter>('all');
   const localRef = useRef<Record<string, TaskStatus>>({});
 
   useEffect(() => {
@@ -78,18 +82,25 @@ export default function TrackerView({ siteId }: { siteId: string }) {
   }, [siteId]);
 
   const counts = useMemo(() => (site ? countTasks(site.tasks) : null), [site]);
-  const areas = useMemo(() => (site ? groupByArea(site.tasks) : []), [site]);
   const nextSteps = useMemo(
     () => (site ? [...site.tasks].filter(isOpenNextStep).sort((a, b) => a.order - b.order) : []),
     [site],
   );
+  // Areas keep their whole-area counts (so "x of y done" is always true); the
+  // filter only decides which rows are listed under them.
+  const areas = useMemo(
+    () => (site ? groupByArea(site.tasks).map(a => ({ ...a, shown: a.tasks.filter(t => matchesFilter(t, filter)) })) : []),
+    [site, filter],
+  );
+  const shownTotal = areas.reduce((n, a) => n + a.shown.length, 0);
+  const link = site?.url ? siteLink(site.url) : null;
 
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6">
       <Link
         href="/"
         className="inline-flex min-h-11 items-center text-sm font-medium underline-offset-4 hover:underline"
-        style={{ color: 'var(--hub-accent-text)' }}
+        style={{ color: 'var(--accent-text)' }}
       >
         ← Command Hub
       </Link>
@@ -107,29 +118,39 @@ export default function TrackerView({ siteId }: { siteId: string }) {
       )}
 
       {state === 'ready' && site && counts && (
-        <>
+        <div className="flex flex-col" style={{ gap: 'var(--space-section)' }}>
           <header className="mt-2">
             <div className="flex items-center gap-2.5">
               <span
                 aria-hidden="true"
                 className="h-3 w-3 shrink-0 rounded-full"
-                style={{ background: site.accent ?? 'var(--hub-accent)' }}
+                style={{ background: site.accent ?? 'var(--accent)' }}
               />
               <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--fg)' }}>{site.name}</h1>
             </div>
             {site.description && (
               <p className="mt-1 text-sm" style={{ color: 'var(--fg-2)' }}>{site.description}</p>
             )}
-            {(site.url || site.repo) && (
-              <p className="mt-1 flex flex-wrap items-center gap-x-2 text-xs" style={{ color: 'var(--fg-2)' }}>
-                {site.url && <span>{site.url}</span>}
+            {(link || site.repo) && (
+              <p className="mt-1 flex flex-wrap items-center gap-x-4 text-sm" style={{ color: 'var(--fg-2)' }}>
+                {link && (
+                  <a
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-11 items-center underline underline-offset-2"
+                    style={{ color: 'var(--accent-text)' }}
+                  >
+                    {link.label} ↗
+                  </a>
+                )}
                 {site.repo && (
                   <a
                     href={`https://github.com/${site.repo}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex min-h-11 items-center underline underline-offset-2"
-                    style={{ color: 'var(--hub-accent-text)' }}
+                    style={{ color: 'var(--accent-text)' }}
                   >
                     {site.repo} ↗
                   </a>
@@ -141,8 +162,8 @@ export default function TrackerView({ siteId }: { siteId: string }) {
           {deviceOnly && (
             <p
               role="status"
-              className="mt-4 rounded-lg p-3 text-sm"
-              style={{ background: 'var(--panel-2)', color: 'var(--fg)', border: '1px solid var(--warn)' }}
+              className="p-4 text-sm"
+              style={{ background: 'var(--panel-2)', color: 'var(--fg)', border: '1px solid var(--warn)', borderRadius: 'var(--radius-control)' }}
             >
               <strong style={{ color: 'var(--warn)' }}>Saved on this device only.</strong>{' '}
               The shared tracker store couldn’t be reached, so changes you make stay in this browser and
@@ -150,75 +171,35 @@ export default function TrackerView({ siteId }: { siteId: string }) {
             </p>
           )}
 
-          {/* ── Overall progress ── */}
-          <section
-            aria-labelledby="overall-h"
-            className="mt-5 rounded-xl p-4"
-            style={{ background: 'var(--panel)', border: '1px solid var(--line-2)' }}
-          >
-            <h2 id="overall-h" className="sr-only">Overall progress</h2>
-            <div className="mb-3 flex items-baseline gap-3">
-              <span className="mono-num text-5xl font-semibold leading-none" style={{ color: 'var(--fg)' }}>
-                {percentDone(counts)}%
-              </span>
-              <span className="text-sm" style={{ color: 'var(--fg-2)' }}>
-                done · {counts.done} of {counts.total} tasks
-              </span>
-            </div>
-            <ProgressMeter counts={counts} label={site.name} height={16} legend />
-            {counts.parked > 0 && (
-              <p className="mt-3 text-xs" style={{ color: 'var(--fg-2)' }}>
-                Parked tasks are deliberately not started yet; they still count towards the total.
-              </p>
-            )}
-          </section>
+          <SummaryBand counts={counts} label={site.name} headingId="overall-h" heading="Overall progress" />
 
-          {/* ── Your next steps ── */}
-          <section aria-labelledby="next-h" className="mt-6">
-            <h2 id="next-h" className="mb-2 text-base font-bold" style={{ color: 'var(--fg)' }}>
-              Your next steps <span className="mono-num font-normal" style={{ color: 'var(--fg-2)' }}>({nextSteps.length})</span>
-            </h2>
-            {nextSteps.length === 0 ? (
-              <p className="text-sm" style={{ color: 'var(--fg-2)' }}>Nothing flagged as a next step right now.</p>
-            ) : (
-              <ul className="flex flex-col gap-2">
-                {nextSteps.map(t => (
+          <NextStepsPanel count={nextSteps.length} headingId="next-h">
+            {nextSteps.map(t => (
+              <TaskRow key={t.id} task={t} onStatus={setStatus} areaLabel={t.area} />
+            ))}
+          </NextStepsPanel>
+
+          <section aria-labelledby="areas-h" className="flex flex-col gap-4">
+            <h2 id="areas-h" className="text-lg font-bold" style={{ color: 'var(--fg)' }}>All tasks by area</h2>
+            <FilterChips value={filter} onChange={setFilter} shown={shownTotal} />
+            {shownTotal === 0 && (
+              <p className="text-sm" style={{ color: 'var(--fg-2)' }}>Nothing matches this filter.</p>
+            )}
+            {areas.filter(a => a.shown.length > 0).map(area => (
+              <AreaCard
+                key={`${area.name}:${filter}`}
+                name={area.name}
+                counts={area.counts}
+                visible={area.shown.length}
+                open={filter !== 'all' || area.counts.parked !== area.counts.total}
+              >
+                {area.shown.map(t => (
                   <TaskRow key={t.id} task={t} onStatus={setStatus} />
                 ))}
-              </ul>
-            )}
+              </AreaCard>
+            ))}
           </section>
-
-          {/* ── Tasks by area ── */}
-          <section aria-labelledby="areas-h" className="mt-8">
-            <h2 id="areas-h" className="mb-2 text-base font-bold" style={{ color: 'var(--fg)' }}>All tasks by area</h2>
-            <div className="flex flex-col gap-3">
-              {areas.map(area => (
-                <details
-                  key={area.name}
-                  open={area.counts.parked !== area.counts.total}
-                  className="rounded-xl"
-                  style={{ background: 'var(--panel)', border: '1px solid var(--line-2)' }}
-                >
-                  <summary className="flex min-h-11 cursor-pointer flex-col gap-2 p-3">
-                    <span className="flex items-baseline justify-between gap-3">
-                      <span className="text-sm font-bold" style={{ color: 'var(--fg)' }}>{area.name}</span>
-                      <span className="mono-num shrink-0 text-xs" style={{ color: 'var(--fg-2)' }}>
-                        {area.counts.done}/{area.counts.total} done
-                      </span>
-                    </span>
-                    <ProgressMeter counts={area.counts} label={area.name} height={8} />
-                  </summary>
-                  <ul className="flex flex-col gap-2 p-3 pt-0">
-                    {area.tasks.map(t => (
-                      <TaskRow key={t.id} task={t} onStatus={setStatus} />
-                    ))}
-                  </ul>
-                </details>
-              ))}
-            </div>
-          </section>
-        </>
+        </div>
       )}
 
       <div aria-live="polite" role="status" className="sr-only">{announce}</div>
