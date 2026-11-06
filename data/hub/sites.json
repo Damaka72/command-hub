@@ -1,0 +1,58 @@
+{
+  "vercelTeamId": "team_2fG7WKNEcvEFVhRPxREhEgs8",
+  "vercelTeamSlug": "didi-anolues-projects",
+  "sites": [
+    {
+      "id": "masteryourcareerpath",
+      "name": "Master Your Career Path",
+      "short": "MYCP",
+      "url": "https://masteryourcareerpath.com",
+      "vercelProject": "masteryourcareerpath",
+      "vercelProjectId": "prj_5d1hVfhY4QBj1p0ntgDcueFo0zdd",
+      "repo": "Damaka72/Masteryourcareerpath",
+      "adminPath": "/admin",
+      "note": "Includes the former TCC. OPERATE is waitlist-only."
+    },
+    {
+      "id": "worldofcontracts",
+      "name": "World of Contracts",
+      "short": "WoC",
+      "url": "https://www.worldofcontracts.co.uk",
+      "vercelProject": "roles-board",
+      "vercelProjectId": "prj_5qRIqKcp0UAaxejM96Zr7FGULc9G",
+      "repo": "Damaka72/roles-board",
+      "adminPath": "/admin",
+      "tracker": "/trackers/world-of-contracts"
+    },
+    {
+      "id": "didianolue",
+      "name": "didianolue.co.uk",
+      "short": "Didi",
+      "url": "https://didianolue.co.uk",
+      "vercelProject": "didi-anolue-landing-page",
+      "vercelProjectId": "prj_MqTdvJPBlJRC0A6JIYBQLPEsnuQV",
+      "repo": "Damaka72/didi-anolue-landing-page",
+      "adminPath": "/admin"
+    },
+    {
+      "id": "oldoaktown",
+      "name": "Old Oak Town",
+      "short": "OOT",
+      "url": "https://oldoaktown.co.uk",
+      "vercelProject": "oldoaktown",
+      "vercelProjectId": "prj_IGyLo0ADMJlofgrPbyrWYwMYbgPo",
+      "repo": "Damaka72/oldoaktown",
+      "adminPath": "/admin"
+    },
+    {
+      "id": "aiviralvideoprompts",
+      "name": "AI Viral Video Prompts",
+      "short": "AIVVP",
+      "url": "https://aiviralvideoprompts.com",
+      "vercelProject": "ai-viral-video-prompts",
+      "vercelProjectId": "prj_Qf2os2TZQSoDpCTFOwUHGbjGNGeH",
+      "repo": "Damaka72/ai-viral-video-prompts",
+      "adminPath": "/admin"
+    }
+  ]
+}

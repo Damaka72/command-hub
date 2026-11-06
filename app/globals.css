@@ -130,3 +130,55 @@ body {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* ── Morning-paper theme (Command Hub home) ─────────────────────────────────
+   Brand palette: gold, near-black, off-white. Scoped to .news-paper so every
+   other page keeps the dark Hub theme. All text/background pairs are ≥4.5:1
+   (checked: ink 16:1, ink-2 8.5:1, ink-3 5.3:1, gold-ink 6.5:1 on cards, each
+   status colour ≥5.5:1 on its tint). Status is never colour alone — every use
+   also carries a word and a glyph. */
+.news-paper {
+  --n-paper:     #F6F2E9;
+  --n-card:      #FFFDF8;
+  --n-night:     #15120D;
+  --n-night-2:   #B9B09B;
+  --n-ink:       #17140F;
+  --n-ink-2:     #4A453B;
+  --n-ink-3:     #6A6354;
+  --n-rule:      #DDD5C3;
+  --n-gold:      #D9B25A;
+  --n-gold-ink:  #775708;
+  --n-gold-tint: #F3E7C4;
+  --n-ok:        #17653F;
+  --n-ok-tint:   #DDEFE4;
+  --n-warn:      #9A4300;
+  --n-warn-tint: #FBE8D0;
+  --n-bad:       #A3281F;
+  --n-bad-tint:  #F9DEDA;
+  background: var(--n-paper);
+  color: var(--n-ink);
+}
+
+@theme inline {
+  --color-news-paper:     var(--n-paper);
+  --color-news-card:      var(--n-card);
+  --color-news-night:     var(--n-night);
+  --color-news-night-2:   var(--n-night-2);
+  --color-news-ink:       var(--n-ink);
+  --color-news-ink-2:     var(--n-ink-2);
+  --color-news-ink-3:     var(--n-ink-3);
+  --color-news-rule:      var(--n-rule);
+  --color-news-gold:      var(--n-gold);
+  --color-news-gold-ink:  var(--n-gold-ink);
+  --color-news-gold-tint: var(--n-gold-tint);
+  --color-news-ok:        var(--n-ok);
+  --color-news-ok-tint:   var(--n-ok-tint);
+  --color-news-warn:      var(--n-warn);
+  --color-news-warn-tint: var(--n-warn-tint);
+  --color-news-bad:       var(--n-bad);
+  --color-news-bad-tint:  var(--n-bad-tint);
+}
+
+.news-paper :focus-visible { outline: 2px solid var(--n-gold-ink); outline-offset: 2px; }
+.news-paper .news-night :focus-visible { outline-color: var(--n-gold); }
+.news-paper input, .news-paper textarea { font-size: 16px; } /* stops iOS zooming on focus */
