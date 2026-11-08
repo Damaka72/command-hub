@@ -11,16 +11,3 @@
 export function driveDirectDownloadUrl(fileId: string): string {
   return `https://drive.google.com/uc?export=download&id=${encodeURIComponent(fileId)}`;
 }
-
-// Extracts a Drive file id from any of the common share-link shapes Didi might
-// paste (view link, open link, or an id already on its own). Returns null if
-// nothing recognisable is found.
-export function extractDriveFileId(input: string): string | null {
-  const trimmed = input.trim();
-  const fileMatch = trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-  if (fileMatch) return fileMatch[1];
-  const idParamMatch = trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-  if (idParamMatch) return idParamMatch[1];
-  if (/^[a-zA-Z0-9_-]{10,}$/.test(trimmed)) return trimmed;
-  return null;
-}

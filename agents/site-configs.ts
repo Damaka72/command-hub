@@ -121,38 +121,6 @@ ${DIVERSITY_GUIDELINE}`,
   },
 
   {
-    id: 'theconcurrentcontractor',
-    name: 'The Concurrent Contractor',
-    url: 'theconcurrentcontractor.com',
-    platforms: ['LinkedIn', 'Instagram'],
-    primaryPlatform: 'LinkedIn',
-    automateBlotato: true,
-    blotatoPlatforms: ['LinkedIn', 'Instagram', 'Facebook'],
-    audience: 'UK contractors with 5+ years\' experience who are managing multiple contracts or want to optimise their current one',
-    tone: 'Straight-talking, knowledgeable, peer-to-peer — never advisory or preachy',
-    rubricName: 'Contractor lens rubric',
-    passChecks: [
-      'Written through the lens of an experienced UK contractor, not a career advisor',
-      'Addresses a specific contracting topic: OPERATE framework, rate optimisation, client management, IR35, or contractor mindset',
-      'Practical and peer-to-peer in tone — shares insight, does not dispense advice',
-    ],
-    failCheck: 'Fails if it reads as generic career, recruitment, or motivational content',
-    subagentSystemPrompt: `You are writing content for The Concurrent Contractor, a resource for experienced UK contractors.
-
-The audience are contractors with 5+ years of experience who are either already running multiple contracts or actively trying to optimise the one they have. They are not beginners. They know how contracting works. Write as a peer who has been there, not as an advisor handing down guidance.
-
-The platform is built around the OPERATE framework — a structured approach to running multiple contracts without chaos. Reference OPERATE by name where relevant to the content pillar.
-
-Content pillars:
-${pillarBlock('theconcurrentcontractor')}
-
-Never write generic career content. Never sound like a recruiter or financial advisor. Never be preachy. UK English throughout. Peer-to-peer tone always.
-
-${DIVERSITY_GUIDELINE}`,
-    researchFocus: 'IR35/off-payroll working rule changes, HMRC guidance updates, day-rate and contract-market trends, notable contractor tribunal cases or client-side IR35 policy shifts, and UK contracting-market conditions.',
-  },
-
-  {
     id: 'oldoaktown',
     name: 'Old Oak Town',
     url: 'oldoaktown.co.uk',

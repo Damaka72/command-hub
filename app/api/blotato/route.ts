@@ -35,7 +35,6 @@ export interface BlotatoData {
 // Maps known Blotato subaccount names and usernames → site IDs
 const SUBACCOUNT_MAP: Record<string, string> = {
   'Old Oak Town':              'oldoaktown',
-  'The Concurrent Contractor': 'theconcurrentcontractor',
   'AI Viral Video Prompts':    'aiviralvideoprompts',
   'Master Your Career Path':   'masteryourcareerpath',
 };
@@ -44,7 +43,6 @@ const USERNAME_MAP: Record<string, string> = {
   oldoaktown:              'oldoaktown',
   aiviralvideoprompts:     'aiviralvideoprompts',
   masteryourcareerpath:    'masteryourcareerpath',
-  theconcurrentcontractor: 'theconcurrentcontractor',
 };
 
 function detectSiteFromAccount(account: Record<string, unknown> | null): string | null {
@@ -61,7 +59,6 @@ function detectSiteFromContent(platform: string, text: string): string {
   // Platform-exclusive mappings (each platform is only used by one site)
   if (platform === 'facebook') return 'oldoaktown';
   if (platform === 'tiktok')   return 'aiviralvideoprompts';
-  if (platform === 'linkedin') return 'theconcurrentcontractor';
 
   // Content-based detection for Twitter/Instagram (shared across sites)
   const t = text.toLowerCase();
@@ -75,11 +72,6 @@ function detectSiteFromContent(platform: string, text: string): string {
     t.includes('opdc') || t.includes('hemiko') || t.includes('station box') ||
     t.includes('hs2') || t.includes('old oak common')
   ) return 'oldoaktown';
-
-  if (
-    t.includes('ir35') || t.includes('theconcurrentcontractor') || t.includes('ltd co') ||
-    t.includes('outside ir35') || t.includes('consultant who contracts')
-  ) return 'theconcurrentcontractor';
 
   if (
     t.includes('masteryourcareerpath') || t.includes('cv-to-website') ||
@@ -157,7 +149,7 @@ export async function GET() {
     });
 
   // Group by site
-  const SITE_IDS = ['oldoaktown', 'theconcurrentcontractor', 'masteryourcareerpath', 'aiviralvideoprompts', 'didianolue'];
+  const SITE_IDS = ['oldoaktown', 'masteryourcareerpath', 'aiviralvideoprompts', 'didianolue'];
   const bySite: Record<string, BlotatoSiteFeed> = {};
   for (const id of SITE_IDS) {
     bySite[id] = {

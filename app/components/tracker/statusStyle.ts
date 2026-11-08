@@ -19,9 +19,9 @@ export const STATUS_STYLE: Record<TaskStatus, StatusStyle> = {
     segment: 'var(--ok)',
   },
   in_progress: {
-    color: 'var(--hub-cyan)',
+    color: 'var(--info)',
     glyph: '◐',
-    segment: 'var(--hub-cyan)',
+    segment: 'var(--info)',
   },
   todo: {
     color: 'var(--fg-2)',

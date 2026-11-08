@@ -117,7 +117,8 @@ export interface StatusResponse {
 interface SiteConfig {
   id: string;
   url: string;
-  vercelProjectId: string;
+  /** Null when the Vercel project isn't known; the deploy card is then left empty. */
+  vercelProjectId: string | null;
   revenueModel: string;
   newsletterProvider: string | null;
   newsletterConnected: boolean;
@@ -137,17 +138,6 @@ const SITES: SiteConfig[] = [
     revenueProvider: 'Stripe',
     revenueConnected: true,
     servesMostData: true,
-  },
-  {
-    id: 'theconcurrentcontractor',
-    url: 'https://www.theconcurrentcontractor.com',
-    vercelProjectId: 'prj_6a52DLbKMQSpKfcGFe0KpqfpNKie',
-    revenueModel: 'leadgen',
-    newsletterProvider: 'Beehiiv',
-    newsletterConnected: false,
-    revenueProvider: null,
-    revenueConnected: false,
-    servesMostData: false, // Next.js — data/ not in public/
   },
   {
     id: 'masteryourcareerpath',
@@ -170,6 +160,17 @@ const SITES: SiteConfig[] = [
     revenueProvider: 'Gumroad',
     revenueConnected: false,
     servesMostData: true,
+  },
+  {
+    id: 'world-of-contracts',
+    url: 'https://www.worldofcontracts.co.uk',
+    vercelProjectId: null, // not recorded here yet; only the up/down check runs
+    revenueModel: 'jobs-board',
+    newsletterProvider: null,
+    newsletterConnected: false,
+    revenueProvider: null,
+    revenueConnected: false,
+    servesMostData: false,
   },
   {
     id: 'didianolue',
@@ -221,8 +222,8 @@ async function checkUptime(url: string): Promise<boolean> {
   } catch { return false; }
 }
 
-async function checkVercel(projectId: string): Promise<{ state: string; ago: string; commitMessage: string } | null> {
-  if (!VERCEL_TOKEN) return null;
+async function checkVercel(projectId: string | null): Promise<{ state: string; ago: string; commitMessage: string } | null> {
+  if (!VERCEL_TOKEN || !projectId) return null;
   try {
     const res = await fetch(
       `https://api.vercel.com/v6/deployments?projectId=${projectId}&teamId=${VERCEL_TEAM_ID}&limit=1&target=production`,
@@ -360,7 +361,7 @@ async function fetchPortfolioCoordinator(): Promise<PortfolioCoordinator | null>
 }
 
 async function fetchReviewQueue(): Promise<DraftItem[]> {
-  const siteIds = ['masteryourcareerpath', 'theconcurrentcontractor', 'oldoaktown', 'aiviralvideoprompts'];
+  const siteIds = ['masteryourcareerpath', 'oldoaktown', 'aiviralvideoprompts'];
   const allItems: DraftItem[] = [];
 
   for (const siteId of siteIds) {

@@ -1,14 +1,38 @@
 # Site work trackers
 
 One JSON file per site. Add a file here and the site appears on the Hub home page
-roll-up and at `/trackers/<siteId>` — no code changes.
+(summary band, "Your next steps" panel and a site card) and at `/trackers/<siteId>`
+— no code changes.
+
+## How to add a new site
+
+1. **The work list (all you need to get a card and a tracker page).** Copy
+   `world-of-contracts.json` to `data/trackers/<siteId>.json`, change `siteId`,
+   `name`, `description`, `url`, `repo` and `accent`, and replace the tasks. Check
+   the file with `npm run build` (a mistake gives an error naming the file and task).
+2. **Make it a managed site (live address, site list, identity colour).** Only
+   needed if you want the Hub to check the site is up and to give it a
+   permanent colour:
+   - `app/lib/sites.ts`: add an entry whose `id` is the same as the tracker's `siteId`.
+   - `app/lib/siteColors.ts`: add a `make(...)` line for that id.
+   - `app/globals.css`: add `--site-<siteId>: #rrggbb;` next to the other `--site-*`
+     colours (the only place a site colour is written down).
+   - `app/api/status/route.ts`: add the site to `SITES` (use `vercelProjectId: null`
+     if you do not have the Vercel project id).
+   A site that is in the site list but has no tracker file still gets a card on the
+   home page, saying "No tracker yet".
+3. A site that runs in the weekly content pipeline also needs entries in
+   `agents/site-configs.ts` and `agents/accounts.ts`; that is separate from trackers.
+
+To retire a site, move its entries to `archive/<site>/` with a short README (see
+`archive/the-concurrent-contractor/`); never drop its database rows.
 
 ```json
 {
   "siteId": "my-site",            // lower-case, numbers, hyphens; also the URL
   "name": "My Site",
   "description": "One line (optional)",
-  "url": "example.com",           // optional
+  "url": "https://www.example.com", // optional; with or without https://
   "repo": "owner/repo",           // optional
   "accent": "#E9C46A",            // optional identity dot colour
   "tasks": [

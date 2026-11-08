@@ -63,11 +63,11 @@ export default function MonthView({
               style={{
                 height: 88,
                 opacity: inMonth ? 1 : 0.32,
-                background: isToday ? 'rgba(59,130,246,0.05)' : 'var(--panel)',
-                border: isToday ? '1px solid #3b82f6' : '1px solid var(--line)',
+                background: isToday ? 'color-mix(in srgb, var(--info) 5%, transparent)' : 'var(--panel)',
+                border: isToday ? '1px solid var(--info)' : '1px solid var(--line)',
               }}
             >
-              <span className="mono-num text-xs" style={{ color: isToday ? '#3b82f6' : 'var(--fg-2)' }}>
+              <span className="mono-num text-xs" style={{ color: isToday ? 'var(--info)' : 'var(--fg-2)' }}>
                 {dayOfMonth(date)}
               </span>
               <div className="flex flex-wrap gap-1">

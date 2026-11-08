@@ -21,7 +21,6 @@ export interface CoordinatorStatusData {
   sites: {
     aivvp: SiteCoordinatorStatus;
     mycp: SiteCoordinatorStatus;
-    tcc: SiteCoordinatorStatus;
     oot: SiteCoordinatorStatus;
   };
 }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useWeek } from '../context/WeekContext';
 import WeekSelector from '../components/WeekSelector';
+import Link from 'next/link';
 
 interface Pillar {
   id:          string;
@@ -26,14 +27,12 @@ type PillarsData = Record<string, Pillar[]>;
 
 const SITE_LABELS: Record<string, string> = {
   masteryourcareerpath:    'Master Your Career Path',
-  theconcurrentcontractor: 'The Concurrent Contractor',
   oldoaktown:              'Old Oak Town',
   aiviralvideoprompts:     'AI Viral Video Prompts',
 };
 
 const SITE_ORDER = [
   'masteryourcareerpath',
-  'theconcurrentcontractor',
   'oldoaktown',
   'aiviralvideoprompts',
 ];
@@ -185,10 +184,10 @@ export default function PlanPage() {
 
   if (errorMsg && !form) {
     return (
-      <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center">
-        <div className="bg-red-900/30 border border-red-700 rounded-lg p-6 max-w-md text-center">
-          <p className="text-red-300 font-medium">Could not load plan</p>
-          <p className="text-gray-400 text-sm mt-2">{errorMsg}</p>
+      <div className="min-h-screen bg-bg text-fg flex items-center justify-center">
+        <div className="bg-bad/15 border border-bad/60 rounded-lg p-6 max-w-md text-center">
+          <p className="text-bad font-medium">Could not load plan</p>
+          <p className="text-fg-2 text-sm mt-2">{errorMsg}</p>
         </div>
       </div>
     );
@@ -196,19 +195,19 @@ export default function PlanPage() {
 
   if (!form) {
     return (
-      <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center">
-        <p className="text-gray-400">Loading plan…</p>
+      <div className="min-h-screen bg-bg text-fg flex items-center justify-center">
+        <p className="text-fg-2">Loading plan…</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
+    <div className="min-h-screen bg-bg text-fg">
       {/* Header */}
-      <div className="border-b border-gray-800 px-6 py-4 flex items-center justify-between">
+      <div className="border-b border-line px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <a href="/" className="text-gray-400 hover:text-white text-sm">← Dashboard</a>
-          <h1 className="text-lg font-semibold text-white">Weekly Content Plan</h1>
+          <Link href="/" className="text-fg-2 hover:text-fg text-sm">← Dashboard</Link>
+          <h1 className="text-lg font-semibold text-fg">Weekly Content Plan</h1>
         </div>
         <div className="flex items-center gap-3">
           <WeekSelector />
@@ -217,10 +216,10 @@ export default function PlanPage() {
             disabled={status === 'saving'}
             className={`px-5 py-2 rounded-lg text-sm font-medium transition-colors ${
               status === 'saved'
-                ? 'bg-green-700 text-white'
+                ? 'bg-ok text-on-solid'
                 : status === 'error'
-                ? 'bg-red-700 text-white'
-                : 'bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50'
+                ? 'bg-bad text-on-solid'
+                : 'bg-accent hover:brightness-125 text-on-solid disabled:opacity-50'
             }`}
           >
             {status === 'saving' ? 'Saving…' : status === 'saved' ? '✓ Saved' : status === 'error' ? 'Error — retry' : 'Save Plan'}
@@ -230,16 +229,16 @@ export default function PlanPage() {
 
       <div className="max-w-4xl mx-auto px-6 py-8 space-y-8">
         {/* Campaign objective */}
-        <div className="bg-gray-900 border border-gray-700 rounded-xl p-5">
+        <div className="bg-panel border border-line-2 rounded-xl p-5">
           <div className="flex items-start gap-6 flex-wrap">
             <div className="flex-[2] min-w-64">
-              <label className="block text-xs font-medium text-gray-400 mb-1 uppercase tracking-wide">Campaign objective (optional)</label>
+              <label className="block text-xs font-medium text-fg-2 mb-1 uppercase tracking-wide">Campaign objective (optional)</label>
               <input
                 type="text"
                 value={form.campaignObjective ?? ''}
                 onChange={e => setForm(prev => prev ? { ...prev, campaignObjective: e.target.value || null } : prev)}
                 placeholder="e.g. OPERATE launch week, cohort open enrolment…"
-                className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 placeholder-gray-600"
+                className="w-full bg-panel-2 border border-line-2 rounded-lg px-3 py-2 text-fg text-sm focus:outline-none focus:border-accent/70 placeholder-fg-3"
               />
             </div>
           </div>
@@ -251,18 +250,18 @@ export default function PlanPage() {
           const sitePillars = pillars[siteId] ?? [];
 
           return (
-            <div key={siteId} className="bg-gray-900 border border-gray-700 rounded-xl p-5 space-y-4">
-              <h2 className="text-sm font-semibold text-white">{SITE_LABELS[siteId] ?? siteId}</h2>
+            <div key={siteId} className="bg-panel border border-line-2 rounded-xl p-5 space-y-4">
+              <h2 className="text-sm font-semibold text-fg">{SITE_LABELS[siteId] ?? siteId}</h2>
 
               {/* Research brief for the selected week — generatable + editable */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="block text-xs font-medium text-gray-400 uppercase tracking-wide">Research brief for this week</label>
+                  <label className="block text-xs font-medium text-fg-2 uppercase tracking-wide">Research brief for this week</label>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => generateBrief(siteId)}
                       disabled={busy !== null}
-                      className="rounded-lg bg-purple-700 hover:bg-purple-600 text-white px-3 py-1.5 text-xs font-medium disabled:opacity-50"
+                      className="rounded-lg bg-accent hover:brightness-125 text-on-solid px-3 py-1.5 text-xs font-medium disabled:opacity-50"
                       title="Search the web for what's actually happening right now, relevant to this site's audience"
                     >
                       {busy === `research-${siteId}` ? 'Researching…' : '🔎 Generate research brief'}
@@ -270,7 +269,7 @@ export default function PlanPage() {
                     <button
                       onClick={() => saveBrief(siteId)}
                       disabled={busy !== null}
-                      className="rounded-lg bg-gray-700 hover:bg-gray-600 text-white px-3 py-1.5 text-xs font-medium disabled:opacity-50"
+                      className="rounded-lg bg-panel-3 hover:brightness-125 text-fg px-3 py-1.5 text-xs font-medium disabled:opacity-50"
                     >
                       {busy === `save-research-${siteId}` ? 'Saving…' : 'Save brief'}
                     </button>
@@ -281,23 +280,23 @@ export default function PlanPage() {
                   onChange={e => setBriefs(prev => ({ ...prev, [siteId]: e.target.value }))}
                   rows={6}
                   placeholder="Hit 🔎 Generate research brief to search the web for what's happening this week for this audience — or write the brief yourself. It feeds this week's content pipeline."
-                  className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-gray-100 text-xs focus:outline-none focus:border-blue-500 font-sans leading-relaxed whitespace-pre-wrap"
+                  className="w-full bg-panel-2 border border-line-2 rounded-lg px-3 py-2 text-fg text-xs focus:outline-none focus:border-accent/70 font-sans leading-relaxed whitespace-pre-wrap"
                 />
                 {researchError[siteId] && (
-                  <p className="text-xs text-red-400">{researchError[siteId]}</p>
+                  <p className="text-xs text-bad">{researchError[siteId]}</p>
                 )}
                 {researchNote[siteId] && (
-                  <p className="text-xs text-amber-400">{researchNote[siteId]}</p>
+                  <p className="text-xs text-warn">{researchNote[siteId]}</p>
                 )}
               </div>
 
               {/* Pillar selector */}
               <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1 uppercase tracking-wide">Content pillar</label>
+                <label className="block text-xs font-medium text-fg-2 mb-1 uppercase tracking-wide">Content pillar</label>
                 <select
                   value={sitePlan.pillarId}
                   onChange={e => handlePillarChange(siteId, e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
+                  className="w-full bg-panel-2 border border-line-2 rounded-lg px-3 py-2 text-fg text-sm focus:outline-none focus:border-accent/70"
                 >
                   <option value="">— select pillar —</option>
                   {sitePillars.map(p => (
@@ -305,7 +304,7 @@ export default function PlanPage() {
                   ))}
                 </select>
                 {sitePlan.pillarId && sitePillars.find(p => p.id === sitePlan.pillarId) && (
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-fg-3 mt-1">
                     {sitePillars.find(p => p.id === sitePlan.pillarId)?.description}
                   </p>
                 )}
@@ -313,27 +312,27 @@ export default function PlanPage() {
 
               {/* Theme (editable — auto-filled from pillar, can override) */}
               <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1 uppercase tracking-wide">
-                  Theme for this week <span className="text-gray-600 normal-case">(auto-filled from pillar — edit to focus further)</span>
+                <label className="block text-xs font-medium text-fg-2 mb-1 uppercase tracking-wide">
+                  Theme for this week <span className="text-fg-3 normal-case">(auto-filled from pillar — edit to focus further)</span>
                 </label>
                 <input
                   type="text"
                   value={sitePlan.theme}
                   onChange={e => handleThemeEdit(siteId, e.target.value)}
                   placeholder="Select a pillar above, or type a custom theme"
-                  className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 placeholder-gray-600"
+                  className="w-full bg-panel-2 border border-line-2 rounded-lg px-3 py-2 text-fg text-sm focus:outline-none focus:border-accent/70 placeholder-fg-3"
                 />
               </div>
 
               {/* Optional notes */}
               <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1 uppercase tracking-wide">Notes (optional)</label>
+                <label className="block text-xs font-medium text-fg-2 mb-1 uppercase tracking-wide">Notes (optional)</label>
                 <input
                   type="text"
                   value={sitePlan.notes ?? ''}
                   onChange={e => handleNotesEdit(siteId, e.target.value)}
                   placeholder="e.g. focus on graduates this week, mention the cohort opening"
-                  className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500 placeholder-gray-600"
+                  className="w-full bg-panel-2 border border-line-2 rounded-lg px-3 py-2 text-fg text-sm focus:outline-none focus:border-accent/70 placeholder-fg-3"
                 />
               </div>
             </div>
@@ -342,15 +341,15 @@ export default function PlanPage() {
 
         {/* Error message */}
         {status === 'error' && errorMsg && (
-          <div className="bg-red-900/30 border border-red-700 rounded-lg p-4">
-            <p className="text-red-300 text-sm">{errorMsg}</p>
+          <div className="bg-bad/15 border border-bad/60 rounded-lg p-4">
+            <p className="text-bad text-sm">{errorMsg}</p>
           </div>
         )}
 
         {/* Instruction */}
-        <div className="bg-gray-900 border border-gray-700 rounded-xl p-5 text-sm text-gray-400 space-y-1">
-          <p className="text-gray-300 font-medium">After saving</p>
-          <p>Run the weekly pipeline to generate this week&apos;s drafts — 5 per site (Monday–Friday). Drafts appear in the <a href="/review" className="text-blue-400 hover:text-blue-300 underline">Review</a> queue, where you edit, approve, and push approved posts to Blotato.</p>
+        <div className="bg-panel border border-line-2 rounded-xl p-5 text-sm text-fg-2 space-y-1">
+          <p className="text-fg font-medium">After saving</p>
+          <p>Run the weekly pipeline to generate this week&apos;s drafts — 5 per site (Monday–Friday). Drafts appear in the <a href="/review" className="text-accent-text hover:text-accent-text underline">Review</a> queue, where you edit, approve, and push approved posts to Blotato.</p>
         </div>
       </div>
     </div>

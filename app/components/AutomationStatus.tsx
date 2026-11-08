@@ -15,7 +15,6 @@ import { SITE_SHORT } from "../lib/siteConstants";
 
 const SITE_ORDER = [
   'masteryourcareerpath',
-  'theconcurrentcontractor',
   'oldoaktown',
   'aiviralvideoprompts',
 ] as const;
@@ -33,26 +32,26 @@ function relativeTime(iso: string | null): string {
 }
 
 const SUBAGENT_PILL: Record<string, { bg: string; color: string; extra?: string }> = {
-  idle:      { bg: 'rgba(71,85,105,0.3)',  color: '#94a3b8' },
-  running:   { bg: 'rgba(245,158,11,0.15)', color: '#fbbf24', extra: 'animate-pulse' },
-  complete:  { bg: 'rgba(16,185,129,0.15)', color: '#34d399' },
-  error:     { bg: 'rgba(248,113,113,0.15)', color: '#f87171' },
-  never_run: { bg: 'rgba(30,41,59,0.6)',   color: '#475569' },
+  idle:      { bg: 'color-mix(in srgb, var(--idle) 20%, transparent)',  color: 'var(--idle)' },
+  running:   { bg: 'color-mix(in srgb, var(--warn) 15%, transparent)', color: 'var(--warn)', extra: 'animate-pulse' },
+  complete:  { bg: 'color-mix(in srgb, var(--ok) 15%, transparent)', color: 'var(--ok)' },
+  error:     { bg: 'color-mix(in srgb, var(--bad) 15%, transparent)', color: 'var(--bad)' },
+  never_run: { bg: 'var(--panel-2)', color: 'var(--fg-3)' },
 };
 
 const GRADER_PILL: Record<string, { bg: string; color: string }> = {
-  pass:  { bg: 'rgba(16,185,129,0.15)',  color: '#34d399' },
-  fail:  { bg: 'rgba(248,113,113,0.15)', color: '#f87171' },
-  retry: { bg: 'rgba(245,158,11,0.15)',  color: '#fbbf24' },
+  pass:  { bg: 'color-mix(in srgb, var(--ok) 15%, transparent)',  color: 'var(--ok)' },
+  fail:  { bg: 'color-mix(in srgb, var(--bad) 15%, transparent)', color: 'var(--bad)' },
+  retry: { bg: 'color-mix(in srgb, var(--warn) 15%, transparent)',  color: 'var(--warn)' },
 };
 
 function conclusionLabel(c: RunConclusion): { text: string; color: string } {
   switch (c) {
-    case 'success':   return { text: 'Succeeded', color: '#34d399' };
-    case 'failure':   return { text: 'Failed',    color: '#f87171' };
-    case 'timed_out': return { text: 'Timed out', color: '#f87171' };
-    case 'cancelled': return { text: 'Cancelled', color: '#fbbf24' };
-    default:          return { text: 'Finished',  color: '#94a3b8' };
+    case 'success':   return { text: 'Succeeded', color: 'var(--ok)' };
+    case 'failure':   return { text: 'Failed',    color: 'var(--bad)' };
+    case 'timed_out': return { text: 'Timed out', color: 'var(--bad)' };
+    case 'cancelled': return { text: 'Cancelled', color: 'var(--warn)' };
+    default:          return { text: 'Finished',  color: 'var(--idle)' };
   }
 }
 
@@ -61,9 +60,9 @@ function StepRow({ step }: { step: WorkflowStep }) {
   let color = 'var(--hub-text-3)';
   if (step.status === 'in_progress') { icon = '◐'; color = 'var(--hub-cyan)'; }
   else if (step.status === 'completed') {
-    if (step.conclusion === 'success') { icon = '✓'; color = '#34d399'; }
+    if (step.conclusion === 'success') { icon = '✓'; color = 'var(--ok)'; }
     else if (step.conclusion === 'skipped') { icon = '–'; color = 'var(--hub-text-3)'; }
-    else { icon = '✗'; color = '#f87171'; }
+    else { icon = '✗'; color = 'var(--bad)'; }
   }
   return (
     <div className="flex items-center gap-2 text-[13px]">
@@ -74,11 +73,11 @@ function StepRow({ step }: { step: WorkflowStep }) {
 }
 
 const ACTIVITY_LEVEL_DOT: Record<ActivityLevel, string> = {
-  success: '#34d399',
-  warning: '#fbbf24',
-  error:   '#f87171',
-  running: '#6a9bcc',
-  info:    '#94a3b8',
+  success: 'var(--ok)',
+  warning: 'var(--warn)',
+  error:   'var(--bad)',
+  running: 'var(--info)',
+  info:    'var(--idle)',
 };
 
 function CoordinatorAndSubagents({ portfolioCoordinator, sites }: { portfolioCoordinator: PortfolioCoordinator | null; sites: Record<string, SiteDetail> }) {
@@ -172,7 +171,7 @@ function CoordinatorAndSubagents({ portfolioCoordinator, sites }: { portfolioCoo
         </p>
         <div className="mt-2 flex gap-4">
           <div className="text-center">
-            <p className="text-xl font-bold" style={{ color: '#34d399' }}>
+            <p className="text-xl font-bold" style={{ color: 'var(--ok)' }}>
               {portfolioCoordinator?.batchStatus.approved ?? 0}
             </p>
             <p className="text-[12px]" style={{ color: 'var(--hub-text-3)' }}>Approved</p>
@@ -184,7 +183,7 @@ function CoordinatorAndSubagents({ portfolioCoordinator, sites }: { portfolioCoo
             <p className="text-[12px]" style={{ color: 'var(--hub-text-3)' }}>Pending</p>
           </div>
           <div className="text-center">
-            <p className="text-xl font-bold" style={{ color: '#f87171' }}>
+            <p className="text-xl font-bold" style={{ color: 'var(--bad)' }}>
               {portfolioCoordinator?.batchStatus.failed ?? 0}
             </p>
             <p className="text-[12px]" style={{ color: 'var(--hub-text-3)' }}>Failed</p>
@@ -194,7 +193,7 @@ function CoordinatorAndSubagents({ portfolioCoordinator, sites }: { portfolioCoo
           <a
             href="#review-queue"
             className="mt-2 flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium"
-            style={{ background: 'rgba(245,158,11,0.12)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.25)' }}
+            style={{ background: 'color-mix(in srgb, var(--warn) 12%, transparent)', color: 'var(--warn)', border: '1px solid color-mix(in srgb, var(--warn) 25%, transparent)' }}
           >
             ⚑ Batch ready — review before publishing
           </a>
@@ -274,7 +273,7 @@ function PipelineControl({ pipeline }: { pipeline: ReturnType<typeof usePipeline
       ) : activeRun ? (
         <span
           className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium"
-          style={{ background: 'rgba(106,155,204,0.12)', color: 'var(--hub-cyan)', border: '1px solid rgba(106,155,204,0.3)' }}
+          style={{ background: 'color-mix(in srgb, var(--info) 12%, transparent)', color: 'var(--info)', border: '1px solid color-mix(in srgb, var(--info) 30%, transparent)' }}
         >
           <span className="h-2 w-2 animate-hub-pulse rounded-full" style={{ background: 'var(--hub-cyan)' }} />
           Running…

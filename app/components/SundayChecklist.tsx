@@ -13,14 +13,12 @@ import { useState, useEffect } from "react";
 const COORDINATOR_LINKS = [
   { key: "aivvp", label: "AIVVP", url: "https://claude.ai/project/01996e3c-808c-7457-a43a-c0f830af4ab7" },
   { key: "mycp",  label: "MYCP",  url: "https://claude.ai/project/a740ba19-2ad2-4de9-b0a0-1a99512378dd" },
-  { key: "tcc",   label: "TCC",   url: "https://claude.ai/project/0197e1d1-9a28-729f-8388-17974d7e829c" },
   { key: "oot",   label: "OOT",   url: "https://claude.ai/project/01994548-0edc-7432-b080-2deb9b296af3" },
 ] as const;
 
 const CHECKLIST_ITEMS = [
   "Brief AIVVP Coordinator and read output",
   "Brief MYCP Coordinator and read output",
-  "Brief TCC Coordinator and read output",
   "Brief OOT Coordinator and read output",
   "Add voice to all NEEDS YOUR VOICE sections",
   "Beehiiv — The Prompt-ly draft ready (Wednesday send)",
@@ -49,14 +47,12 @@ TikTok posts: 18:00 GMT on the specified day
 Pinterest posts: 14:00 GMT on the specified day — retrieve boardId first by calling blotato_list_pinterest_boards with accountId 6423
 YouTube: 10:00 GMT on the specified day
 After each post confirms successfully, tell me the post ID before moving to the next. If any post fails, stop and tell me the exact error message.
-Work through the sites in this order: AIVVP first, then MYCP, then TCC, then OOT.
+Work through the sites in this order: AIVVP first, then MYCP, then OOT.
 Here are this week's approved posts:
 
 AIVVP POSTS: [paste the full Blotato fields block for each approved AIVVP post, exactly as the coordinator produced it]
 
 MYCP POSTS: [paste the full Blotato fields block for each approved MYCP post]
-
-TCC POSTS: [paste the full Blotato fields block for each approved TCC post]
 
 OOT POSTS: [paste the full Blotato fields block for each approved OOT post]
 
@@ -113,19 +109,18 @@ export default function SundayChecklist() {
     });
   }
 
-  // YouTube rotation — even ISO week: AIVVP/TCC = Yes, MYCP = No
+  // YouTube rotation — even ISO week: AIVVP = Yes, MYCP = No
   const monday0 = getMondayOfCurrentWeek();
   const weeks = Array.from({ length: 4 }, (_, i) => {
     const monday = new Date(monday0);
     monday.setDate(monday0.getDate() + i * 7);
     const weekNum = getISOWeek(monday);
-    const aivvcTcc = weekNum % 2 === 0;
+    const aivvpWeek = weekNum % 2 === 0;
     return {
       weekNum,
       label: formatWeekRange(monday),
-      aivvp: aivvcTcc ? "Yes" : "No",
-      mycp:  aivvcTcc ? "No"  : "Yes",
-      tcc:   aivvcTcc ? "Yes" : "No",
+      aivvp: aivvpWeek ? "Yes" : "No",
+      mycp:  aivvpWeek ? "No"  : "Yes",
       isCurrent: i === 0,
     };
   });
@@ -134,39 +129,37 @@ export default function SundayChecklist() {
   const progressPct    = Math.round((completedCount / CHECKLIST_ITEMS.length) * 100);
 
   return (
-    <div className="rounded-2xl border border-zinc-700 bg-gray-900 px-6 py-6">
+    <div className="rounded-2xl border border-line-2 bg-panel px-6 py-6">
       <div className="flex flex-col gap-8">
 
         {/* ── Section 1 — YouTube rotation ── */}
         <section className="flex flex-col gap-3">
-          <h3 className="text-sm font-semibold text-zinc-300">YouTube Rotation</h3>
-          <div className="overflow-hidden rounded-xl border border-zinc-700">
+          <h3 className="text-sm font-semibold text-fg">YouTube Rotation</h3>
+          <div className="overflow-hidden rounded-xl border border-line-2">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-zinc-700 bg-zinc-800/50">
-                  <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-zinc-400">Week</th>
-                  <th className="px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-zinc-400">AIVVP YouTube</th>
-                  <th className="px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-zinc-400">MYCP YouTube</th>
-                  <th className="px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-zinc-400">TCC YouTube</th>
+                <tr className="border-b border-line-2 bg-panel-2/50">
+                  <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-fg-2">Week</th>
+                  <th className="px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-fg-2">AIVVP YouTube</th>
+                  <th className="px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-fg-2">MYCP YouTube</th>
                 </tr>
               </thead>
               <tbody>
                 {weeks.map((w) => (
                   <tr
                     key={w.weekNum}
-                    className={`border-b border-zinc-800 last:border-0 ${w.isCurrent ? "bg-zinc-800" : "bg-zinc-900"}`}
+                    className={`border-b border-line last:border-0 ${w.isCurrent ? "bg-panel-2" : "bg-panel"}`}
                   >
-                    <td className="px-4 py-2.5 text-xs text-zinc-300">
+                    <td className="px-4 py-2.5 text-xs text-fg">
                       {w.label}
                       {w.isCurrent && (
-                        <span className="ml-2 rounded-full bg-zinc-200 px-1.5 py-0.5 text-[12px] font-medium text-zinc-900">
+                        <span className="ml-2 rounded-full bg-fg px-1.5 py-0.5 text-[12px] font-medium text-bg">
                           this week
                         </span>
                       )}
                     </td>
-                    <td className={`px-4 py-2.5 text-center text-xs font-semibold ${w.aivvp === "Yes" ? "text-emerald-400" : "text-zinc-500"}`}>{w.aivvp}</td>
-                    <td className={`px-4 py-2.5 text-center text-xs font-semibold ${w.mycp === "Yes" ? "text-emerald-400" : "text-zinc-500"}`}>{w.mycp}</td>
-                    <td className={`px-4 py-2.5 text-center text-xs font-semibold ${w.tcc === "Yes" ? "text-emerald-400" : "text-zinc-500"}`}>{w.tcc}</td>
+                    <td className={`px-4 py-2.5 text-center text-xs font-semibold ${w.aivvp === "Yes" ? "text-ok" : "text-fg-3"}`}>{w.aivvp}</td>
+                    <td className={`px-4 py-2.5 text-center text-xs font-semibold ${w.mycp === "Yes" ? "text-ok" : "text-fg-3"}`}>{w.mycp}</td>
                   </tr>
                 ))}
               </tbody>
@@ -177,32 +170,32 @@ export default function SundayChecklist() {
         {/* ── Section 2 — Sunday checklist ── */}
         <section className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-zinc-300">Sunday Checklist</h3>
-            <span className="text-xs text-zinc-400">{completedCount} of {CHECKLIST_ITEMS.length} complete</span>
+            <h3 className="text-sm font-semibold text-fg">Sunday Checklist</h3>
+            <span className="text-xs text-fg-2">{completedCount} of {CHECKLIST_ITEMS.length} complete</span>
           </div>
 
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-700">
-            <div className="h-full rounded-full bg-emerald-500 transition-all duration-300" style={{ width: `${progressPct}%` }} />
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-panel-3">
+            <div className="h-full rounded-full bg-ok transition-all duration-300" style={{ width: `${progressPct}%` }} />
           </div>
 
           <div className="flex flex-col gap-0.5">
             {CHECKLIST_ITEMS.map((item, i) => (
-              <div key={i} className="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-zinc-800/60">
+              <div key={i} className="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:brightness-125">
                 <label className="flex flex-1 cursor-pointer items-center gap-3">
                   <input
                     type="checkbox"
                     checked={checked[i] ?? false}
                     onChange={() => toggleCheck(i)}
-                    className="h-4 w-4 flex-shrink-0 rounded border-zinc-600 accent-emerald-500"
+                    className="h-4 w-4 flex-shrink-0 rounded border-line-2 accent-accent"
                   />
-                  <span className={`text-sm ${checked[i] ? "text-zinc-500 line-through" : "text-zinc-300"}`}>
+                  <span className={`text-sm ${checked[i] ? "text-fg-3 line-through" : "text-fg"}`}>
                     {item}
                   </span>
                 </label>
                 {NEWSLETTER_LINKS[i] && (
                   <a
                     href={`/newsletters?pub=${NEWSLETTER_LINKS[i]}`}
-                    className="flex-shrink-0 rounded-lg border border-zinc-600 bg-zinc-900 px-2.5 py-1 text-xs font-medium text-zinc-300 transition-colors hover:border-zinc-400 hover:bg-zinc-800"
+                    className="flex-shrink-0 rounded-lg border border-line-2 bg-panel px-2.5 py-1 text-xs font-medium text-fg transition-colors hover:border-line-2 hover:brightness-125"
                   >
                     Open →
                   </a>
@@ -214,7 +207,7 @@ export default function SundayChecklist() {
 
         {/* ── Section 3 — Quick links ── */}
         <section className="flex flex-col gap-3">
-          <h3 className="text-sm font-semibold text-zinc-300">Open Coordinators</h3>
+          <h3 className="text-sm font-semibold text-fg">Open Coordinators</h3>
           <div className="flex flex-wrap gap-2">
             {COORDINATOR_LINKS.map(({ key, label, url }) => (
               <a
@@ -222,7 +215,7 @@ export default function SundayChecklist() {
                 href={url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-lg border border-zinc-600 bg-zinc-900 px-4 py-2 text-sm font-medium text-zinc-300 transition-colors hover:border-zinc-400 hover:bg-zinc-800"
+                className="rounded-lg border border-line-2 bg-panel px-4 py-2 text-sm font-medium text-fg transition-colors hover:border-line-2 hover:brightness-125"
               >
                 Open {label} Coordinator →
               </a>
@@ -234,16 +227,16 @@ export default function SundayChecklist() {
         <section>
           <button
             onClick={() => setBriefOpen(o => !o)}
-            className={`flex w-full items-center justify-between border border-zinc-700 bg-zinc-800/50 px-4 py-3 text-left text-sm font-medium text-zinc-400 transition-colors hover:bg-zinc-800 ${
+            className={`flex w-full items-center justify-between border border-line-2 bg-panel-2/50 px-4 py-3 text-left text-sm font-medium text-fg-2 transition-colors hover:brightness-125 ${
               briefOpen ? "rounded-t-xl" : "rounded-xl"
             }`}
           >
             <span>Cowork brief — media posts only (Instagram / TikTok / Pinterest / YouTube)</span>
-            <span className="text-xs text-zinc-500">{briefOpen ? "▲" : "▼"}</span>
+            <span className="text-xs text-fg-3">{briefOpen ? "▲" : "▼"}</span>
           </button>
           {briefOpen && (
-            <div className="rounded-b-xl border border-t-0 border-zinc-700 bg-zinc-900 px-5 py-4">
-              <pre className="whitespace-pre-wrap font-sans text-xs leading-relaxed text-zinc-400">
+            <div className="rounded-b-xl border border-t-0 border-line-2 bg-panel px-5 py-4">
+              <pre className="whitespace-pre-wrap font-sans text-xs leading-relaxed text-fg-2">
                 {COWORK_BRIEF}
               </pre>
             </div>

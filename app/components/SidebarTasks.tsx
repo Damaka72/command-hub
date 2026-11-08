@@ -24,12 +24,12 @@ export default function SidebarTasks() {
   }, []);
 
   return (
-    <div className="flex flex-col gap-2 border-t border-zinc-100 p-4 dark:border-zinc-800">
-      <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+    <div className="flex flex-col gap-2 border-t p-4 border-line">
+      <span className="text-xs font-semibold uppercase tracking-wider text-fg-3">
         All Tasks
       </span>
       {tasks.length === 0 ? (
-        <p className="text-xs text-zinc-400 dark:text-zinc-500">No incomplete tasks</p>
+        <p className="text-xs text-fg-3">No incomplete tasks</p>
       ) : (
         <ul className="flex flex-col gap-1.5">
           {tasks.map((task) => {
@@ -40,11 +40,11 @@ export default function SidebarTasks() {
               : "General";
             return (
               <li key={task.id} className="flex items-start gap-2">
-                <span className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-zinc-300 dark:bg-zinc-600" />
-                <span className="flex-1 text-xs leading-snug text-zinc-700 dark:text-zinc-200">
+                <span className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-panel-3" />
+                <span className="flex-1 text-xs leading-snug text-fg">
                   {task.action}
                 </span>
-                <span className="flex-shrink-0 rounded bg-zinc-100 px-1.5 py-0.5 text-[12px] font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+                <span className="flex-shrink-0 rounded px-1.5 py-0.5 text-[12px] font-medium bg-panel-2 text-fg-2">
                   {tag}
                 </span>
               </li>

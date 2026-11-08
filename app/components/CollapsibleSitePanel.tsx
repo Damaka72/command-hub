@@ -3,7 +3,7 @@
 import SiteCard, { type Site } from './SiteCard';
 import ProgressRing from './ui/ProgressRing';
 import StatusPill from './ui/StatusPill';
-import { siteColor } from '@/app/lib/siteColors';
+import { alpha, siteColor } from '@/app/lib/siteColors';
 import type { SiteDetail, DraftItem } from '../api/status/route';
 import type { HomeSiteStat } from '../api/home/route';
 
@@ -91,7 +91,7 @@ export default function CollapsibleSitePanel({
         </div>
 
         {inReview > 0 && (
-          <StatusPill tone="warn" label={`${inReview} in review`} tint={{ accent: c.accent, tint: c.tint }} />
+          <StatusPill tone="warn" label={`${inReview} in review`} tint={{ accent: c.text, tint: c.tint }} />
         )}
 
         <span
@@ -120,7 +120,7 @@ export default function CollapsibleSitePanel({
               <a
                 href={`/library?view=week&site=${site.id}&week=${week}`}
                 className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all hover:brightness-125"
-                style={{ background: c.tint, color: c.accent, border: `1px solid ${c.accent}40` }}
+                style={{ background: c.tint, color: c.text, border: `1px solid ${alpha(c.accent, 25)}` }}
               >
                 Week view →
               </a>

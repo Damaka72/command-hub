@@ -6,22 +6,76 @@
   "accent": "#E9C46A",
   "tasks": [
     {
-      "id": "web-brand-tokens-tidied",
+      "id": "web-sign-up-fix-merged-to-main-pr-40",
       "area": "On the website",
-      "title": "Brand tokens tidied",
+      "title": "Sign-up fix merged to main (pull request #40)",
       "status": "done",
-      "owner": "claude",
+      "owner": "didi",
       "next": false,
       "order": 10
     },
     {
-      "id": "web-role-choice-questions-removed-from-sign-up-and-w",
+      "id": "web-sign-up-script-fixed-and-tested",
       "area": "On the website",
-      "title": "Role-choice questions removed from sign-up and welcome email",
+      "title": "Sign-up script fixed and tested in a browser",
       "status": "done",
       "owner": "claude",
       "next": false,
       "order": 20
+    },
+    {
+      "id": "web-weekly-email-pop-up-and-slimmer-sign-up",
+      "area": "On the website",
+      "title": "Weekly email pop-up and slimmer home page sign-up",
+      "status": "done",
+      "owner": "claude",
+      "next": false,
+      "order": 30
+    },
+    {
+      "id": "web-try-a-real-weekly-email-sign-up",
+      "area": "On the website",
+      "title": "Try a real weekly email sign-up on the live site",
+      "status": "todo",
+      "owner": "didi",
+      "next": true,
+      "order": 40
+    },
+    {
+      "id": "web-work-mode-on-site-plus-remote-is-hybrid",
+      "area": "On the website",
+      "title": "Work mode: on-site plus remote means hybrid",
+      "status": "done",
+      "owner": "claude",
+      "next": false,
+      "order": 50
+    },
+    {
+      "id": "web-merge-work-mode-fix-then-check-remote-roles",
+      "area": "On the website",
+      "title": "Merge the work-mode fix, then check a few remote roles",
+      "status": "todo",
+      "owner": "didi",
+      "next": true,
+      "order": 60
+    },
+    {
+      "id": "web-brand-tokens-tidied",
+      "area": "On the website",
+      "title": "Brand tokens tidied across the site",
+      "status": "done",
+      "owner": "claude",
+      "next": false,
+      "order": 70
+    },
+    {
+      "id": "web-role-choice-questions-removed-from-sign-up-and-w",
+      "area": "On the website",
+      "title": "Role-choice questions removed from sign-up and the welcome email",
+      "status": "done",
+      "owner": "claude",
+      "next": false,
+      "order": 80
     },
     {
       "id": "web-founding-employer-badge-built",
@@ -30,7 +84,7 @@
       "status": "done",
       "owner": "claude",
       "next": false,
-      "order": 30
+      "order": 90
     },
     {
       "id": "web-founding-migration-applied-to-the-live-database",
@@ -39,7 +93,7 @@
       "status": "done",
       "owner": "claude",
       "next": false,
-      "order": 40
+      "order": 100
     },
     {
       "id": "web-duplicate-role-card-badges-fixed",
@@ -48,7 +102,7 @@
       "status": "done",
       "owner": "claude",
       "next": false,
-      "order": 50
+      "order": 110
     },
     {
       "id": "web-review-a-preview-link-of-the-branch",
@@ -57,7 +111,7 @@
       "status": "todo",
       "owner": "both",
       "next": true,
-      "order": 60
+      "order": 120
     },
     {
       "id": "web-confirm-the-vercel-function-count",
@@ -66,7 +120,7 @@
       "status": "todo",
       "owner": "claude",
       "next": false,
-      "order": 70
+      "order": 130
     },
     {
       "id": "web-build-the-for-employers-page",
@@ -75,7 +129,7 @@
       "status": "todo",
       "owner": "claude",
       "next": false,
-      "order": 80
+      "order": 140
     },
     {
       "id": "web-add-a-sponsor-slot-to-the-weekly-email-template",
@@ -84,7 +138,7 @@
       "status": "todo",
       "owner": "claude",
       "next": false,
-      "order": 90
+      "order": 150
     },
     {
       "id": "web-fix-copy-left-over-from-removing-role-choices",
@@ -93,7 +147,7 @@
       "status": "todo",
       "owner": "claude",
       "next": false,
-      "order": 100
+      "order": 160
     },
     {
       "id": "web-decide-what-happens-to-existing-subscribers-save",
@@ -102,16 +156,16 @@
       "status": "todo",
       "owner": "both",
       "next": false,
-      "order": 110
+      "order": 170
     },
     {
       "id": "web-add-an-admin-form-to-add-a-founding-employer",
       "area": "On the website",
-      "title": "Add an admin form to add a founding employer",
+      "title": "Add a form in the admin to add a founding employer",
       "status": "todo",
       "owner": "claude",
       "next": false,
-      "order": 120
+      "order": 180
     },
     {
       "id": "web-check-contrast-on-every-new-page-and-the-sponsor",
@@ -120,7 +174,7 @@
       "status": "todo",
       "owner": "claude",
       "next": false,
-      "order": 130
+      "order": 190
     },
     {
       "id": "web-show-places-left-only-from-real-numbers",
@@ -129,7 +183,7 @@
       "status": "todo",
       "owner": "claude",
       "next": false,
-      "order": 140
+      "order": 200
     },
     {
       "id": "web-approve-and-merge-to-production",
@@ -138,7 +192,7 @@
       "status": "todo",
       "owner": "didi",
       "next": false,
-      "order": 150
+      "order": 210
     },
     {
       "id": "deck-deck-re-themed-to-the-site-palette-and-fonts",
@@ -147,16 +201,16 @@
       "status": "done",
       "owner": "claude",
       "next": false,
-      "order": 160
+      "order": 220
     },
     {
       "id": "deck-draft-deck-updated-to-the-agreed-offer",
       "area": "Pitch deck",
       "title": "Draft deck updated to the agreed offer",
-      "status": "in_progress",
+      "status": "done",
       "owner": "claude",
       "next": false,
-      "order": 170
+      "order": 230
     },
     {
       "id": "deck-look-through-the-draft-deck-and-say-what-to-chan",
@@ -165,7 +219,7 @@
       "status": "todo",
       "owner": "didi",
       "next": true,
-      "order": 180
+      "order": 240
     },
     {
       "id": "deck-add-real-screenshots-of-the-badge-and-sponsor-sl",
@@ -174,25 +228,25 @@
       "status": "todo",
       "owner": "claude",
       "next": false,
-      "order": 190
+      "order": 250
     },
     {
       "id": "deck-install-fraunces-and-inter-on-the-presenting-com",
       "area": "Pitch deck",
-      "title": "Install Fraunces and Inter on the presenting computer",
+      "title": "Install Fraunces and Inter on the computer you present from",
       "status": "todo",
       "owner": "didi",
       "next": false,
-      "order": 200
+      "order": 260
     },
     {
       "id": "onboard-shortlist-five-employers-or-agencies",
       "area": "Getting the five companies on board",
-      "title": "Shortlist five employers or agencies",
+      "title": "Shortlist five employers or agencies to pitch to",
       "status": "parked",
       "owner": "didi",
       "next": false,
-      "order": 210
+      "order": 270
     },
     {
       "id": "onboard-draft-the-outreach-email",
@@ -201,16 +255,16 @@
       "status": "parked",
       "owner": "claude",
       "next": false,
-      "order": 220
+      "order": 280
     },
     {
       "id": "onboard-write-the-reply-template-for-reservations",
       "area": "Getting the five companies on board",
-      "title": "Write the reply template for reservations",
+      "title": "Write the reply template for when someone reserves a place",
       "status": "parked",
       "owner": "claude",
       "next": false,
-      "order": 230
+      "order": 290
     },
     {
       "id": "onboard-agree-how-payment-is-taken",
@@ -219,7 +273,7 @@
       "status": "parked",
       "owner": "both",
       "next": false,
-      "order": 240
+      "order": 300
     },
     {
       "id": "onboard-get-each-founder-s-name-exactly-as-shown-on-thei",
@@ -228,7 +282,7 @@
       "status": "parked",
       "owner": "didi",
       "next": false,
-      "order": 250
+      "order": 310
     },
     {
       "id": "onboard-add-each-founding-employer-and-set-featured-date",
@@ -237,7 +291,7 @@
       "status": "parked",
       "owner": "claude",
       "next": false,
-      "order": 260
+      "order": 320
     },
     {
       "id": "onboard-review-each-advert-before-it-goes-live",
@@ -246,7 +300,7 @@
       "status": "parked",
       "owner": "didi",
       "next": false,
-      "order": 270
+      "order": 330
     },
     {
       "id": "onboard-schedule-each-founder-s-sponsor-issue",
@@ -255,7 +309,7 @@
       "status": "parked",
       "owner": "both",
       "next": false,
-      "order": 280
+      "order": 340
     },
     {
       "id": "onboard-track-places-taken-5-in-total",
@@ -264,16 +318,16 @@
       "status": "parked",
       "owner": "didi",
       "next": false,
-      "order": 290
+      "order": 350
     },
     {
       "id": "onboard-diary-a-renewal-reminder-for-month-11",
       "area": "Getting the five companies on board",
-      "title": "Diary a renewal reminder for month 11",
+      "title": "Diary a renewal reminder for month 11 for each founder",
       "status": "parked",
       "owner": "didi",
       "next": false,
-      "order": 300
+      "order": 360
     },
     {
       "id": "terms-founding-offer-agreed",
@@ -282,16 +336,16 @@
       "status": "done",
       "owner": "didi",
       "next": false,
-      "order": 310
+      "order": 370
     },
     {
       "id": "terms-footer-keeps-the-operator-name",
       "area": "Terms, payment and compliance",
-      "title": "Footer keeps the operator name",
+      "title": "Footer keeps 'Master Your Career Path'",
       "status": "done",
       "owner": "didi",
       "next": false,
-      "order": 320
+      "order": 380
     },
     {
       "id": "terms-confirm-the-vat-wording-with-an-accountant",
@@ -300,7 +354,7 @@
       "status": "todo",
       "owner": "didi",
       "next": true,
-      "order": 330
+      "order": 390
     },
     {
       "id": "terms-update-the-draft-advertiser-terms-for-the-foundi",
@@ -309,7 +363,7 @@
       "status": "todo",
       "owner": "claude",
       "next": false,
-      "order": 340
+      "order": 400
     },
     {
       "id": "terms-decide-the-refund-policy-for-founding-places",
@@ -318,16 +372,16 @@
       "status": "todo",
       "owner": "didi",
       "next": false,
-      "order": 350
+      "order": 410
     },
     {
       "id": "terms-set-up-stripe-and-store-test-keys-as-secrets",
       "area": "Terms, payment and compliance",
-      "title": "Set up Stripe and store test keys as secrets",
+      "title": "Set up Stripe and store test keys as Supabase secrets",
       "status": "todo",
       "owner": "didi",
       "next": false,
-      "order": 360
+      "order": 420
     },
     {
       "id": "bec-first-draft-built",
@@ -336,34 +390,34 @@
       "status": "done",
       "owner": "claude",
       "next": false,
-      "order": 370
+      "order": 430
     },
     {
       "id": "bec-check-contract-and-nda-terms-on-reusing-the-meth",
       "area": "Bid Evaluation Clerk (separate product)",
-      "title": "Check contract and NDA terms on reusing the methods",
+      "title": "Check your contract and NDA terms on reusing the methods",
       "status": "todo",
       "owner": "didi",
       "next": true,
-      "order": 380
+      "order": 440
     },
     {
       "id": "bec-verify-the-8-working-day-standstill-rule",
       "area": "Bid Evaluation Clerk (separate product)",
-      "title": "Verify the 8 working day standstill rule",
+      "title": "Verify the 8 working day standstill rule against the Act",
       "status": "todo",
       "owner": "didi",
       "next": false,
-      "order": 390
+      "order": 450
     },
     {
       "id": "bec-test-the-prompts-on-the-dummy-tender",
       "area": "Bid Evaluation Clerk (separate product)",
-      "title": "Test the prompts on the dummy tender",
+      "title": "Test the prompts on the dummy tender in Claude and ChatGPT",
       "status": "todo",
       "owner": "didi",
       "next": false,
-      "order": 400
+      "order": 460
     },
     {
       "id": "bec-widen-the-workbook-and-cache-the-values",
@@ -372,7 +426,7 @@
       "status": "todo",
       "owner": "claude",
       "next": false,
-      "order": 410
+      "order": 470
     },
     {
       "id": "bec-decide-name-licence-refund-policy-and-answer-key",
@@ -381,7 +435,7 @@
       "status": "todo",
       "owner": "both",
       "next": false,
-      "order": 420
+      "order": 480
     },
     {
       "id": "bec-check-the-fictional-names-do-not-match-real-peop",
@@ -390,27 +444,71 @@
       "status": "todo",
       "owner": "didi",
       "next": false,
-      "order": 430
+      "order": 490
     },
     {
       "id": "hub-plug-world-of-contracts-into-the-command-hub",
       "area": "Command hub",
       "title": "Plug World of Contracts into the command hub",
-      "detail": "Built on branch claude/site-tracker-template; not yet reviewed, merged or deployed.",
       "status": "done",
       "owner": "claude",
       "next": false,
-      "order": 440
+      "order": 500
     },
     {
       "id": "hub-build-the-same-tracker-template-inside-the-comma",
       "area": "Command hub",
       "title": "Build the same tracker template inside the command hub",
-      "detail": "Built on branch claude/site-tracker-template; not yet reviewed, merged or deployed.",
       "status": "done",
       "owner": "claude",
       "next": false,
-      "order": 450
+      "order": 510
+    },
+    {
+      "id": "hub-replace-the-concurrent-contractor-with-woc",
+      "area": "Command hub",
+      "title": "Replace The Concurrent Contractor with World of Contracts in the hub",
+      "status": "done",
+      "owner": "claude",
+      "next": false,
+      "order": 520
+    },
+    {
+      "id": "hub-restyle-and-tidy-the-command-hub",
+      "area": "Command hub",
+      "title": "Restyle and tidy the command hub in this tracker's look",
+      "status": "done",
+      "owner": "claude",
+      "next": false,
+      "order": 530
+    },
+    {
+      "id": "hub-review-the-command-hub-branch-and-approve",
+      "area": "Command hub",
+      "title": "Review the command hub branch and approve before anything is merged",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 540
+    },
+    {
+      "id": "hub-decide-keep-the-hub-dark-or-vellum",
+      "area": "Command hub",
+      "title": "Decide: keep the hub dark, or move it to the lighter vellum look",
+      "status": "done",
+      "owner": "didi",
+      "next": false,
+      "order": 550
+    },
+    {
+      "id": "hub-saving-changes-migration-applied",
+      "area": "Command hub",
+      "title": "Hub saving-changes migration applied",
+      "status": "done",
+      "owner": "didi",
+      "next": false,
+      "order": 560
     }
-  ]
+  ],
+  "url": "https://www.worldofcontracts.co.uk"
 }

@@ -29,7 +29,7 @@ const STATUSES: ActionStatus[] = ['done', 'in_progress', 'blocked'];
 const SOURCES: ActionSource[] = ['cowork_session', 'manual', 'coordinator_agent'];
 const SITE_IDS = [
   'aiviralvideoprompts', 'didianolue', 'masteryourcareerpath',
-  'oldoaktown', 'theconcurrentcontractor',
+  'oldoaktown',
 ];
 
 export interface ActionLogEntry {

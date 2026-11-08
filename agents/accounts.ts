@@ -64,13 +64,6 @@ export const ACCOUNT_MAP: Record<string, Record<string, AccountTarget | null>> =
     'X (Twitter)': null, // not connected
   },
 
-  theconcurrentcontractor: {
-    'LinkedIn':    { accountId: '21073', platform: 'linkedin',  target: { pageId: '108040401' } },       // TCC company page
-    'Instagram':   { accountId: '46494', platform: 'instagram', target: {} },                            // @theconcurrentcontractor (needs media)
-    'Facebook':    { accountId: '31336', platform: 'facebook',  target: { pageId: '715241081677485' } }, // TCC Facebook page
-    'X (Twitter)': null, // not connected
-  },
-
   aiviralvideoprompts: {
     'LinkedIn':    { accountId: '21073', platform: 'linkedin',  target: { pageId: '109540269' } },       // AIVVP company page (dup 109539232 disconnected)
     'Instagram':   { accountId: '46493', platform: 'instagram', target: {} },                            // @aiviralvideoprompts (needs media)
@@ -93,7 +86,6 @@ export function isVideoUrl(url: string): boolean {
 
 export const BLOTATO_SITE_ACCOUNTS: Record<string, string[]> = {
   oldoaktown:              ['46484'],                                    // 46484 = Instagram @oldoaktown
-  theconcurrentcontractor: ['46494', '36388'],                          // 46494 = Instagram @theconcurrentcontractor · 36388 = YouTube (TCC)
   masteryourcareerpath:    ['46492', '42443', '36387'],                 // 46492 = Instagram @masteryourcareerpath · 42443 = TikTok @masteryourcareerpath · 36387 = YouTube (MYCP)
   aiviralvideoprompts:     ['46493', '42441', '41948', '6423', '36389'],// 46493 = Instagram @aiviralvideoprompts · 42441 = TikTok @aiviralvideoprompts · 41948 = AIVVP (legacy — not in current account list) · 6423 = Pinterest (AIVVP) · 36389 = YouTube (AIVVP)
   didianolue:              ['46490', '18212', '36391'],                 // 46490 = Instagram @damaka (Didi) · 18212 = X/Twitter @DidiAnolue · 36391 = YouTube (Didi Anolue)
