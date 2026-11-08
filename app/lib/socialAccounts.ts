@@ -22,13 +22,6 @@ export const SITE_SOCIAL_ACCOUNTS: Record<string, SocialAccountEntry[]> = {
     { platform: 'LinkedIn',  handle: 'Old Oak Town',  url: 'https://www.linkedin.com/company/110106506/', status: 'linked' },
   ],
 
-  theconcurrentcontractor: [
-    { platform: 'Facebook',  handle: 'The Concurrent Contractor', url: 'https://www.facebook.com/profile.php?id=715241081677485', status: 'linked' },
-    { platform: 'Instagram', handle: '@theconcurrentcontractor',  url: 'https://www.instagram.com/theconcurrentcontractor/', status: 'linked' },
-    { platform: 'LinkedIn',  handle: 'The Concurrent Contractor', url: 'https://www.linkedin.com/company/108040401/', status: 'linked' },
-    { platform: 'YouTube',   handle: 'The Concurrent Contractor', url: null, status: 'needs_link', note: "Blotato account id 36388 has no public channel handle on record — paste the real channel URL here." },
-  ],
-
   masteryourcareerpath: [
     { platform: 'Facebook',  handle: 'Master Your Career Path', url: 'https://www.facebook.com/profile.php?id=505366222652604', status: 'linked' },
     { platform: 'Instagram', handle: '@masteryourcareerpath',   url: 'https://www.instagram.com/masteryourcareerpath/', status: 'linked' },

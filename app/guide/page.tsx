@@ -12,7 +12,7 @@ import Link from "next/link";
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-50 border-b border-zinc-200 dark:border-zinc-800 pb-2">
+      <h2 className="text-base font-bold text-fg border-b border-line pb-2">
         {title}
       </h2>
       {children}
@@ -21,12 +21,12 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 function Prose({ children }: { children: React.ReactNode }) {
-  return <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">{children}</p>;
+  return <p className="text-sm text-fg-2 leading-relaxed">{children}</p>;
 }
 
 function Code({ children }: { children: React.ReactNode }) {
   return (
-    <code className="rounded bg-zinc-100 px-1 py-0.5 text-[0.85em] text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+    <code className="rounded px-1 py-0.5 text-[0.85em] bg-panel-2 text-fg">
       {children}
     </code>
   );
@@ -58,8 +58,8 @@ const RHYTHM: {
     action: "Set the plan, then run the pipeline",
     detail: (
       <>
-        On <Code>/plan</Code>, pick a content pillar and theme for each of the four pipeline sites
-        (MYCP, TCC, OOT, AIVVP) and save. Then on the dashboard press <Code>▶ Run pipeline</Code> and
+        On <Code>/plan</Code>, pick a content pillar and theme for each of the three pipeline sites
+        (MYCP, OOT, AIVVP) and save. Then on the dashboard press <Code>▶ Run pipeline</Code> and
         confirm. This is a <strong>manual trigger — the pipeline never runs on its own</strong>. It
         generates five drafts per site (one per weekday) into the content library.
       </>
@@ -144,14 +144,13 @@ const PAGES: { path: string; name: string; what: string }[] = [
 
 const PIPELINE_SITES: { site: string; url: string; rubric: string; primary: string }[] = [
   { site: "Master Your Career Path", url: "masteryourcareerpath.com",    rubric: "Career transformation rubric", primary: "LinkedIn" },
-  { site: "The Concurrent Contractor", url: "theconcurrentcontractor.com", rubric: "Contractor lens rubric",       primary: "LinkedIn" },
   { site: "Old Oak Town",            url: "oldoaktown.co.uk",             rubric: "No-fabrication rubric",         primary: "Instagram" },
   { site: "AI Viral Video Prompts",  url: "aiviralvideoprompts.com",      rubric: "Conversion rubric",             primary: "TikTok" },
 ];
 
 const PUBLICATIONS: { title: string; site: string; send: string }[] = [
   { title: "The Prompt-ly", site: "AI Viral Video Prompts",           send: "Wednesday" },
-  { title: "The Pathway",   site: "MYCP + The Concurrent Contractor", send: "Tuesday" },
+  { title: "The Pathway",   site: "MYCP", send: "Tuesday" },
   { title: "The Oak",       site: "Old Oak Town",                     send: "Thursday" },
 ];
 
@@ -167,23 +166,23 @@ const FEEDS: { source: string; detail: string }[] = [
 
 export default function GuidePage() {
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
+    <div className="min-h-screen bg-bg">
 
       {/* Header */}
-      <header className="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+      <header className="border-b border-line bg-panel">
         <div className="mx-auto max-w-4xl px-6 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+              <h1 className="text-2xl font-bold tracking-tight text-fg">
                 Operations Guide
               </h1>
-              <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+              <p className="mt-1 text-sm text-fg-2">
                 How the Command Hub works · the weekly rhythm · what feeds it
               </p>
             </div>
             <Link
               href="/"
-              className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
+              className="rounded-lg border px-4 py-2 text-sm font-medium transition-colors border-line-2 text-fg hover:brightness-125"
             >
               ← Dashboard
             </Link>
@@ -197,16 +196,17 @@ export default function GuidePage() {
         <Section title="What the Command Hub is">
           <Prose>
             The Hub is both a monitor and a workspace. It watches all five sites — up/down, deploys,
-            scheduled posts, revenue — and it drives the weekly content pipeline for four of them
-            (MYCP, TCC, OOT, AIVVP). From here you set the week&rsquo;s plan, run the pipeline, review
+            scheduled posts, revenue — and it drives the weekly content pipeline for three of them
+            (MYCP, OOT, AIVVP). From here you set the week&rsquo;s plan, run the pipeline, review
             and edit drafts, push approved posts to Blotato, build the newsletters, and read the Friday
             report. It is not read-only.
           </Prose>
           <Prose>
-            The fifth site, <strong>Didi Anolue</strong>, is monitored only — it has a site card, its
-            own task list, the consulting deals board, and appears in the Blotato feed, but it is{" "}
-            <strong>never part of pipeline automation</strong>. Nothing on <Code>/plan</Code>,{" "}
-            <Code>/review</Code>, or the pipeline touches it.
+            The other two sites, <strong>Didi Anolue</strong> and <strong>World of Contracts</strong>, are
+            monitored only — each has a site card, and World of Contracts has a work tracker at{" "}
+            <Code>/trackers/world-of-contracts</Code> (shown on the Home page summary). Neither is{" "}
+            <strong>ever part of pipeline automation</strong>: nothing on <Code>/plan</Code>,{" "}
+            <Code>/review</Code>, or the pipeline touches them.
           </Prose>
         </Section>
 
@@ -228,14 +228,14 @@ export default function GuidePage() {
           <div className="flex flex-col gap-3">
             {RHYTHM.map((row, i) => {
               const bg = row.who === "you"
-                ? "bg-indigo-50 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-900"
-                : "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900";
+                ? "bg-accent-dim border-accent/70"
+                : "bg-ok/15 border-ok/60";
               const dayC = row.who === "you"
-                ? "text-indigo-700 dark:text-indigo-400"
-                : "text-emerald-700 dark:text-emerald-400";
+                ? "text-accent-text"
+                : "text-ok";
               const whoC = row.who === "you"
-                ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-300"
-                : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/60 dark:text-emerald-300";
+                ? "bg-accent-dim text-accent-text"
+                : "bg-ok/15 text-ok";
               return (
                 <div key={i} className={`rounded-xl border px-4 py-4 ${bg}`}>
                   <div className="flex items-center gap-3 mb-2 flex-wrap">
@@ -243,9 +243,9 @@ export default function GuidePage() {
                     <span className={`rounded-full px-2 py-0.5 text-[12px] font-semibold ${whoC}`}>
                       {row.who === "you" ? "You" : "Automatic"}
                     </span>
-                    <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{row.action}</span>
+                    <span className="text-sm font-semibold text-fg">{row.action}</span>
                   </div>
-                  <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">{row.detail}</p>
+                  <p className="text-xs text-fg-2 leading-relaxed">{row.detail}</p>
                 </div>
               );
             })}
@@ -254,21 +254,21 @@ export default function GuidePage() {
 
         {/* 4. The pages */}
         <Section title="The Pages">
-          <div className="overflow-x-auto rounded-xl border border-zinc-200 dark:border-zinc-800">
+          <div className="overflow-x-auto rounded-xl border border-line">
             <table className="w-full text-xs">
               <thead>
-                <tr className="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900">
-                  <th className="px-4 py-3 text-left font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Page</th>
-                  <th className="px-4 py-3 text-left font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Route</th>
-                  <th className="px-4 py-3 text-left font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">What you do there</th>
+                <tr className="border-b border-line bg-panel">
+                  <th className="px-4 py-3 text-left font-semibold uppercase tracking-wider text-fg-2">Page</th>
+                  <th className="px-4 py-3 text-left font-semibold uppercase tracking-wider text-fg-2">Route</th>
+                  <th className="px-4 py-3 text-left font-semibold uppercase tracking-wider text-fg-2">What you do there</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-100 bg-white dark:divide-zinc-800 dark:bg-zinc-900">
+              <tbody className="divide-y divide-line bg-panel">
                 {PAGES.map(p => (
                   <tr key={p.path}>
-                    <td className="px-4 py-3 font-medium text-zinc-700 dark:text-zinc-300 whitespace-nowrap">{p.name}</td>
-                    <td className="px-4 py-3 font-mono text-zinc-500 dark:text-zinc-400 whitespace-nowrap">{p.path}</td>
-                    <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400">{p.what}</td>
+                    <td className="px-4 py-3 font-medium text-fg whitespace-nowrap">{p.name}</td>
+                    <td className="px-4 py-3 font-mono text-fg-2 whitespace-nowrap">{p.path}</td>
+                    <td className="px-4 py-3 text-fg-2">{p.what}</td>
                   </tr>
                 ))}
               </tbody>
@@ -277,38 +277,38 @@ export default function GuidePage() {
         </Section>
 
         {/* 5. Pipeline sites + Didi */}
-        <Section title="The Four Pipeline Sites (and Didi)">
+        <Section title="The Three Pipeline Sites (and Didi)">
           <Prose>
-            The pipeline drafts, grades, and publishes for these four sites. Each has its own grader
+            The pipeline drafts, grades, and publishes for these three sites. Each has its own grader
             rubric — a draft that fails is flagged in Review with the failing criterion so you can fix
             or reject it.
           </Prose>
-          <div className="overflow-x-auto rounded-xl border border-zinc-200 dark:border-zinc-800">
+          <div className="overflow-x-auto rounded-xl border border-line">
             <table className="w-full text-xs">
               <thead>
-                <tr className="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900">
-                  <th className="px-4 py-3 text-left font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Site</th>
-                  <th className="px-4 py-3 text-left font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Primary platform</th>
-                  <th className="px-4 py-3 text-left font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Grader rubric</th>
+                <tr className="border-b border-line bg-panel">
+                  <th className="px-4 py-3 text-left font-semibold uppercase tracking-wider text-fg-2">Site</th>
+                  <th className="px-4 py-3 text-left font-semibold uppercase tracking-wider text-fg-2">Primary platform</th>
+                  <th className="px-4 py-3 text-left font-semibold uppercase tracking-wider text-fg-2">Grader rubric</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-100 bg-white dark:divide-zinc-800 dark:bg-zinc-900">
+              <tbody className="divide-y divide-line bg-panel">
                 {PIPELINE_SITES.map(row => (
                   <tr key={row.url}>
-                    <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">
+                    <td className="px-4 py-3 text-fg">
                       {row.site}
-                      <span className="ml-1 font-mono text-[12px] text-zinc-400 dark:text-zinc-500">{row.url}</span>
+                      <span className="ml-1 font-mono text-[12px] text-fg-3">{row.url}</span>
                     </td>
-                    <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400">{row.primary}</td>
-                    <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400">{row.rubric}</td>
+                    <td className="px-4 py-3 text-fg-2">{row.primary}</td>
+                    <td className="px-4 py-3 text-fg-2">{row.rubric}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 dark:border-blue-900 dark:bg-blue-950/40">
-            <p className="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-1">Didi Anolue — monitored, not automated</p>
-            <p className="text-xs text-blue-700 dark:text-blue-400 leading-relaxed">
+          <div className="rounded-xl border px-4 py-3 border-accent/70 bg-accent-dim">
+            <p className="text-sm font-semibold text-accent-text mb-1">Didi Anolue — monitored, not automated</p>
+            <p className="text-xs text-accent-text leading-relaxed">
               didianolue.co.uk shows up as a site card, in the daily task list, and in the Blotato
               scheduled-post feed, so you can keep an eye on it. But it is deliberately excluded from the
               plan, the pipeline, and the Review push path — its content stays handled personally.
@@ -322,9 +322,9 @@ export default function GuidePage() {
             Approving a draft doesn&rsquo;t post it — it queues it. Pushing is what schedules it in
             Blotato, and Blotato then publishes on the day.
           </Prose>
-          <div className="rounded-xl border border-zinc-200 bg-white px-4 py-4 dark:border-zinc-800 dark:bg-zinc-900">
-            <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 mb-1">Text posts — pushed from Review</p>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+          <div className="rounded-xl border px-4 py-4 border-line bg-panel">
+            <p className="text-sm font-semibold text-fg mb-1">Text posts — pushed from Review</p>
+            <p className="text-xs text-fg-2 leading-relaxed">
               <Code>Push approved to Blotato</Code> on <Code>/review</Code> schedules each approved text
               post on its weekday, at the platform&rsquo;s London wall-clock time (BST/GMT handled
               automatically): <strong>LinkedIn 08:00</strong>, <strong>Facebook 10:00</strong>,{" "}
@@ -333,9 +333,9 @@ export default function GuidePage() {
               failed push keeps the row approved with the error, so you can retry.
             </p>
           </div>
-          <div className="rounded-xl border border-zinc-200 bg-white px-4 py-4 dark:border-zinc-800 dark:bg-zinc-900">
-            <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 mb-1">Media posts — via the Sunday Cowork brief</p>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+          <div className="rounded-xl border px-4 py-4 border-line bg-panel">
+            <p className="text-sm font-semibold text-fg mb-1">Media posts — via the Sunday Cowork brief</p>
+            <p className="text-xs text-fg-2 leading-relaxed">
               Instagram, TikTok, Pinterest, and YouTube need media attached, so they aren&rsquo;t pushed
               from Review directly. The Sunday checklist (expand it from <Code>/review</Code>) holds a
               ready-made Cowork brief that posts those to Blotato with their own scheduling rules. Rows
@@ -352,21 +352,21 @@ export default function GuidePage() {
             free plan, so the flow ends in a copy-and-paste: pull grader-passed content, draft, finalise,{" "}
             <Code>Copy formatted for Beehiiv</Code>, paste into Beehiiv, send, then mark it sent.
           </Prose>
-          <div className="overflow-x-auto rounded-xl border border-zinc-200 dark:border-zinc-800">
+          <div className="overflow-x-auto rounded-xl border border-line">
             <table className="w-full text-xs">
               <thead>
-                <tr className="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900">
-                  <th className="px-4 py-3 text-left font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Publication</th>
-                  <th className="px-4 py-3 text-left font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Draws from</th>
-                  <th className="px-4 py-3 text-left font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Usual send</th>
+                <tr className="border-b border-line bg-panel">
+                  <th className="px-4 py-3 text-left font-semibold uppercase tracking-wider text-fg-2">Publication</th>
+                  <th className="px-4 py-3 text-left font-semibold uppercase tracking-wider text-fg-2">Draws from</th>
+                  <th className="px-4 py-3 text-left font-semibold uppercase tracking-wider text-fg-2">Usual send</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-100 bg-white dark:divide-zinc-800 dark:bg-zinc-900">
+              <tbody className="divide-y divide-line bg-panel">
                 {PUBLICATIONS.map(p => (
                   <tr key={p.title}>
-                    <td className="px-4 py-3 font-medium text-zinc-700 dark:text-zinc-300 whitespace-nowrap">{p.title}</td>
-                    <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400">{p.site}</td>
-                    <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400 whitespace-nowrap">{p.send}</td>
+                    <td className="px-4 py-3 font-medium text-fg whitespace-nowrap">{p.title}</td>
+                    <td className="px-4 py-3 text-fg-2">{p.site}</td>
+                    <td className="px-4 py-3 text-fg-2 whitespace-nowrap">{p.send}</td>
                   </tr>
                 ))}
               </tbody>
@@ -383,9 +383,9 @@ export default function GuidePage() {
           </Prose>
           <div className="grid sm:grid-cols-2 gap-4">
             {FEEDS.map(f => (
-              <div key={f.source} className="rounded-xl border border-zinc-200 bg-white px-4 py-4 dark:border-zinc-800 dark:bg-zinc-900">
-                <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 mb-1">{f.source}</p>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{f.detail}</p>
+              <div key={f.source} className="rounded-xl border px-4 py-4 border-line bg-panel">
+                <p className="text-sm font-semibold text-fg mb-1">{f.source}</p>
+                <p className="text-xs text-fg-2 leading-relaxed">{f.detail}</p>
               </div>
             ))}
           </div>
@@ -393,9 +393,9 @@ export default function GuidePage() {
 
         {/* 9. Pipeline is manual */}
         <Section title="The Pipeline Is Manual">
-          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-4 dark:border-amber-900 dark:bg-amber-950/40">
-            <p className="text-sm font-semibold text-amber-800 dark:text-amber-300 mb-1">Nothing generates or publishes on its own</p>
-            <p className="text-xs text-amber-800/90 dark:text-amber-400 leading-relaxed">
+          <div className="rounded-xl border px-4 py-4 border-warn/60 bg-warn/15">
+            <p className="text-sm font-semibold text-warn mb-1">Nothing generates or publishes on its own</p>
+            <p className="text-xs text-warn leading-relaxed">
               The pipeline only runs when you press <Code>▶ Run pipeline</Code> on the dashboard and
               confirm — it warns you first that it publishes to Blotato. It produces five drafts per site
               (one per weekday) into the content library. From there, nothing reaches the public until{" "}
@@ -434,9 +434,9 @@ export default function GuidePage() {
                 solution: "Either nothing is scheduled in Blotato for that site this week, or the Blotato key needs checking. Log into Blotato to confirm.",
               },
             ].map(item => (
-              <div key={item.problem} className="rounded-xl border border-zinc-200 bg-white px-4 py-4 dark:border-zinc-800 dark:bg-zinc-900">
-                <p className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 mb-1">⚠ {item.problem}</p>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{item.solution}</p>
+              <div key={item.problem} className="rounded-xl border px-4 py-4 border-line bg-panel">
+                <p className="text-sm font-semibold text-fg mb-1">⚠ {item.problem}</p>
+                <p className="text-xs text-fg-2 leading-relaxed">{item.solution}</p>
               </div>
             ))}
           </div>
@@ -444,8 +444,8 @@ export default function GuidePage() {
 
       </main>
 
-      <footer className="mt-auto border-t border-zinc-200 bg-white py-6 dark:border-zinc-800 dark:bg-zinc-900">
-        <p className="text-center text-xs text-zinc-400 dark:text-zinc-600">
+      <footer className="mt-auto border-t py-6 border-line bg-panel">
+        <p className="text-center text-xs text-fg-3">
           Command Hub Operations Guide · Didi Anolue · Five-site portfolio
         </p>
       </footer>

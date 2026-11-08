@@ -1,6 +1,6 @@
 export const SITE_SHORT: Record<string, string> = {
   oldoaktown:              'OOT',
-  theconcurrentcontractor: 'TCC',
+  'world-of-contracts':    'WOC',
   masteryourcareerpath:    'MYCP',
   aiviralvideoprompts:     'AIVVP',
   didianolue:              'Didi',
@@ -9,7 +9,7 @@ export const SITE_SHORT: Record<string, string> = {
 // ── Newsletter publications ──────────────────────────────────────────────────
 // Single source of truth for the newsletter workspace and its API route. Each
 // publication draws its research briefs and content-library source material from
-// one or more sites. The Pathway blends MYCP with TCC's research feed.
+// one or more sites. The Pathway blends MYCP's research feed.
 //
 // `audience` and `voice` describe the newsletter's own editorial identity (not
 // any single site's) and seed the draft-generation prompt in
@@ -35,7 +35,7 @@ export const PUBLICATIONS: Publication[] = [
   {
     slug:     'the-pathway',
     title:    'The Pathway',
-    siteIds:  ['masteryourcareerpath', 'theconcurrentcontractor'],
+    siteIds:  ['masteryourcareerpath'],
     audience: 'Action-oriented professionals taking control of their careers: graduates, early-to-mid-career people levelling up, career changers, and experienced UK contractors optimising how they work.',
     voice:    'Encouraging, practical and aspirational without motivational fluff; straight-talking and peer-to-peer, never preachy or advisory.',
   },

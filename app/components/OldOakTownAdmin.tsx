@@ -99,8 +99,8 @@ export default function OldOakTownAdmin() {
       ) : (
         <div className="flex flex-col gap-3">
           {totalUrgent > 0 && (
-            <div className="rounded-lg px-3 py-2" style={{ background: "rgba(248,113,113,0.1)", border: "1px solid rgba(248,113,113,0.25)" }}>
-              <p className="text-xs font-medium" style={{ color: "#f87171" }}>
+            <div className="rounded-lg px-3 py-2" style={{ background: "color-mix(in srgb, var(--bad) 10%, transparent)", border: "1px solid color-mix(in srgb, var(--bad) 25%, transparent)" }}>
+              <p className="text-xs font-medium" style={{ color: "var(--bad)" }}>
                 {totalUrgent} item{totalUrgent === 1 ? "" : "s"} waiting on your approval
               </p>
             </div>
@@ -115,8 +115,8 @@ export default function OldOakTownAdmin() {
               <span
                 className="rounded-full px-2 py-0.5 text-[12px] font-semibold"
                 style={{
-                  background: businessCount > 0 ? "rgba(248,113,113,0.15)" : "var(--hub-surface-2)",
-                  color: businessCount > 0 ? "#f87171" : "var(--hub-text-3)",
+                  background: businessCount > 0 ? "color-mix(in srgb, var(--bad) 15%, transparent)" : "var(--hub-surface-2)",
+                  color: businessCount > 0 ? "var(--bad)" : "var(--hub-text-3)",
                 }}
               >
                 {pendingBusinesses === null ? "—" : businessCount}
@@ -152,8 +152,8 @@ export default function OldOakTownAdmin() {
               <span
                 className="rounded-full px-2 py-0.5 text-[12px] font-semibold"
                 style={{
-                  background: eventCount > 0 ? "rgba(248,113,113,0.15)" : "var(--hub-surface-2)",
-                  color: eventCount > 0 ? "#f87171" : "var(--hub-text-3)",
+                  background: eventCount > 0 ? "color-mix(in srgb, var(--bad) 15%, transparent)" : "var(--hub-surface-2)",
+                  color: eventCount > 0 ? "var(--bad)" : "var(--hub-text-3)",
                 }}
               >
                 {pendingEvents === null ? "—" : eventCount}
@@ -204,13 +204,13 @@ export default function OldOakTownAdmin() {
             </div>
 
             {promoteError && (
-              <p className="mt-2 text-xs" style={{ color: "#f87171" }}>{promoteError}</p>
+              <p className="mt-2 text-xs" style={{ color: "var(--bad)" }}>{promoteError}</p>
             )}
 
             {promoteResult && promoteResult.length > 0 && (
               <div className="mt-2 flex flex-col gap-1">
                 {promoteResult.map(r => (
-                  <p key={r.businessId} className="text-[12px]" style={{ color: r.error ? "#f87171" : "#34d399" }}>
+                  <p key={r.businessId} className="text-[12px]" style={{ color: r.error ? "var(--bad)" : "var(--ok)" }}>
                     {r.error
                       ? `${r.businessName} — failed: ${r.error}`
                       : r.published.length > 0

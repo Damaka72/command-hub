@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useWeek } from '../context/WeekContext';
 import WeekSelector from '../components/WeekSelector';
+import Link from 'next/link';
 
 // ── Friday report ─────────────────────────────────────────────────────────────
 // End-of-week analysis for the current (or selected) week. Four panels:
@@ -14,11 +15,10 @@ import WeekSelector from '../components/WeekSelector';
 
 const SITE_LABELS: Record<string, string> = {
   masteryourcareerpath:    'Master Your Career Path',
-  theconcurrentcontractor: 'The Concurrent Contractor',
   oldoaktown:              'Old Oak Town',
   aiviralvideoprompts:     'AI Viral Video Prompts',
 };
-const SITE_ORDER = ['masteryourcareerpath', 'theconcurrentcontractor', 'oldoaktown', 'aiviralvideoprompts'];
+const SITE_ORDER = ['masteryourcareerpath', 'oldoaktown', 'aiviralvideoprompts'];
 
 // content_library statuses, in the order shown across the planned-vs-published row.
 const STATUS_KEYS = ['draft', 'approved', 'approved_needs_media', 'rejected', 'pushed', 'failed'] as const;
@@ -35,9 +35,9 @@ const PUBLICATIONS = [
 ];
 
 const NL_STATUS_PILL: Record<string, string> = {
-  draft:     'bg-gray-700 text-gray-200',
-  finalised: 'bg-amber-800 text-amber-100',
-  sent:      'bg-green-800 text-green-100',
+  draft:     'bg-panel-3 text-fg',
+  finalised: 'bg-warn/15 text-warn',
+  sent:      'bg-ok/15 text-ok',
 };
 const NL_STATUS_LABEL: Record<string, string> = {
   draft: 'Draft', finalised: 'Finalised', sent: 'Sent',
@@ -152,30 +152,30 @@ export default function FridayPage() {
     : null;
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
+    <div className="min-h-screen bg-bg text-fg">
       {/* Header */}
-      <div className="border-b border-gray-800 px-6 py-4 flex items-center justify-between">
+      <div className="border-b border-line px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <a href="/" className="text-gray-400 hover:text-white text-sm">← Dashboard</a>
-          <h1 className="text-lg font-semibold text-white">Friday Report</h1>
+          <Link href="/" className="text-fg-2 hover:text-fg text-sm">← Dashboard</Link>
+          <h1 className="text-lg font-semibold text-fg">Friday Report</h1>
         </div>
         <WeekSelector />
       </div>
 
       <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
         {error && (
-          <div className="bg-red-900/30 border border-red-700 rounded-lg p-4">
-            <p className="text-red-300 text-sm">{error}</p>
+          <div className="bg-bad/15 border border-bad/60 rounded-lg p-4">
+            <p className="text-bad text-sm">{error}</p>
           </div>
         )}
-        {loading && !data && <p className="text-gray-400 text-sm">Loading…</p>}
+        {loading && !data && <p className="text-fg-2 text-sm">Loading…</p>}
 
         {data && (
           <>
             {/* ── Panel 1: Planned vs published ── */}
-            <section className="bg-gray-900 border border-gray-700 rounded-xl p-5">
-              <h2 className="text-sm font-semibold text-white mb-1">Planned vs published</h2>
-              <p className="text-xs text-gray-500 mb-4">Content library rows for this week, by status — am I actually posting?</p>
+            <section className="bg-panel border border-line-2 rounded-xl p-5">
+              <h2 className="text-sm font-semibold text-fg mb-1">Planned vs published</h2>
+              <p className="text-xs text-fg-3 mb-4">Content library rows for this week, by status — am I actually posting?</p>
               <div className="space-y-3">
                 {SITE_ORDER.map(siteId => {
                   const row = data.planned.find(p => p.siteId === siteId);
@@ -184,22 +184,22 @@ export default function FridayPage() {
                   const pushed = counts?.pushed ?? 0;
                   const inReview = (counts?.draft ?? 0) + (counts?.approved ?? 0) + (counts?.approved_needs_media ?? 0);
                   return (
-                    <div key={siteId} className="border border-gray-800 rounded-lg p-3">
+                    <div key={siteId} className="border border-line rounded-lg p-3">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-gray-200">{SITE_LABELS[siteId] ?? siteId}</span>
-                        <span className="text-xs text-gray-400">
-                          {total} planned · <span className="text-blue-300">{pushed} pushed</span> · <span className="text-amber-300">{inReview} in review</span>
+                        <span className="text-sm font-medium text-fg">{SITE_LABELS[siteId] ?? siteId}</span>
+                        <span className="text-xs text-fg-2">
+                          {total} planned · <span className="text-accent-text">{pushed} pushed</span> · <span className="text-warn">{inReview} in review</span>
                         </span>
                       </div>
                       {/* Stacked bar of statuses */}
                       {total > 0 ? (
-                        <div className="flex h-2 w-full overflow-hidden rounded-full bg-gray-800">
+                        <div className="flex h-2 w-full overflow-hidden rounded-full bg-panel-2">
                           {STATUS_KEYS.map(k => {
                             const v = counts?.[k] ?? 0;
                             if (v === 0) return null;
                             const color: Record<StatusKey, string> = {
-                              draft: '#6b7280', approved: '#16a34a', approved_needs_media: '#d97706',
-                              rejected: '#7f1d1d', pushed: '#2563eb', failed: '#dc2626',
+                              draft: 'var(--idle)', approved: 'var(--ok)', approved_needs_media: 'var(--warn)',
+                              rejected: 'var(--fg-3)', pushed: 'var(--info)', failed: 'var(--bad)',
                             };
                             return (
                               <div
@@ -211,7 +211,7 @@ export default function FridayPage() {
                           })}
                         </div>
                       ) : (
-                        <p className="text-xs text-gray-600">No content generated for this week.</p>
+                        <p className="text-xs text-fg-3">No content generated for this week.</p>
                       )}
                       {/* Count chips */}
                       {total > 0 && (
@@ -220,8 +220,8 @@ export default function FridayPage() {
                             const v = counts?.[k] ?? 0;
                             if (v === 0) return null;
                             return (
-                              <span key={k} className="text-[13px] text-gray-400">
-                                {STATUS_LABEL[k]}: <span className="text-gray-200">{v}</span>
+                              <span key={k} className="text-[13px] text-fg-2">
+                                {STATUS_LABEL[k]}: <span className="text-fg">{v}</span>
                               </span>
                             );
                           })}
@@ -234,21 +234,21 @@ export default function FridayPage() {
             </section>
 
             {/* ── Panel 2: Newsletter status ── */}
-            <section className="bg-gray-900 border border-gray-700 rounded-xl p-5">
-              <h2 className="text-sm font-semibold text-white mb-4">Newsletter status</h2>
+            <section className="bg-panel border border-line-2 rounded-xl p-5">
+              <h2 className="text-sm font-semibold text-fg mb-4">Newsletter status</h2>
               <div className="grid gap-3 sm:grid-cols-3">
                 {PUBLICATIONS.map(pub => {
                   const nl = data.newsletters.find(n => n.slug === pub.slug);
                   const status = nl?.status ?? null;
                   return (
-                    <div key={pub.slug} className="border border-gray-800 rounded-lg p-3 flex items-center justify-between">
-                      <span className="text-sm text-gray-200">{pub.title}</span>
+                    <div key={pub.slug} className="border border-line rounded-lg p-3 flex items-center justify-between">
+                      <span className="text-sm text-fg">{pub.title}</span>
                       {status ? (
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${NL_STATUS_PILL[status] ?? 'bg-gray-700 text-gray-200'}`}>
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${NL_STATUS_PILL[status] ?? 'bg-panel-3 text-fg'}`}>
                           {NL_STATUS_LABEL[status] ?? status}
                         </span>
                       ) : (
-                        <span className="text-xs text-gray-600">Not started</span>
+                        <span className="text-xs text-fg-3">Not started</span>
                       )}
                     </div>
                   );
@@ -257,42 +257,42 @@ export default function FridayPage() {
             </section>
 
             {/* ── Panel 3: Gumroad revenue ── */}
-            <section className="bg-gray-900 border border-gray-700 rounded-xl p-5">
-              <h2 className="text-sm font-semibold text-white mb-1">Gumroad revenue</h2>
-              <p className="text-xs text-gray-500 mb-4">AI Viral Video Prompts — this week vs last week.</p>
+            <section className="bg-panel border border-line-2 rounded-xl p-5">
+              <h2 className="text-sm font-semibold text-fg mb-1">Gumroad revenue</h2>
+              <p className="text-xs text-fg-3 mb-4">AI Viral Video Prompts — this week vs last week.</p>
               <div className="flex items-end gap-8">
                 <div>
-                  <p className="text-xs text-gray-400 uppercase tracking-wide">This week</p>
-                  <p className="text-2xl font-semibold text-green-400">{fmtMoney(data.gumroad.thisWeek)}</p>
+                  <p className="text-xs text-fg-2 uppercase tracking-wide">This week</p>
+                  <p className="text-2xl font-semibold text-ok">{fmtMoney(data.gumroad.thisWeek)}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-400 uppercase tracking-wide">Last week</p>
-                  <p className="text-2xl font-semibold text-gray-300">{fmtMoney(data.gumroad.lastWeek)}</p>
+                  <p className="text-xs text-fg-2 uppercase tracking-wide">Last week</p>
+                  <p className="text-2xl font-semibold text-fg">{fmtMoney(data.gumroad.lastWeek)}</p>
                 </div>
                 {gumroadDelta !== null && (
                   <div>
-                    <p className="text-xs text-gray-400 uppercase tracking-wide">Change</p>
-                    <p className={`text-2xl font-semibold ${gumroadDelta >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    <p className="text-xs text-fg-2 uppercase tracking-wide">Change</p>
+                    <p className={`text-2xl font-semibold ${gumroadDelta >= 0 ? 'text-ok' : 'text-bad'}`}>
                       {gumroadDelta >= 0 ? '+' : '−'}£{Math.abs(gumroadDelta).toLocaleString()}
                     </p>
                   </div>
                 )}
               </div>
               {data.gumroad.thisWeek === null && data.gumroad.lastWeek === null && (
-                <p className="mt-3 text-xs text-gray-600">No Gumroad data available (GUMROAD_ACCESS not set, or the API returned nothing).</p>
+                <p className="mt-3 text-xs text-fg-3">No Gumroad data available (GUMROAD_ACCESS not set, or the API returned nothing).</p>
               )}
             </section>
 
             {/* ── Panel 4: Subscriber counts ── */}
-            <section className="bg-gray-900 border border-gray-700 rounded-xl p-5">
-              <h2 className="text-sm font-semibold text-white mb-1">Subscriber counts</h2>
-              <p className="text-xs text-gray-500 mb-4">Manual entry — no Beehiiv API on the free plan. Log each publication&apos;s current count for this week.</p>
+            <section className="bg-panel border border-line-2 rounded-xl p-5">
+              <h2 className="text-sm font-semibold text-fg mb-1">Subscriber counts</h2>
+              <p className="text-xs text-fg-3 mb-4">Manual entry — no Beehiiv API on the free plan. Log each publication&apos;s current count for this week.</p>
 
               {/* Entry form */}
               <div className="grid gap-3 sm:grid-cols-3 mb-5">
                 {PUBLICATIONS.map(pub => (
-                  <div key={pub.slug} className="border border-gray-800 rounded-lg p-3">
-                    <label className="block text-xs text-gray-300 mb-1">{pub.title}</label>
+                  <div key={pub.slug} className="border border-line rounded-lg p-3">
+                    <label className="block text-xs text-fg mb-1">{pub.title}</label>
                     <div className="flex gap-2">
                       <input
                         type="number"
@@ -300,12 +300,12 @@ export default function FridayPage() {
                         value={subForm[pub.slug] ?? ''}
                         onChange={e => setSubForm(prev => ({ ...prev, [pub.slug]: e.target.value }))}
                         placeholder="count"
-                        className="w-full bg-gray-800 border border-gray-600 rounded-lg px-2 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500 placeholder-gray-600"
+                        className="w-full bg-panel-2 border border-line-2 rounded-lg px-2 py-1.5 text-fg text-sm focus:outline-none focus:border-accent/70 placeholder-fg-3"
                       />
                       <button
                         onClick={() => saveSubscriber(pub.slug)}
                         disabled={saving === pub.slug}
-                        className="px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50"
+                        className="px-3 py-1.5 rounded-lg text-xs font-medium bg-accent hover:brightness-125 text-on-solid disabled:opacity-50"
                       >
                         {saving === pub.slug ? '…' : 'Log'}
                       </button>
@@ -313,14 +313,14 @@ export default function FridayPage() {
                   </div>
                 ))}
               </div>
-              {saveMsg && <p className="text-xs text-gray-400 mb-4">{saveMsg}</p>}
+              {saveMsg && <p className="text-xs text-fg-2 mb-4">{saveMsg}</p>}
 
               {/* Week-over-week table */}
               {historyWeeks.length > 0 ? (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="text-left text-xs text-gray-500 border-b border-gray-800">
+                      <tr className="text-left text-xs text-fg-3 border-b border-line">
                         <th className="py-2 pr-4 font-medium">Week</th>
                         {PUBLICATIONS.map(pub => (
                           <th key={pub.slug} className="py-2 pr-4 font-medium">{pub.title}</th>
@@ -329,12 +329,12 @@ export default function FridayPage() {
                     </thead>
                     <tbody>
                       {historyWeeks.map(w => (
-                        <tr key={w} className="border-b border-gray-800/60">
-                          <td className="py-2 pr-4 text-gray-300">{w}</td>
+                        <tr key={w} className="border-b border-line/60">
+                          <td className="py-2 pr-4 text-fg">{w}</td>
                           {PUBLICATIONS.map(pub => {
                             const v = subLookup.get(`${w}|${pub.slug}`);
                             return (
-                              <td key={pub.slug} className="py-2 pr-4 text-gray-200">
+                              <td key={pub.slug} className="py-2 pr-4 text-fg">
                                 {v === null || v === undefined ? '—' : v.toLocaleString()}
                               </td>
                             );
@@ -345,7 +345,7 @@ export default function FridayPage() {
                   </table>
                 </div>
               ) : (
-                <p className="text-xs text-gray-600">No subscriber counts logged yet.</p>
+                <p className="text-xs text-fg-3">No subscriber counts logged yet.</p>
               )}
             </section>
           </>

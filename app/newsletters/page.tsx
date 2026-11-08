@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { SITE_SHORT } from '@/app/lib/siteConstants';
 import { formatWeekChip } from '@/app/lib/weekDates';
+import Link from 'next/link';
 
 interface BriefRow {
   id:              number;
@@ -54,9 +55,9 @@ interface QueueWeek {
 }
 
 const STATUS_PILL: Record<string, string> = {
-  draft:     'bg-gray-700 text-gray-200',
-  finalised: 'bg-amber-800 text-amber-100',
-  sent:      'bg-green-800 text-green-100',
+  draft:     'bg-panel-3 text-fg',
+  finalised: 'bg-warn/15 text-warn',
+  sent:      'bg-ok/15 text-ok',
 };
 const STATUS_LABEL: Record<string, string> = {
   draft: 'Draft', finalised: 'Finalised', sent: 'Sent',
@@ -297,38 +298,38 @@ export default function NewslettersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
-      <div className="border-b border-gray-800 px-6 py-4 flex items-center justify-between flex-wrap gap-3">
+    <div className="min-h-screen bg-bg text-fg">
+      <div className="border-b border-line px-6 py-4 flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-4">
-          <a href="/" className="text-gray-400 hover:text-white text-sm">← Dashboard</a>
-          <h1 className="text-lg font-semibold text-white">Newsletters</h1>
+          <Link href="/" className="text-fg-2 hover:text-fg text-sm">← Dashboard</Link>
+          <h1 className="text-lg font-semibold text-fg">Newsletters</h1>
         </div>
         <div className="flex items-center gap-3">
-          <label className="text-xs text-gray-400 uppercase tracking-wide">Week</label>
+          <label className="text-xs text-fg-2 uppercase tracking-wide">Week</label>
           <input
             type="date"
             value={week}
             onChange={e => setWeek(e.target.value)}
-            className="bg-gray-800 border border-gray-600 rounded-lg px-3 py-1.5 text-white text-sm focus:outline-none focus:border-blue-500"
+            className="bg-panel-2 border border-line-2 rounded-lg px-3 py-1.5 text-fg text-sm focus:outline-none focus:border-accent/70"
           />
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-800 px-6 flex items-center gap-2">
+      <div className="border-b border-line px-6 flex items-center gap-2">
         {blocks.map(b => (
           <button
             key={b.slug}
             onClick={() => setActive(b.slug)}
             className={`px-4 py-3 text-sm font-medium border-b-2 -mb-px transition-colors ${
               active === b.slug
-                ? 'border-blue-500 text-white'
-                : 'border-transparent text-gray-400 hover:text-gray-200'
+                ? 'border-accent/70 text-fg'
+                : 'border-transparent text-fg-2 hover:text-fg'
             }`}
           >
             {b.title}
             {b.newsletter && (
-              <span className={`ml-2 rounded-full px-2 py-0.5 text-[12px] font-medium ${STATUS_PILL[b.newsletter.status] ?? 'bg-gray-700 text-gray-200'}`}>
+              <span className={`ml-2 rounded-full px-2 py-0.5 text-[12px] font-medium ${STATUS_PILL[b.newsletter.status] ?? 'bg-panel-3 text-fg'}`}>
                 {STATUS_LABEL[b.newsletter.status] ?? b.newsletter.status}
               </span>
             )}
@@ -338,36 +339,36 @@ export default function NewslettersPage() {
 
       <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
         {error && (
-          <div className="bg-red-900/30 border border-red-700 rounded-lg p-4 text-red-300 text-sm">{error}</div>
+          <div className="bg-bad/15 border border-bad/60 rounded-lg p-4 text-bad text-sm">{error}</div>
         )}
 
         {/* Draft queue — Google Drive links for several weeks ahead, so drafts
             written in Docs (based on themes, things happening) can be queued
             up before the pipeline would otherwise generate that week. */}
-        <section className="rounded-xl border border-gray-700 bg-gray-900">
+        <section className="rounded-xl border border-line-2 bg-panel">
           <button
             onClick={() => setQueueOpen(o => !o)}
             className="flex w-full items-center justify-between px-4 py-3 text-left"
           >
-            <span className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+            <span className="text-xs font-semibold uppercase tracking-wide text-fg-2">
               Draft queue — next {queue.length || 12} weeks
             </span>
-            <span className="text-xs text-gray-500">{queueOpen ? '▲' : '▼'}</span>
+            <span className="text-xs text-fg-3">{queueOpen ? '▲' : '▼'}</span>
           </button>
           {queueOpen && (
-            <div className="border-t border-gray-800 divide-y divide-gray-800">
-              {queueLoading && <p className="px-4 py-3 text-gray-500 text-sm">Loading…</p>}
+            <div className="border-t border-line divide-y divide-line">
+              {queueLoading && <p className="px-4 py-3 text-fg-3 text-sm">Loading…</p>}
               {!queueLoading && queue.map(w => (
                 <div key={w.week} className="flex items-center gap-3 px-4 py-2.5 flex-wrap">
                   <button
                     onClick={() => setWeek(w.week)}
-                    className={`shrink-0 w-36 text-left text-xs font-medium hover:underline ${w.week === week ? 'text-blue-400' : 'text-gray-300'}`}
+                    className={`shrink-0 w-36 text-left text-xs font-medium hover:underline ${w.week === week ? 'text-accent-text' : 'text-fg'}`}
                     title="Open this week in the editor below"
                   >
                     {formatWeekChip(w.week)}
                   </button>
                   {w.status && (
-                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-[12px] font-medium ${STATUS_PILL[w.status] ?? 'bg-gray-700 text-gray-200'}`}>
+                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-[12px] font-medium ${STATUS_PILL[w.status] ?? 'bg-panel-3 text-fg'}`}>
                       {STATUS_LABEL[w.status] ?? w.status}
                     </span>
                   )}
@@ -376,14 +377,14 @@ export default function NewslettersPage() {
                     value={queueDrafts[w.week] ?? ''}
                     onChange={e => setQueueDrafts(prev => ({ ...prev, [w.week]: e.target.value }))}
                     placeholder="Paste the Google Drive link for this week's draft…"
-                    className="flex-1 min-w-[220px] bg-gray-800 border border-gray-600 rounded-lg px-2.5 py-1 text-gray-100 text-xs focus:outline-none focus:border-blue-500"
+                    className="flex-1 min-w-[220px] bg-panel-2 border border-line-2 rounded-lg px-2.5 py-1 text-fg text-xs focus:outline-none focus:border-accent/70"
                   />
                   {w.driveLink && (
                     <a
                       href={w.driveLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="shrink-0 text-xs text-blue-400 hover:underline"
+                      className="shrink-0 text-xs text-accent-text hover:underline"
                     >
                       Open ↗
                     </a>
@@ -391,7 +392,7 @@ export default function NewslettersPage() {
                   <button
                     onClick={() => saveQueueLink(active, w.week)}
                     disabled={queueBusy !== null || (queueDrafts[w.week] ?? '') === (w.driveLink ?? '')}
-                    className="shrink-0 rounded-lg bg-gray-700 hover:bg-gray-600 text-white px-2.5 py-1 text-[12px] font-medium disabled:opacity-40"
+                    className="shrink-0 rounded-lg bg-panel-3 hover:brightness-125 text-fg px-2.5 py-1 text-[12px] font-medium disabled:opacity-40"
                   >
                     {queueBusy === w.week ? 'Saving…' : 'Save'}
                   </button>
@@ -401,19 +402,19 @@ export default function NewslettersPage() {
           )}
         </section>
 
-        {loading && <p className="text-gray-400 text-sm">Loading…</p>}
+        {loading && <p className="text-fg-2 text-sm">Loading…</p>}
 
         {!loading && block && (
           <>
             {/* Status control */}
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div className="flex items-center gap-3">
-                <h2 className="text-base font-semibold text-white">{block.title}</h2>
-                <span className={`rounded-full px-2.5 py-0.5 text-[13px] font-medium ${STATUS_PILL[block.newsletter?.status ?? 'draft'] ?? 'bg-gray-700 text-gray-200'}`}>
+                <h2 className="text-base font-semibold text-fg">{block.title}</h2>
+                <span className={`rounded-full px-2.5 py-0.5 text-[13px] font-medium ${STATUS_PILL[block.newsletter?.status ?? 'draft'] ?? 'bg-panel-3 text-fg'}`}>
                   {STATUS_LABEL[block.newsletter?.status ?? 'draft'] ?? block.newsletter?.status}
                 </span>
                 {block.newsletter?.sent_at && (
-                  <span className="text-xs text-green-300">
+                  <span className="text-xs text-ok">
                     Sent {new Date(block.newsletter.sent_at).toLocaleString('en-GB')}
                   </span>
                 )}
@@ -423,7 +424,7 @@ export default function NewslettersPage() {
                   <button
                     onClick={() => setStatus(block.slug, 'finalised')}
                     disabled={busy !== null}
-                    className="rounded-lg bg-amber-700 hover:bg-amber-600 text-white px-3 py-1.5 text-xs font-medium disabled:opacity-50"
+                    className="rounded-lg bg-warn hover:brightness-125 text-on-solid px-3 py-1.5 text-xs font-medium disabled:opacity-50"
                   >
                     {busy === `status-${block.slug}-finalised` ? 'Finalising…' : 'Finalise'}
                   </button>
@@ -433,14 +434,14 @@ export default function NewslettersPage() {
                     <button
                       onClick={() => setStatus(block.slug, 'sent')}
                       disabled={busy !== null}
-                      className="rounded-lg bg-green-700 hover:bg-green-600 text-white px-3 py-1.5 text-xs font-medium disabled:opacity-50"
+                      className="rounded-lg bg-ok hover:brightness-125 text-on-solid px-3 py-1.5 text-xs font-medium disabled:opacity-50"
                     >
                       {busy === `status-${block.slug}-sent` ? 'Marking…' : 'Mark as sent'}
                     </button>
                     <button
                       onClick={() => setStatus(block.slug, 'draft')}
                       disabled={busy !== null}
-                      className="rounded-lg bg-gray-700 hover:bg-gray-600 text-white px-3 py-1.5 text-xs font-medium disabled:opacity-50"
+                      className="rounded-lg bg-panel-3 hover:brightness-125 text-fg px-3 py-1.5 text-xs font-medium disabled:opacity-50"
                     >
                       Back to draft
                     </button>
@@ -450,7 +451,7 @@ export default function NewslettersPage() {
                   <button
                     onClick={() => setStatus(block.slug, 'draft')}
                     disabled={busy !== null}
-                    className="rounded-lg bg-gray-700 hover:bg-gray-600 text-white px-3 py-1.5 text-xs font-medium disabled:opacity-50"
+                    className="rounded-lg bg-panel-3 hover:brightness-125 text-fg px-3 py-1.5 text-xs font-medium disabled:opacity-50"
                   >
                     Reopen as draft
                   </button>
@@ -461,12 +462,12 @@ export default function NewslettersPage() {
             {/* Research brief — the newsletter's own, generatable + editable */}
             <section className="space-y-2">
               <div className="flex items-center justify-between">
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-400">Research brief</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-fg-2">Research brief</h3>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => generateResearch(block.slug)}
                     disabled={busy !== null}
-                    className="rounded-lg bg-purple-700 hover:bg-purple-600 text-white px-3 py-1.5 text-xs font-medium disabled:opacity-50"
+                    className="rounded-lg bg-accent hover:brightness-125 text-on-solid px-3 py-1.5 text-xs font-medium disabled:opacity-50"
                     title="Research this issue from the weekly-plan theme and social highlights"
                   >
                     {busy === `research-${block.slug}` ? 'Researching…' : '🔎 Generate research brief'}
@@ -474,7 +475,7 @@ export default function NewslettersPage() {
                   <button
                     onClick={() => saveResearch(block.slug)}
                     disabled={busy !== null}
-                    className="rounded-lg bg-gray-700 hover:bg-gray-600 text-white px-3 py-1.5 text-xs font-medium disabled:opacity-50"
+                    className="rounded-lg bg-panel-3 hover:brightness-125 text-fg px-3 py-1.5 text-xs font-medium disabled:opacity-50"
                   >
                     {busy === `save-research-${block.slug}` ? 'Saving…' : 'Save brief'}
                   </button>
@@ -485,13 +486,13 @@ export default function NewslettersPage() {
                 onChange={e => setResearch(prev => ({ ...prev, [block.slug]: e.target.value }))}
                 rows={8}
                 placeholder="Hit 🔎 Generate research brief to distil this issue's angle from the weekly-plan theme and social highlights — or write the brief yourself. It feeds the draft below."
-                className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-gray-100 text-sm focus:outline-none focus:border-blue-500 font-sans leading-relaxed"
+                className="w-full bg-panel-2 border border-line-2 rounded-lg px-3 py-2 text-fg text-sm focus:outline-none focus:border-accent/70 font-sans leading-relaxed"
               />
 
               {/* Upstream per-site research from the weekly plan (reference only) */}
               {block.briefs.length > 0 && (
                 <details className="text-sm">
-                  <summary className="cursor-pointer text-xs text-gray-500 hover:text-gray-300">
+                  <summary className="cursor-pointer text-xs text-fg-3 hover:text-fg">
                     Site research from the weekly plan ({block.briefs.length})
                   </summary>
                   <div className="mt-2 space-y-2">
@@ -499,12 +500,12 @@ export default function NewslettersPage() {
                       .slice()
                       .sort((a, b) => (block.siteIds.indexOf(a.site_id)) - (block.siteIds.indexOf(b.site_id)))
                       .map(brief => (
-                        <div key={brief.id} className="bg-gray-900 border border-gray-700 rounded-xl p-4">
+                        <div key={brief.id} className="bg-panel border border-line-2 rounded-xl p-4">
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="text-xs font-semibold text-gray-300">{SITE_SHORT[brief.site_id] ?? brief.site_id}</span>
-                            <span className="text-[12px] text-gray-500 uppercase tracking-wide">{brief.source}</span>
+                            <span className="text-xs font-semibold text-fg">{SITE_SHORT[brief.site_id] ?? brief.site_id}</span>
+                            <span className="text-[12px] text-fg-3 uppercase tracking-wide">{brief.source}</span>
                           </div>
-                          <p className="whitespace-pre-wrap text-sm text-gray-200 leading-relaxed">{brief.brief}</p>
+                          <p className="whitespace-pre-wrap text-sm text-fg leading-relaxed">{brief.brief}</p>
                         </div>
                       ))}
                   </div>
@@ -514,11 +515,11 @@ export default function NewslettersPage() {
 
             {/* Pull from content library */}
             <section className="space-y-2">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-                Pull from content library <span className="text-gray-600">(grader-passed)</span>
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-fg-2">
+                Pull from content library <span className="text-fg-3">(grader-passed)</span>
               </h3>
               {block.library.length === 0 ? (
-                <p className="text-gray-500 text-sm">No grader-passed content for this week yet.</p>
+                <p className="text-fg-3 text-sm">No grader-passed content for this week yet.</p>
               ) : (
                 <div className="space-y-2">
                   {block.library
@@ -527,20 +528,20 @@ export default function NewslettersPage() {
                     .map(row => {
                       const isSel = (selected[block.slug] ?? []).includes(row.id);
                       return (
-                        <div key={row.id} className={`rounded-xl border p-3 ${isSel ? 'border-blue-600 bg-blue-950/20' : 'border-gray-700 bg-gray-900'}`}>
+                        <div key={row.id} className={`rounded-xl border p-3 ${isSel ? 'border-accent/70 bg-accent-dim' : 'border-line-2 bg-panel'}`}>
                           <div className="flex items-start justify-between gap-3">
                             <label className="flex items-start gap-2 cursor-pointer flex-1">
                               <input
                                 type="checkbox"
                                 checked={isSel}
                                 onChange={() => toggleSource(block.slug, row.id)}
-                                className="mt-1 h-4 w-4 flex-shrink-0 accent-blue-500"
+                                className="mt-1 h-4 w-4 flex-shrink-0 accent-accent"
                               />
                               <span className="flex-1">
-                                <span className="block text-xs text-gray-400 mb-1">
+                                <span className="block text-xs text-fg-2 mb-1">
                                   {SITE_SHORT[row.site_id] ?? row.site_id} · {row.day_name} · {row.platform}
                                 </span>
-                                <span className="block text-sm text-gray-200 line-clamp-3 whitespace-pre-wrap">
+                                <span className="block text-sm text-fg line-clamp-3 whitespace-pre-wrap">
                                   {row.edited_content ?? row.content}
                                 </span>
                               </span>
@@ -548,7 +549,7 @@ export default function NewslettersPage() {
                             <button
                               onClick={() => insertIntoDraft(block.slug, row)}
                               disabled={busy !== null}
-                              className="rounded-lg bg-gray-700 hover:bg-gray-600 text-white px-2.5 py-1 text-xs font-medium disabled:opacity-50 flex-shrink-0"
+                              className="rounded-lg bg-panel-3 hover:brightness-125 text-fg px-2.5 py-1 text-xs font-medium disabled:opacity-50 flex-shrink-0"
                             >
                               Insert ↓
                             </button>
@@ -563,12 +564,12 @@ export default function NewslettersPage() {
             {/* Editable draft */}
             <section className="space-y-2">
               <div className="flex items-center justify-between">
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-400">Draft</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-fg-2">Draft</h3>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => generateDraft(block.slug)}
                     disabled={busy !== null}
-                    className="rounded-lg bg-purple-700 hover:bg-purple-600 text-white px-3 py-1.5 text-xs font-medium disabled:opacity-50"
+                    className="rounded-lg bg-accent hover:brightness-125 text-on-solid px-3 py-1.5 text-xs font-medium disabled:opacity-50"
                     title="Synthesise a newsletter draft from the research brief and social highlights"
                   >
                     {busy === `generate-${block.slug}` ? 'Generating…' : '✨ Generate draft'}
@@ -576,14 +577,14 @@ export default function NewslettersPage() {
                   <button
                     onClick={() => copyForBeehiiv(block.slug)}
                     disabled={busy !== null}
-                    className="rounded-lg bg-gray-700 hover:bg-gray-600 text-white px-3 py-1.5 text-xs font-medium disabled:opacity-50"
+                    className="rounded-lg bg-panel-3 hover:brightness-125 text-fg px-3 py-1.5 text-xs font-medium disabled:opacity-50"
                   >
                     {copied === block.slug ? 'Copied!' : 'Copy formatted for Beehiiv'}
                   </button>
                   <button
                     onClick={() => save(block.slug)}
                     disabled={busy !== null}
-                    className="rounded-lg bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 text-xs font-medium disabled:opacity-50"
+                    className="rounded-lg bg-accent hover:brightness-125 text-on-solid px-3 py-1.5 text-xs font-medium disabled:opacity-50"
                   >
                     {busy === `save-${block.slug}` ? 'Saving…' : 'Save draft'}
                   </button>
@@ -594,13 +595,13 @@ export default function NewslettersPage() {
                 const subjects = Array.isArray(opts) ? (opts as unknown[]).filter((s): s is string => typeof s === 'string') : [];
                 if (subjects.length === 0) return null;
                 return (
-                  <div className="rounded-xl border border-gray-700 bg-gray-900 p-3 space-y-1.5">
-                    <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-500">Subject line options</p>
+                  <div className="rounded-xl border border-line-2 bg-panel p-3 space-y-1.5">
+                    <p className="text-[12px] font-semibold uppercase tracking-wide text-fg-3">Subject line options</p>
                     {subjects.map((s, i) => (
                       <button
                         key={i}
                         onClick={() => { navigator.clipboard.writeText(s).catch(() => {}); }}
-                        className="block w-full text-left text-sm text-gray-200 hover:text-white"
+                        className="block w-full text-left text-sm text-fg hover:text-fg"
                         title="Click to copy"
                       >
                         · {s}
@@ -614,7 +615,7 @@ export default function NewslettersPage() {
                 onChange={e => setEdits(prev => ({ ...prev, [block.slug]: e.target.value }))}
                 rows={16}
                 placeholder="Hit ✨ Generate draft to synthesise a newsletter from the research brief and social highlights — then edit here. You can also write from scratch or pull individual content-library items in above."
-                className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-gray-100 text-sm focus:outline-none focus:border-blue-500 font-sans leading-relaxed"
+                className="w-full bg-panel-2 border border-line-2 rounded-lg px-3 py-2 text-fg text-sm focus:outline-none focus:border-accent/70 font-sans leading-relaxed"
               />
             </section>
           </>

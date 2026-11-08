@@ -1,0 +1,34 @@
+{
+  "theconcurrentcontractor": [
+    {
+      "id": "multiple-contracts",
+      "name": "Running multiple contracts",
+      "description": "The OPERATE framework, scheduling, managing two clients without chaos — the mechanics of concurrent contracting"
+    },
+    {
+      "id": "single-contract-optimisation",
+      "name": "Single contract optimisation",
+      "description": "The CHAOS assessment, billable hours, reclaiming wasted capacity — getting more from the contract you already have"
+    },
+    {
+      "id": "income-strategy",
+      "name": "Contractor income strategy",
+      "description": "Rate setting, hidden opportunity cost, true hourly rate — understanding what you actually earn and how to improve it"
+    },
+    {
+      "id": "client-management",
+      "name": "Client management & communication",
+      "description": "Expectation setting, proactive reporting, protecting your reputation — running client relationships like a business"
+    },
+    {
+      "id": "contractor-mindset",
+      "name": "Contractor mindset & resilience",
+      "description": "Burnout, boundaries, operating like a business — the mental and operational side of sustainable contracting"
+    },
+    {
+      "id": "ir35-essentials",
+      "name": "IR35 & contractor essentials",
+      "description": "Compliance, structure, staying protected — the non-negotiable fundamentals every serious contractor needs to understand"
+    }
+  ]
+}

@@ -1,3 +1,5 @@
+import { alpha } from '@/app/lib/siteColors';
+
 // Semantic status pill (UX spec §2.2) — pushed/published = --ok, needs
 // media/awaiting action = --warn, draft/idle = --idle. Every status also
 // carries a text label, never colour alone (UX spec §9).
@@ -21,11 +23,11 @@ export default function StatusPill({
   tint?: { accent: string; tint: string };
 }) {
   const color = tint ? tint.accent : COLOR[tone];
-  const bg    = tint ? tint.tint   : `color-mix(in srgb, ${COLOR[tone]} 16%, transparent)`;
+  const bg    = tint ? tint.tint   : alpha(COLOR[tone], 16);
   return (
     <span
       className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[13px] font-medium"
-      style={{ background: bg, color, border: `1px solid ${tint ? tint.accent + '40' : color + '40'}` }}
+      style={{ background: bg, color, border: `1px solid ${alpha(color, 25)}` }}
     >
       <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: color }} aria-hidden="true" />
       {label}

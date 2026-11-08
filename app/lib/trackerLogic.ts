@@ -29,7 +29,7 @@ export interface TrackerSite {
   siteId:       string;
   name:         string;
   description?: string;
-  /** Public address, without protocol. Leave out until there is one. */
+  /** Public address, with or without https://. Leave out until there is one. */
   url?:         string;
   /** owner/repo on GitHub. */
   repo?:        string;
@@ -75,6 +75,9 @@ export interface TrackerSummary {
   percentDone: number;
   /** Next-step tasks that are not yet done. */
   nextSteps:   number;
+  /** The open next-step tasks themselves, in order, for the home-page panel. */
+  nextTasks:   TrackerTask[];
+  url?:        string;
 }
 
 export function countTasks(tasks: TrackerTask[]): TrackerCounts {
@@ -94,14 +97,55 @@ export function isOpenNextStep(t: TrackerTask): boolean {
 
 export function summarise(site: TrackerSite): TrackerSummary {
   const counts = countTasks(site.tasks);
+  const nextTasks = site.tasks.filter(isOpenNextStep).sort((a, b) => a.order - b.order);
   return {
     siteId:      site.siteId,
     name:        site.name,
     accent:      site.accent,
+    url:         site.url,
     counts,
     percentDone: percentDone(counts),
-    nextSteps:   site.tasks.filter(isOpenNextStep).length,
+    nextSteps:   nextTasks.length,
+    nextTasks,
   };
+}
+
+/** Adds up the counts of several trackers (for the home-page summary band). */
+export function sumCounts(all: TrackerCounts[]): TrackerCounts {
+  const sum: TrackerCounts = { total: 0, done: 0, in_progress: 0, todo: 0, parked: 0 };
+  for (const c of all) {
+    sum.total += c.total; sum.done += c.done; sum.in_progress += c.in_progress;
+    sum.todo += c.todo; sum.parked += c.parked;
+  }
+  return sum;
+}
+
+// ── Filter chips ────────────────────────────────────────────────────────────
+export const FILTERS = ['all', 'needs_you', 'hide_done'] as const;
+export type TaskFilter = (typeof FILTERS)[number];
+
+export const FILTER_LABEL: Record<TaskFilter, string> = {
+  all:       'Everything',
+  needs_you: 'Needs you',
+  hide_done: 'Hide done',
+};
+
+/**
+ * "Needs you" = still to do or in progress, and Didi (or Didi + Claude) owns it.
+ * Parked work is deliberately waiting, so it never "needs you" yet.
+ */
+export function matchesFilter(t: TrackerTask, filter: TaskFilter): boolean {
+  switch (filter) {
+    case 'all':       return true;
+    case 'hide_done': return t.status !== 'done';
+    case 'needs_you': return (t.status === 'todo' || t.status === 'in_progress') && t.owner !== 'claude';
+  }
+}
+
+/** A public address as a clickable link plus the text to show for it. */
+export function siteLink(url: string): { href: string; label: string } {
+  const href = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+  return { href, label: href.replace(/^https?:\/\//i, '').replace(/\/$/, '') };
 }
 
 export interface TaskArea {
