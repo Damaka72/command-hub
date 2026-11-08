@@ -1,0 +1,77 @@
+{
+  "projects": [
+    {
+      "id": "hexagon-waygate",
+      "name": "Hexagon Waygate",
+      "aka": "Formerly Project Spectra",
+      "type": "client",
+      "client": "Hexagon",
+      "status": "live",
+      "nextAction": null,
+      "site": null,
+      "deadline": null,
+      "priority": null
+    },
+    {
+      "id": "sap-ams-rfp",
+      "name": "SAP AMS RFP",
+      "type": "client",
+      "client": "Hexagon",
+      "status": "completed",
+      "nextAction": null,
+      "site": null,
+      "deadline": null,
+      "priority": null
+    },
+    {
+      "id": "atos-dtp-exit",
+      "name": "Atos DTP Exit",
+      "type": "client",
+      "client": "NLFT",
+      "status": null,
+      "nextAction": null,
+      "site": null,
+      "deadline": null,
+      "priority": null
+    },
+    {
+      "id": "build-back-better",
+      "name": "Build Back Better",
+      "type": "own",
+      "client": null,
+      "role": "The why",
+      "summary": "Preparation season, running to February.",
+      "status": "active",
+      "nextAction": null,
+      "site": "didianolue",
+      "deadline": { "date": "2027-02-28", "label": "End of February 2027" },
+      "priority": null
+    },
+    {
+      "id": "boss-moves",
+      "name": "Boss Moves",
+      "type": "own",
+      "client": null,
+      "role": "The how",
+      "summary": "YouTube channel: Built on a Shoestring.",
+      "status": "active",
+      "nextAction": null,
+      "site": "didianolue",
+      "deadline": null,
+      "priority": null
+    },
+    {
+      "id": "five-pound-challenge",
+      "name": "£5 Challenge",
+      "type": "own",
+      "client": null,
+      "role": "The proof",
+      "summary": "The art of the possible by Christmas. Produced World of Contracts. No targets, service-led.",
+      "status": "active",
+      "nextAction": null,
+      "site": "worldofcontracts",
+      "deadline": { "date": "2026-12-25", "label": "Christmas 2026" },
+      "priority": null
+    }
+  ]
+}

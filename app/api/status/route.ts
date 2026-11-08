@@ -13,7 +13,7 @@ function getSupabase() {
 }
 
 const VERCEL_TOKEN   = process.env.VERCEL_TOKEN;
-const VERCEL_TEAM_ID = 'team_2fG7WKNEcvEFVhRPxREhEgs8';
+const VERCEL_TEAM_ID = process.env.VERCEL_TEAM_ID ?? "team_2fG7WKNEcvEFVhRPxREhEgs8";
 const BLOTATO_API_KEY = process.env.BLOTATO_API_KEY;
 
 // ─── Exported types ──────────────────────────────────────────────────────────

@@ -1,0 +1,15 @@
+{
+  "insights": [
+    { "id": "five-proof", "kind": "think", "prompt": "On Christmas Day, what is the one piece of proof from the £5 Challenge you would want to point to: a number, a screenshot, a story?", "about": "£5 Challenge" },
+    { "id": "shoestring-advice", "kind": "advice", "prompt": "Who has built a YouTube channel on a tight budget and would tell you honestly what they would do differently in their first ten episodes?", "about": "Boss Moves", "withWhom": "A creator a few steps ahead of you" },
+    { "id": "bbb-accountability", "kind": "discuss", "prompt": "Build Back Better runs to February. Who could you ask to check in with you monthly on the preparation season?", "about": "Build Back Better", "withWhom": "A trusted peer or mentor" },
+    { "id": "operate-waitlist", "kind": "think", "prompt": "OPERATE is waitlist-only. What is the waitlist telling you so far: who is joining and what are they asking for?", "about": "Master Your Career Path" },
+    { "id": "waygate-ownership", "kind": "discuss", "prompt": "Hexagon Waygate is live. Is it clear with the client who owns what from here, and have you said it out loud?", "about": "Hexagon Waygate", "withWhom": "Your Hexagon contact" },
+    { "id": "nlft-exit", "kind": "discuss", "prompt": "What would a good Atos DTP exit look like for the people at NLFT? Have you asked them rather than assumed?", "about": "Atos DTP Exit", "withWhom": "NLFT stakeholders" },
+    { "id": "global-test", "kind": "think", "prompt": "These brands are built to travel. Which one could you test with a non-UK audience this month?", "about": "All sites" },
+    { "id": "casting-check", "kind": "think", "prompt": "Before you brief this week's images or video: does the casting show a range of nationalities and ethnicities, so no one group becomes the default face of a brand?", "about": "Content" },
+    { "id": "service-led", "kind": "think", "prompt": "The £5 Challenge has no targets and is service-led. What is one thing you could do this week purely to help someone?", "about": "£5 Challenge" },
+    { "id": "woc-feedback", "kind": "advice", "prompt": "Which recruiter or procurement leader could you ask what would make World of Contracts a board they check every morning?", "about": "World of Contracts", "withWhom": "A recruiter or hiring manager" },
+    { "id": "not-doing", "kind": "think", "prompt": "What are you deliberately not doing this week, so the important things get proper attention?", "about": "Focus" }
+  ]
+}

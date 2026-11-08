@@ -1,3 +1,28 @@
+// ── Command Hub home: the morning paper ──────────────────────────────────────
+// Didi's AI OS front page, read top to bottom every morning:
+//   Faith → Health check → Today → Overnight → Insights
+// Each section is its own component that loads its own data, so one slow or
+// failing source never blanks the page. To add a section: build a component in
+// app/components/hub/, then add it to SECTIONS below (and to JUMP in
+// FaithHeader.tsx if it should get a jump link). See data/hub/README.md.
+//
+// The previous operations dashboard (content pipeline, automation status,
+// per-site panels) now lives at /ops, unchanged.
+
+import type { ComponentType } from 'react';
+import FaithHeader from './components/hub/FaithHeader';
+import HealthCheck from './components/hub/HealthCheck';
+import TodaySection from './components/hub/TodaySection';
+import OvernightSection from './components/hub/OvernightSection';
+import InsightsSection from './components/hub/InsightsSection';
+import { display } from './components/hub/ui';
+
+const SECTIONS: { id: string; Component: ComponentType }[] = [
+  { id: 'health', Component: HealthCheck },
+  { id: 'today', Component: TodaySection },
+  { id: 'overnight', Component: OvernightSection },
+  { id: 'insights', Component: InsightsSection },
+];
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -135,65 +160,15 @@ function PortfolioBar({ statusMap, reviewQueue, weekReview }: { statusMap: Statu
 }
 
 export default function Home() {
-  const { week } = useWeek();
-  const [statusMap,   setStatusMap]   = useState<StatusResponse | null>(null);
-  const [homeData,    setHomeData]    = useState<HomeResponse | null>(null);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const [refreshing,  setRefreshing]  = useState(false);
-  const [, setTick]   = useState(0);
-  const [openPanels,  setOpenPanels]  = useState<Set<string>>(new Set());
-
-  // Panel open state persists across visits (UX spec §3.4). Reads
-  // localStorage — an external, client-only source not available during the
-  // initial render — so the sync happens post-mount.
-  useEffect(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem(OPEN_PANELS_KEY) ?? '[]') as string[];
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setOpenPanels(new Set(saved));
-    } catch { /* ignore malformed storage */ }
-  }, []);
-
-  const togglePanel = useCallback((siteId: string) => {
-    setOpenPanels(prev => {
-      const next = new Set(prev);
-      if (next.has(siteId)) next.delete(siteId);
-      else next.add(siteId);
-      localStorage.setItem(OPEN_PANELS_KEY, JSON.stringify([...next]));
-      return next;
-    });
-  }, []);
-
-  const loadStatus = useCallback(() => {
-    setRefreshing(true);
-    fetch('/api/status')
-      .then(r => r.json())
-      .then((d: StatusResponse) => { setStatusMap(d); setLastUpdated(new Date()); })
-      .catch(() => setStatusMap(prev => prev ?? { sites: {}, portfolioCoordinator: null, reviewQueue: [], weekReview: null }))
-      .finally(() => setRefreshing(false));
-  }, []);
-
-  useEffect(() => {
-    fetch(`/api/home?week=${week}`)
-      .then(r => r.json())
-      .then((d: HomeResponse) => setHomeData('error' in d ? null : d))
-      .catch(() => setHomeData(null));
-  }, [week]);
-
-  // Poll for fresh status every 30s so the board stays live without a reload.
-  useEffect(() => {
-    loadStatus();
-    const id = setInterval(loadStatus, 30_000);
-    return () => clearInterval(id);
-  }, [loadStatus]);
-
-  // Re-render every 5s so the "updated Ns ago" label keeps ticking between polls.
-  useEffect(() => {
-    const id = setInterval(() => setTick(t => t + 1), 5_000);
-    return () => clearInterval(id);
-  }, []);
-
   return (
+    <div className={`news-paper ${display.variable} min-h-screen`}>
+      <FaithHeader />
+      <main className="mx-auto max-w-6xl px-4 pb-10 sm:px-6">
+        {SECTIONS.map(({ id, Component }) => <Component key={id} />)}
+      </main>
+      <footer className="border-t border-news-rule py-5 text-center text-xs text-news-ink-3">
+        Command Hub · Didi Anolue
+      </footer>
     <div className="flex h-dvh flex-col" style={{ background: 'var(--hub-bg)' }}>
 
       {/* ── Header ── */}
