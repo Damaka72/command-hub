@@ -1,6 +1,6 @@
 # Social team design: one engine, three brands now, World of Contracts next
 
-Status: AGREED MODEL, build not started. Nothing here has been scheduled or published.
+Status: agreed model. The hub side is built (Sunday review, Brand gate and layer columns, old pipeline retired, Video Studio and guide updated). The Cowork side is written in `docs/cowork-operating-guide.md` and waits for Didi's approval to apply. Nothing here has been scheduled or published.
 Updated 9 Nov 2026 after Didi's answers. Brands in scope: Old Oak Town (OOT), AI Viral Video Prompts (AIVVP), Master Your Career Path (MYCP). World of Contracts (WoC) joins later as a new brand file. The Concurrent Contractor (TCC) no longer exists and is out of scope.
 
 ## 1. The decisions
@@ -121,7 +121,7 @@ Cowork does the post work. Claude Code builds the hub. Hand-offs between them go
 ## 11. Open points
 
 - **OPERATE offer**: confirm "£27/month, or £47/month with PRIME" is still current.
-- **Who presses publish**: today the hub's push route is the only publisher in the code, while Didi wants Cowork to do the work behind the hub. Proposed: the hub marks rows approved; Cowork schedules them in Blotato and writes the result back. Decide at step 4, because the London posting times then need to live in one place.
+- **Who presses publish**: decided. The hub marks rows approved; Cowork's "Schedule approved posts" task schedules them in Blotato and writes the result back (Prompt D in the operating guide). The hub's push route stays as a fallback, and uses the same London times.
 - **Triage decisions**: see `docs/cowork-handoff-2026-11-09.md`.
 - **Monthly pack**: where it is reviewed and scheduled today. It does not appear in `content_library`.
 - **TCC leftovers**: the Instagram account @theconcurrentcontractor is still connected in Blotato with 8 published posts; The Pathway newsletter has a TCC section; research briefs for TCC exist.
