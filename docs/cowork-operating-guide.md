@@ -13,7 +13,7 @@ Status: **a draft for Didi to approve.** Nothing here has been applied to any li
 |---|---|---|
 | 1 | Apply the database migration (section 7). It adds the Brand gate and layer columns. Until then every post shows as "not yet checked". | Supabase SQL editor, project "The Old Oak Town" |
 | 2 | Replace the prompt of **Weekend content brief and drafts** with Prompt A. It stays Saturday 06:55. | Cowork scheduled tasks |
-| 3 | Create **Monthly base posts** with Prompt B. Saturday 07:30. | Cowork scheduled tasks |
+| 3 | Create **Monthly base posts** with Prompt B. Saturday 05:13, so it finishes before the weekly run at 06:55 reads the base rows. | Cowork scheduled tasks |
 | 4 | Create **Wednesday news check** with Prompt C. Wednesday 07:00. | Cowork scheduled tasks |
 | 5 | Create **Schedule approved posts** with Prompt D, three times: Sunday 19:00, Monday 05:30, Wednesday 10:30. | Cowork scheduled tasks |
 | 6 | Create **Media desk** with Prompt E. Every day at 07:30 (it does nothing when the worklist is empty), and on demand by saying "run the media desk". | Cowork scheduled tasks |
@@ -64,6 +64,11 @@ carousel (about four a week). TikTok (MYCP and AIVVP only): just the one or two 
 OOT has no TikTok. Pinterest is paused. Layers (content_library.layer): base = 3 evergreen
 ideas a week (made monthly), focus = 2 ideas Didi cares about (made Saturday), flex = 1
 reactive idea (made Wednesday, only if something real happens).
+
+IF SOMETHING IS MISSING. If you cannot fetch a live site, say so, never guess its prices or
+product status, and mark every post that depends on it 'flagged' with that reason. If an insert
+or update fails because the layer or gate_* columns do not exist, repeat it without those columns
+and tell Didi in your report that the database migration has not been applied.
 
 WRITING TO THE DATABASE (table content_library). Insert rows with status 'draft'. Columns:
 site_id, week_commencing (the Monday, as a date), day_name, platform (LinkedIn, Facebook,
@@ -177,7 +182,7 @@ STEP 6 - Report and log. Insert one actions_log row per site (source 'cowork_ses
 'done', action starting '[scheduled-weekend-run]'). Then the report (see REPORT).
 ```
 
-### Prompt B: Monthly base posts (Saturday 07:30)
+### Prompt B: Monthly base posts (Saturday 05:13)
 
 ```
 [SHARED RULES]
