@@ -13,6 +13,9 @@ import { useNow } from './useNow';
 // (the Word and the fast are hers to write; the reading has a default she can
 // type over if she follows a specific plan).
 
+// Where Didi reads the day's Word (UCB). Linked, not copied: the text is theirs.
+const WORD_FOR_TODAY_URL = 'https://www.ucb.co.uk/word-for-today';
+
 const NAV = [
   { href: '/plan', label: 'Weekly Plan' },
   { href: '/review', label: 'Review' },
@@ -148,6 +151,16 @@ export default function FaithHeader() {
               </>
             ) : (
               <p className="text-sm text-news-ink-2">{loaded ? 'No word set yet. Add today’s word.' : 'Loading…'}</p>
+            )}
+            {editing !== 'word' && (
+              <a
+                href={WORD_FOR_TODAY_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-auto inline-flex min-h-11 items-center text-sm font-semibold text-news-gold-ink underline underline-offset-2"
+              >
+                Read today&rsquo;s Word ↗
+              </a>
             )}
           </FaithCard>
 
