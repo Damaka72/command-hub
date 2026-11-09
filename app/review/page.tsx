@@ -19,6 +19,7 @@ import { useWeek } from '../context/WeekContext';
 import WeekSelector from '../components/WeekSelector';
 import SundayChecklist from '../components/SundayChecklist';
 import PostCard from './PostCard';
+import CompactRow from './CompactRow';
 import {
   BUCKET_LABEL, classify, compareRows, summarise,
   type Bucket, type ReviewRow,
@@ -177,7 +178,20 @@ export default function ReviewPage() {
     .map(siteId => ({ siteId, items: byBucket.ready.filter(r => r.site_id === siteId) }))
     .filter(g => g.items.length > 0);
 
-  const card = (row: ReviewRow, showSite: boolean) => (
+  // Posts grouped under a brand heading, as one-line rows that expand.
+  const grouped = (rows: ReviewRow[]) =>
+    LIVE_SITES
+      .map(siteId => ({ siteId, items: rows.filter(r => r.site_id === siteId) }))
+      .filter(g => g.items.length > 0)
+      .map(({ siteId, items }) => (
+        <div key={siteId} className="space-y-2">
+          <h3 className="text-sm font-medium text-fg-2">{SITE_LABELS[siteId]} <span className="text-fg-3 font-normal">· {items.length}</span></h3>
+          {items.map(r => card(r, false, true))}
+        </div>
+      ));
+
+  const card = (row: ReviewRow, showSite: boolean, compact = false) => {
+    const el = (
     <PostCard
       key={`${row.id}-${row.edited_content ?? ''}-${(row.media_urls ?? []).join('|')}-${row.status}`}
       row={row}
@@ -189,7 +203,11 @@ export default function ReviewPage() {
       onReject={id => act('reject', [id], `reject-${id}`)}
       onRequestCreation={id => act('request_creation', [id], `create-${id}`)}
     />
-  );
+    );
+    return compact
+      ? <CompactRow key={row.id} row={row} siteLabel={showSite ? SITE_LABELS[row.site_id] ?? row.site_id : undefined}>{el}</CompactRow>
+      : el;
+  };
 
   return (
     <div className="min-h-screen bg-bg text-fg">
@@ -284,7 +302,7 @@ export default function ReviewPage() {
                     Approve these {items.length}
                   </button>
                 </summary>
-                <div className="space-y-4 p-4 pt-0">{items.map(r => card(r, false))}</div>
+                <div className="space-y-2 p-4 pt-0">{items.map(r => card(r, false, true))}</div>
               </details>
             ))}
           </Section>
@@ -293,7 +311,7 @@ export default function ReviewPage() {
         {byBucket.unchecked.length > 0 && (
           <Section title="Not yet checked" count={byBucket.unchecked.length}
             hint="Cowork's Brand gate has not looked at these. Ask Cowork to check them, or approve one at a time.">
-            {byBucket.unchecked.map(r => card(r, true))}
+            {grouped(byBucket.unchecked)}
           </Section>
         )}
 
@@ -301,30 +319,52 @@ export default function ReviewPage() {
           <Section title="Needs media" count={mediaRows.length} tone="attention"
             hint="Instagram and TikTok cannot publish without an image or video.">
             <p className="text-[13px] text-fg-3">
-              Needs filming: only you can make these. Everything else: press Ask Cowork to create it, then tell
-              Cowork to run the media desk. How video gets made is on the{' '}
+              Cowork&apos;s media desk makes the first group every morning at 07:30, or straight away if you tell Cowork to
+              run the media desk. Only you can film the second. How video gets made is on the{' '}
               <Link href="/video-studio" className="text-accent-text underline">Video Studio</Link> page.
             </p>
-            {mediaRows.map(r => card(r, true))}
+            {byBucket.needs_media.length > 0 && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <h3 className="text-sm font-medium text-fg">Cowork can make · {byBucket.needs_media.length}</h3>
+                  {byBucket.needs_media.some(r => !r.creation_requested_at) && (
+                    <button
+                      onClick={() => act('request_creation', byBucket.needs_media.filter(r => !r.creation_requested_at).map(r => r.id), 'create-all')}
+                      disabled={isBusy}
+                      className="rounded-lg bg-warn hover:brightness-125 text-on-solid px-3 py-1 text-xs font-medium disabled:opacity-50"
+                    >
+                      {busy === 'create-all' ? 'Asking…' : `Ask Cowork to create all (${byBucket.needs_media.filter(r => !r.creation_requested_at).length})`}
+                    </button>
+                  )}
+                </div>
+                {grouped(byBucket.needs_media)}
+              </div>
+            )}
+            {byBucket.filming.length > 0 && (
+              <div className="space-y-3">
+                <h3 className="text-sm font-medium text-fg">You film · {byBucket.filming.length}</h3>
+                {grouped(byBucket.filming)}
+              </div>
+            )}
           </Section>
         )}
 
         {byBucket.approved.length > 0 && (
           <Section title="Approved, waiting for Cowork to schedule" count={byBucket.approved.length}
             hint="Tell Cowork 'schedule this week' and these go into Blotato.">
-            {byBucket.approved.map(r => card(r, true))}
+            {grouped(byBucket.approved)}
           </Section>
         )}
 
         {byBucket.scheduled.length > 0 && (
           <Section title="Scheduled" count={byBucket.scheduled.length} defaultOpen={false}>
-            {byBucket.scheduled.map(r => card(r, true))}
+            {grouped(byBucket.scheduled)}
           </Section>
         )}
 
         {byBucket.rejected.length > 0 && (
           <Section title="Rejected" count={byBucket.rejected.length} defaultOpen={false}>
-            {byBucket.rejected.map(r => card(r, true))}
+            {grouped(byBucket.rejected)}
           </Section>
         )}
 

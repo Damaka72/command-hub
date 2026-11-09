@@ -165,7 +165,7 @@ export default function PostCard({
             {!hasMedia(row) && bucket !== 'filming' && (
               row.creation_requested_at ? (
                 <span className="text-[13px] text-warn shrink-0">
-                  Asked Cowork {agoLabel(row.creation_requested_at)}. It picks this up on its next media run.
+                  Asked Cowork {agoLabel(row.creation_requested_at)}. The media desk runs every morning at 07:30.
                 </span>
               ) : (
                 <button

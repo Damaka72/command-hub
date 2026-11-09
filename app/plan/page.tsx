@@ -256,7 +256,7 @@ export default function PlanPage() {
                   type="text"
                   value={sitePlan.notes ?? ''}
                   onChange={e => handleNotesEdit(siteId, e.target.value)}
-                  placeholder="e.g. focus on graduates this week, mention the cohort opening"
+                  placeholder="e.g. lean on interview confidence this week, mention OPERATE"
                   className="w-full bg-panel-2 border border-line-2 rounded-lg px-3 py-2 text-fg text-sm focus:outline-none focus:border-accent/70 placeholder-fg-3"
                 />
               </div>

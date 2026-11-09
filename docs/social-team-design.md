@@ -67,7 +67,7 @@ Think of a magazine: standing columns, a cover story, and a news flash.
 | 2. Planner | Picks pillar and angle, assigns the 6 idea slots, sets the production plan | Monthly (base) and Saturday (focus) | Calendar with layer tags |
 | 3. Writer | Writes each idea once, then adapts it per platform | Monthly and Saturday | `content_library` rows, status `draft` |
 | 4. Brand gate | Checks every draft against the reject list, verified facts and live prices. Verdict: `ready`, `flagged` or `blocked` | Straight after writing, and again the week a post goes out | Verdict on each row |
-| 5. Visual desk | Cheapest tool that works: free Blotato cards, then AI Story Video under the credit cap, then a video brief for Didi to film. OOT never uses AI imagery. | Saturday; retry Sunday morning if tools failed | `media_urls` on the row |
+| 5. Visual desk | Cheapest tool that works: free Blotato cards, then AI Story Video under the credit cap, then a video brief for Didi to film. OOT never uses AI imagery. | Saturday; the daily media desk run (07:30) picks up anything missing | `media_urls` on the row |
 | 6. Scheduler | After Didi approves in the hub, schedules the approved rows in Blotato at the right London times and writes the result back for the hub to show (who presses publish: see section 11) | Sunday | Rows `pushed` with Blotato ids |
 | 7. Analyst | Reads Blotato and Beehiiv results, writes three lines on what worked | Friday | Note per brand in `actions_log` |
 
@@ -113,7 +113,7 @@ Cowork does the post work. Claude Code builds the hub. Hand-offs between them go
 | 0. This week | Apply the triage in `docs/cowork-handoff-2026-11-09.md`: fix wording, delete unpublished TCC rows, schedule what Didi approves | None |
 | 1. Remove TCC | Update the Saturday run prompt (no TCC); decide the Instagram account and newsletter section with Didi | Remove TCC remnants from the repo and hub config |
 | 2. Brand files and gate | Write the brand files; run the Brand gate on every draft; sweep existing drafts for retired facts and old OPERATE wording | Show the gate verdict and reason on each post |
-| 3. Saturday and monthly runs | Update the Saturday prompt: OPERATE live, gate step, layer tags, Sunday visual retry, Analyst note; create the monthly run; create the Wednesday pulse | Show layer tags (base, focus, flex) |
+| 3. Saturday and monthly runs | Update the Saturday prompt: OPERATE live, gate step, layer tags, daily media desk run, Analyst note; create the monthly run; create the Wednesday pulse | Show layer tags (base, focus, flex) |
 | 4. Sunday view | Write verdicts to the database; schedule approved rows | Sunday view: flagged first, one-action approve for `ready` rows, media-needed list, Saturday in the day order, results of the week |
 | 5. Retire old pipeline | None | Retire the repo drafting pipeline; keep the grader logic and pillars |
 | 6. World of Contracts | Brand file and prompt sections | Add the brand to the hub's site lists |

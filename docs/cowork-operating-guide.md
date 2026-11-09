@@ -16,7 +16,7 @@ Status: **a draft for Didi to approve.** Nothing here has been applied to any li
 | 3 | Create **Monthly base posts** with Prompt B. Saturday 07:30. | Cowork scheduled tasks |
 | 4 | Create **Wednesday news check** with Prompt C. Wednesday 07:00. | Cowork scheduled tasks |
 | 5 | Create **Schedule approved posts** with Prompt D, three times: Sunday 19:00, Monday 05:30, Wednesday 10:30. | Cowork scheduled tasks |
-| 6 | Create **Media desk** with Prompt E. Sunday 07:30, and run it on demand by saying "run the media desk". | Cowork scheduled tasks |
+| 6 | Create **Media desk** with Prompt E. Every day at 07:30 (it does nothing when the worklist is empty), and on demand by saying "run the media desk". | Cowork scheduled tasks |
 | 7 | Replace the `video-batch-producer` skill with the `media-desk` skill (section 5). It still reads files from the retired pipeline. | Cowork skills |
 | 8 | Delete the two switched-off tasks: **Command hub pipeline reminder** and **Command Hub: routine repurpose sweep**. | Cowork scheduled tasks |
 | 9 | Decide where HyperFrames runs for scheduled tasks (section 6). | Cowork environment |
@@ -281,13 +281,14 @@ appears. Report a table: brand, day, platform, scheduled time, status, anything 
 Insert one actions_log row (source 'cowork_session', action starting '[scheduler]').
 ```
 
-### Prompt E: Media desk (Sunday 07:30, and on demand)
+### Prompt E: Media desk (every day 07:30, and on demand)
 
 ```
 [SHARED RULES]
 
 TASK: Media desk. Make the media that posts are missing, using the cheapest tool that does the
-job. This is also run on demand when Didi says "run the media desk".
+job. This runs every morning, and also on demand when Didi says "run the media desk". If the
+worklist is empty, say so in one line and stop.
 
 WORKLIST. Rows in content_library where week_commencing is this week's Monday or later; status is
 'draft' or 'approved_needs_media'; platform is Instagram, TikTok, Pinterest or YouTube; media_urls is
