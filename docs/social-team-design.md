@@ -9,7 +9,8 @@ Updated 9 Nov 2026 after Didi's answers. Brands in scope: Old Oak Town (OOT), AI
 2. **One engine for every brand**: whatever one brand's agents do, all do. Brands differ only in their brand file (voice, pillars, platforms, facts, rules).
 3. **Three layers**: base (monthly), focus (weekly) and flex (Wednesday pulse). See section 4.
 4. **Cadence**: daily, Monday to Saturday, as 6 ideas per brand per week. Sunday is review day.
-5. **Review**: one 15-minute Sunday batch. Didi decides on flagged items; everything else gets one "approve all and schedule" action. Nothing publishes without Didi's sign-off.
+5. **Review**: one 15-minute Sunday batch, in the hub. Didi decides on flagged items; everything else gets one "approve all and schedule" action. Nothing publishes without Didi's sign-off.
+5a. **Who does what**: Didi sees and approves in the hub. Cowork does the work behind it (research, drafting, checking, visuals, scheduling, clean-ups). Claude Code builds and fixes the hub only, and does not create, change or publish posts.
 6. **OPERATE is live.** The site said "Now open: £27/month, or £47/month with PRIME" on 17 Oct. Didi to confirm this is still the offer. All agent rules that say "waitlist-only" or "coming soon" are out of date.
 
 ## 2. What the review found
@@ -67,7 +68,7 @@ Think of a magazine: standing columns, a cover story, and a news flash.
 | 3. Writer | Writes each idea once, then adapts it per platform | Monthly and Saturday | `content_library` rows, status `draft` |
 | 4. Brand gate | Checks every draft against the reject list, verified facts and live prices. Verdict: `ready`, `flagged` or `blocked` | Straight after writing, and again the week a post goes out | Verdict on each row |
 | 5. Visual desk | Cheapest tool that works: free Blotato cards, then AI Story Video under the credit cap, then a video brief for Didi to film. OOT never uses AI imagery. | Saturday; retry Sunday morning if tools failed | `media_urls` on the row |
-| 6. Scheduler | After Didi's sign-off, pushes approved rows through the hub route at the right London times | Sunday | Rows `pushed` with Blotato ids |
+| 6. Scheduler | After Didi approves in the hub, schedules the approved rows in Blotato at the right London times and writes the result back for the hub to show (who presses publish: see section 11) | Sunday | Rows `pushed` with Blotato ids |
 | 7. Analyst | Reads Blotato and Beehiiv results, writes three lines on what worked | Friday | Note per brand in `actions_log` |
 
 ## 6. The week
@@ -75,7 +76,7 @@ Think of a magazine: standing columns, a cover story, and a news flash.
 1. **Last Saturday of the month**: monthly run drafts the next month's base posts. Brand gate checks them. Didi approves them in one sitting.
 2. **Saturday 06:55**: weekly run: research, focus drafts, Brand gate, visuals.
 3. **Saturday**: Didi gets a digest, flagged items first, each with its reason.
-4. **Sunday, about 15 minutes**: Didi decides on flagged items. Everything `ready`, including this week's base posts, gets one "approve all and schedule" action. Base posts that the gate re-flags (a stale fact, say) come to the top.
+4. **Sunday, about 15 minutes, in the hub's Sunday view**: Didi decides on flagged items. Everything `ready`, including this week's base posts, gets one "approve all and schedule" action. Base posts that the gate re-flags (a stale fact, say) come to the top.
 5. **Sunday**: Scheduler pushes. Rows still missing required media are listed, never silently dropped.
 6. **Monday to Saturday**: posts publish. OOT events discovery runs Monday.
 7. **Wednesday 07:00, 15-minute pulse**: Scout checks for real news per brand. If there is something, Writer drafts the flex post and Didi gets a notification for a same-day yes. If not, it reports "nothing worth posting" rather than padding.
@@ -105,17 +106,23 @@ Add `brands/worldofcontracts`, connect its accounts in Blotato, add them to `age
 
 ## 10. Build order (each step needs Didi's go-ahead)
 
-0. **This week**: triage this week's drafts (AIVVP 24, MYCP 24, OOT 18) against the brand rules and the OPERATE change, so something publishes now.
-1. Remove TCC: delete the unpublished TCC rows; remove TCC from the Saturday run prompt and the repo; decide on the Instagram account and the newsletter section (section 11).
-2. Brand files and the Brand gate, including a sweep of existing drafts for the retired facts and the old OPERATE wording.
-3. Update the Saturday run prompt: OPERATE live, no TCC, gate step, layer tags, Sunday visual retry, Wednesday pulse, Analyst note. Create the monthly run.
-4. Hub Sunday view: flagged first, one-action approve for `ready` rows, media-needed list.
-5. Retire the repo drafting pipeline; keep the grader logic and pillars.
-6. Onboard World of Contracts.
+Cowork does the post work. Claude Code builds the hub. Hand-offs between them go through `docs/` notes and the shared database.
+
+| Step | Cowork (the work) | Claude Code (the hub) |
+|---|---|---|
+| 0. This week | Apply the triage in `docs/cowork-handoff-2026-11-09.md`: fix wording, delete unpublished TCC rows, schedule what Didi approves | None |
+| 1. Remove TCC | Update the Saturday run prompt (no TCC); decide the Instagram account and newsletter section with Didi | Remove TCC remnants from the repo and hub config |
+| 2. Brand files and gate | Write the brand files; run the Brand gate on every draft; sweep existing drafts for retired facts and old OPERATE wording | Show the gate verdict and reason on each post |
+| 3. Saturday and monthly runs | Update the Saturday prompt: OPERATE live, gate step, layer tags, Sunday visual retry, Analyst note; create the monthly run; create the Wednesday pulse | Show layer tags (base, focus, flex) |
+| 4. Sunday view | Write verdicts to the database; schedule approved rows | Sunday view: flagged first, one-action approve for `ready` rows, media-needed list, Saturday in the day order, results of the week |
+| 5. Retire old pipeline | None | Retire the repo drafting pipeline; keep the grader logic and pillars |
+| 6. World of Contracts | Brand file and prompt sections | Add the brand to the hub's site lists |
 
 ## 11. Open points
 
 - **OPERATE offer**: confirm "£27/month, or £47/month with PRIME" is still current.
+- **Who presses publish**: today the hub's push route is the only publisher in the code, while Didi wants Cowork to do the work behind the hub. Proposed: the hub marks rows approved; Cowork schedules them in Blotato and writes the result back. Decide at step 4, because the London posting times then need to live in one place.
+- **Triage decisions**: see `docs/cowork-handoff-2026-11-09.md`.
 - **Monthly pack**: where it is reviewed and scheduled today. It does not appear in `content_library`.
 - **TCC leftovers**: the Instagram account @theconcurrentcontractor is still connected in Blotato with 8 published posts; The Pathway newsletter has a TCC section; research briefs for TCC exist.
 
