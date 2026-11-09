@@ -6,7 +6,7 @@ import AutomationStatus from "../components/AutomationStatus";
 import TodayFocus from "../components/TodayFocus";
 import SidebarTasks from "../components/SidebarTasks";
 import CollapsibleSitePanel from "../components/CollapsibleSitePanel";
-import TrackerRollup from "../components/TrackerRollup";
+import HomeTrackers from "../components/HomeTrackers";
 import { useWeek } from "../context/WeekContext";
 import type { SiteDetail, StatusResponse, DraftItem, WeekReview } from "../api/status/route";
 import type { HomeResponse } from "../api/home/route";
@@ -47,6 +47,10 @@ function updatedAgoLabel(d: Date | null): string {
   return `${Math.floor(s / 60)}m ago`;
 }
 
+function Divider() {
+  return <span style={{ color: 'var(--hub-border-hi)' }} aria-hidden="true">|</span>;
+}
+
 function PortfolioBar({ statusMap, reviewQueue, weekReview }: { statusMap: StatusMap; reviewQueue: DraftItem[]; weekReview: WeekReview | null }) {
   const statuses = Object.values(statusMap);
 
@@ -64,18 +68,16 @@ function PortfolioBar({ statusMap, reviewQueue, weekReview }: { statusMap: Statu
 
   const scheduled = statuses.reduce((sum, s) => sum + s.scheduledCount, 0);
 
-  const Divider = () => <span style={{ color: 'var(--hub-border-hi)' }}>|</span>;
-
   return (
     <div style={{ borderBottom: '1px solid var(--hub-border)', background: 'var(--hub-surface-2)' }}>
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-4 px-6 py-3">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 sm:px-6">
         <span className="shrink-0 text-[12px] font-bold uppercase tracking-widest" style={{ color: 'var(--hub-accent)', letterSpacing: '0.12em' }}>
           Portfolio
         </span>
 
         <span className="flex items-center gap-1.5 text-xs">
           <span style={{ color: 'var(--hub-text-3)' }}>Revenue</span>
-          <span className="font-semibold" style={{ color: totalRevenue !== null ? '#10b981' : 'var(--hub-text-3)' }}>
+          <span className="font-semibold" style={{ color: totalRevenue !== null ? 'var(--ok)' : 'var(--hub-text-3)' }}>
             {totalRevenue !== null ? `£${totalRevenue.toLocaleString()}/mo` : '—'}
           </span>
         </span>
@@ -86,9 +88,9 @@ function PortfolioBar({ statusMap, reviewQueue, weekReview }: { statusMap: Statu
           <span style={{ color: 'var(--hub-text-3)' }}>Pipeline</span>
           <span className="font-semibold" style={{
             color: pipelineSites === PIPELINE_SITE_COUNT
-              ? '#10b981'
+              ? 'var(--ok)'
               : pipelineSites > 0
-                ? '#f59e0b'
+                ? 'var(--warn)'
                 : 'var(--hub-text-3)',
           }}>
             {pipelineSites}/{PIPELINE_SITE_COUNT} sites
@@ -99,7 +101,7 @@ function PortfolioBar({ statusMap, reviewQueue, weekReview }: { statusMap: Statu
 
         <span className="flex items-center gap-1.5 text-xs">
           <span style={{ color: 'var(--hub-text-3)' }}>Outstanding</span>
-          <span className="font-semibold" style={{ color: outstanding > 0 ? '#f87171' : 'var(--hub-text-3)' }}>
+          <span className="font-semibold" style={{ color: outstanding > 0 ? 'var(--bad)' : 'var(--hub-text-3)' }}>
             {outstanding}{outstanding > 0 && ' ⚠'}
           </span>
         </span>
@@ -108,7 +110,7 @@ function PortfolioBar({ statusMap, reviewQueue, weekReview }: { statusMap: Statu
 
         <span className="flex items-center gap-1.5 text-xs">
           <span style={{ color: 'var(--hub-text-3)' }}>Scheduled</span>
-          <span className="font-semibold" style={{ color: scheduled > 0 ? '#10b981' : 'var(--hub-text-3)' }}>
+          <span className="font-semibold" style={{ color: scheduled > 0 ? 'var(--ok)' : 'var(--hub-text-3)' }}>
             {scheduled} posts
           </span>
         </span>
@@ -119,9 +121,9 @@ function PortfolioBar({ statusMap, reviewQueue, weekReview }: { statusMap: Statu
           <span style={{ color: 'var(--hub-text-3)' }}>Batch</span>
           <span className="font-semibold" style={{
             color: (weekReview?.pushed ?? 0) > 0 && (weekReview?.approved ?? 0) === 0
-              ? '#10b981'
+              ? 'var(--ok)'
               : (weekReview?.approved ?? 0) > 0
-                ? '#f59e0b'
+                ? 'var(--warn)'
                 : 'var(--hub-text-3)',
           }}>
             {weekReview?.approved ?? 0} approved · {weekReview?.pushed ?? 0} pushed
@@ -192,24 +194,24 @@ export default function OpsPage() {
   }, []);
 
   return (
-    <div className="flex h-screen flex-col" style={{ background: 'var(--hub-bg)' }}>
+    <div className="flex h-dvh flex-col" style={{ background: 'var(--hub-bg)' }}>
 
       {/* ── Header ── */}
       <header
         className="shrink-0"
         style={{
-          background: 'linear-gradient(135deg, #1c1712 0%, #14110d 60%, var(--hub-bg) 100%)',
-          borderBottom: '1px solid var(--hub-border-hi)',
-          boxShadow: '0 1px 20px rgba(217,119,87,0.08)',
+          background: 'linear-gradient(135deg, var(--panel-2) 0%, var(--panel) 60%, var(--bg) 100%)',
+          borderBottom: '1px solid var(--line-2)',
+          boxShadow: 'var(--shadow-glow)',
         }}
       >
-        <div className="mx-auto max-w-6xl px-6 py-5">
-          <div className="flex items-center justify-between">
+        <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6 sm:py-5">
+          <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
             <div>
               <h1
                 className="text-2xl font-bold tracking-tight"
                 style={{
-                  background: 'linear-gradient(90deg, #e8e6dc 30%, #d97757 100%)',
+                  background: 'linear-gradient(90deg, var(--fg) 30%, var(--accent) 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text',
@@ -221,7 +223,7 @@ export default function OpsPage() {
                 Didi Anolue · {sites.length} sites active
               </p>
             </div>
-            <div className="flex items-center gap-2.5">
+            <div className="flex flex-wrap items-center gap-2.5">
               {/* Weekly-rhythm pages, in the order the week runs — each chip says when it's used */}
               {RHYTHM_NAV.map(link => (
                 <a
@@ -235,7 +237,7 @@ export default function OpsPage() {
                 </a>
               ))}
 
-              <span className="mx-0.5 h-6 w-px" style={{ background: 'var(--hub-border)' }} aria-hidden="true" />
+              <span className="mx-0.5 hidden h-6 w-px sm:inline-block" style={{ background: 'var(--hub-border)' }} aria-hidden="true" />
 
               {/* Reference / utility — not tied to a day */}
               {UTILITY_NAV.map(link => (
@@ -265,7 +267,7 @@ export default function OpsPage() {
               >
                 <span
                   className={`h-2 w-2 rounded-full ${refreshing ? 'animate-hub-pulse' : ''}`}
-                  style={{ background: '#34d399', boxShadow: '0 0 8px rgba(52,211,153,0.6)' }}
+                  style={{ background: 'var(--ok)', boxShadow: '0 0 8px color-mix(in srgb, var(--ok) 60%, transparent)' }}
                 />
                 {refreshing ? 'Updating…' : `Live · ${updatedAgoLabel(lastUpdated)}`}
               </button>
@@ -279,10 +281,8 @@ export default function OpsPage() {
                   <span
                     className="h-2 w-2 rounded-full"
                     style={{
-                      background: Object.values(statusMap.sites).every(s => s.up) ? '#10b981' : '#f59e0b',
-                      boxShadow: Object.values(statusMap.sites).every(s => s.up)
-                        ? '0 0 8px rgba(16,185,129,0.6)'
-                        : '0 0 8px rgba(245,158,11,0.6)',
+                      background: Object.values(statusMap.sites).every(s => s.up) ? 'var(--ok)' : 'var(--warn)',
+                      boxShadow: `0 0 8px color-mix(in srgb, ${Object.values(statusMap.sites).every(s => s.up) ? 'var(--ok)' : 'var(--warn)'} 60%, transparent)`,
                     }}
                   />
                 )}
@@ -298,9 +298,9 @@ export default function OpsPage() {
       {/* ── Two-column body ── */}
       <div className="flex flex-1 overflow-hidden">
 
-        {/* Left sidebar */}
+        {/* Left sidebar — hidden on small screens so the main column gets the whole width */}
         <aside
-          className="w-[300px] shrink-0 overflow-y-auto"
+          className="hidden w-[300px] shrink-0 overflow-y-auto lg:block"
           style={{ background: 'var(--hub-surface)', borderRight: '1px solid var(--hub-border)' }}
         >
           {statusMap !== null && <DailyBriefing statusMap={statusMap} />}
@@ -314,8 +314,13 @@ export default function OpsPage() {
             <PortfolioBar statusMap={statusMap.sites} reviewQueue={statusMap.reviewQueue} weekReview={statusMap.weekReview} />
           )}
 
-          <main className="flex-1 px-6 py-8">
-            {/* What today's job is, and where the whole week sits — first thing a newcomer sees */}
+          <main className="flex-1 px-4 py-6 sm:px-6 sm:py-8">
+            {/* Work overview: summary band, your next steps, one card per site */}
+            <div className="mb-8">
+              <HomeTrackers />
+            </div>
+
+            {/* What today's job is, and where the whole week sits */}
             <div className="mb-6">
               <TodayFocus />
             </div>
@@ -330,10 +335,8 @@ export default function OpsPage() {
               </div>
             )}
 
-            {/* What is done and what is outstanding, per site — one line each */}
-            <TrackerRollup />
-
             {/* ── Collapsible site panels (UX spec §3.4) ── */}
+            <h2 className="mb-3 text-lg font-bold" style={{ color: 'var(--fg)' }}>Content pipeline and operations</h2>
             <div className="flex flex-col gap-3">
               {sites.map((site) => (
                 <CollapsibleSitePanel
