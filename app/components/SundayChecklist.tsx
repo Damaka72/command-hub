@@ -1,62 +1,31 @@
 "use client";
 
 // ── Sunday checklist ─────────────────────────────────────────────────────
-// Lives inside /review (the real Sunday work surface) as a collapsible
-// section, rather than as a second "what do I do on Sunday" page that
-// replaced the whole Home view. YouTube rotation, the weekly checklist,
-// coordinator quick links, and the Cowork media-post brief — everything
-// SundayView used to show, minus the "Open Review queue" link that made
-// sense standalone but not from inside /review itself.
+// Lives inside /review (the Sunday work surface) as a collapsible section.
+// It matches the agreed flow: Cowork researches, drafts and checks on
+// Saturday; Didi decides on the flagged posts, approves the rest in one
+// action, and Cowork schedules what is approved. Nothing here asks Didi to
+// brief a coordinator or paste anything into Cowork.
 
 import { useState, useEffect } from "react";
 
-const COORDINATOR_LINKS = [
-  { key: "aivvp", label: "AIVVP", url: "https://claude.ai/project/01996e3c-808c-7457-a43a-c0f830af4ab7" },
-  { key: "mycp",  label: "MYCP",  url: "https://claude.ai/project/a740ba19-2ad2-4de9-b0a0-1a99512378dd" },
-  { key: "oot",   label: "OOT",   url: "https://claude.ai/project/01994548-0edc-7432-b080-2deb9b296af3" },
-] as const;
-
 const CHECKLIST_ITEMS = [
-  "Brief AIVVP Coordinator and read output",
-  "Brief MYCP Coordinator and read output",
-  "Brief OOT Coordinator and read output",
-  "Add voice to all NEEDS YOUR VOICE sections",
-  "Beehiiv — The Prompt-ly draft ready (Wednesday send)",
-  "Beehiiv — The Pathway draft ready (Tuesday send)",
-  "Beehiiv — The Oak draft ready (Thursday send)",
-  "Review queue cleared — approved posts pushed to Blotato",
+  "Decide the flagged and blocked posts",
+  "Approve all ready posts",
+  "Check the media list: film what needs filming, or ask Cowork to create the rest",
+  "Tell Cowork: schedule this week",
+  "Beehiiv: The Pathway draft ready (Tuesday send)",
+  "Beehiiv: The Prompt-ly draft ready (Wednesday send)",
+  "Beehiiv: The Oak draft ready (Thursday send)",
 ] as const;
 
 // Direct link to the matching newsletter tab, shown next to each newsletter
 // checklist item (keyed by its index in CHECKLIST_ITEMS above).
 const NEWSLETTER_LINKS: Record<number, string> = {
+  4: "the-pathway",
   5: "the-prompt-ly",
-  6: "the-pathway",
-  7: "the-oak",
+  6: "the-oak",
 };
-
-// The exact paste text used every Sunday to brief Cowork.
-// To update, edit this constant directly.
-const COWORK_BRIEF = `I need you to post this week's approved media posts (Instagram, TikTok, Pinterest, YouTube) to Blotato. Text posts (LinkedIn, Facebook, Twitter/X) are pushed from the dashboard Review queue — this brief covers media posts only.
-API key: [YOUR BLOTATO API KEY]
-Post each item using the Blotato API at https://backend.blotato.com/v2/posts with the header blotato-api-key and the exact accountId, pageId, platform, and content fields shown below.
-Scheduling rules:
-Instagram Reels: 09:00 GMT on the specified day
-Instagram Stories: post immediately
-TikTok posts: 18:00 GMT on the specified day
-Pinterest posts: 14:00 GMT on the specified day — retrieve boardId first by calling blotato_list_pinterest_boards with accountId 6423
-YouTube: 10:00 GMT on the specified day
-After each post confirms successfully, tell me the post ID before moving to the next. If any post fails, stop and tell me the exact error message.
-Work through the sites in this order: AIVVP first, then MYCP, then OOT.
-Here are this week's approved posts:
-
-AIVVP POSTS: [paste the full Blotato fields block for each approved AIVVP post, exactly as the coordinator produced it]
-
-MYCP POSTS: [paste the full Blotato fields block for each approved MYCP post]
-
-OOT POSTS: [paste the full Blotato fields block for each approved OOT post]
-
-That is all posts for this week. Once all are confirmed, open https://my.blotato.com and check the calendar to verify everything is showing correctly. Tell me what you see.`;
 
 function getISOWeek(date: Date): number {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
@@ -87,10 +56,10 @@ function formatWeekRange(monday: Date): string {
 export default function SundayChecklist() {
   const today       = new Date();
   const currentWeek = getISOWeek(today);
-  const storageKey  = `sunday-checklist-${currentWeek}`;
+  // v2: the items changed, so old saved ticks (by position) must not carry over.
+  const storageKey  = `sunday-checklist-v2-${currentWeek}`;
 
-  const [checked,   setChecked]   = useState<boolean[]>(Array(CHECKLIST_ITEMS.length).fill(false));
-  const [briefOpen, setBriefOpen] = useState(false);
+  const [checked, setChecked] = useState<boolean[]>(Array(CHECKLIST_ITEMS.length).fill(false));
 
   useEffect(() => {
     try {
@@ -109,7 +78,7 @@ export default function SundayChecklist() {
     });
   }
 
-  // YouTube rotation — even ISO week: AIVVP = Yes, MYCP = No
+  // YouTube rotation: even ISO week, AIVVP = Yes, MYCP = No
   const monday0 = getMondayOfCurrentWeek();
   const weeks = Array.from({ length: 4 }, (_, i) => {
     const monday = new Date(monday0);
@@ -132,42 +101,7 @@ export default function SundayChecklist() {
     <div className="rounded-2xl border border-line-2 bg-panel px-6 py-6">
       <div className="flex flex-col gap-8">
 
-        {/* ── Section 1 — YouTube rotation ── */}
-        <section className="flex flex-col gap-3">
-          <h3 className="text-sm font-semibold text-fg">YouTube Rotation</h3>
-          <div className="overflow-hidden rounded-xl border border-line-2">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-line-2 bg-panel-2/50">
-                  <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-fg-2">Week</th>
-                  <th className="px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-fg-2">AIVVP YouTube</th>
-                  <th className="px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-fg-2">MYCP YouTube</th>
-                </tr>
-              </thead>
-              <tbody>
-                {weeks.map((w) => (
-                  <tr
-                    key={w.weekNum}
-                    className={`border-b border-line last:border-0 ${w.isCurrent ? "bg-panel-2" : "bg-panel"}`}
-                  >
-                    <td className="px-4 py-2.5 text-xs text-fg">
-                      {w.label}
-                      {w.isCurrent && (
-                        <span className="ml-2 rounded-full bg-fg px-1.5 py-0.5 text-[12px] font-medium text-bg">
-                          this week
-                        </span>
-                      )}
-                    </td>
-                    <td className={`px-4 py-2.5 text-center text-xs font-semibold ${w.aivvp === "Yes" ? "text-ok" : "text-fg-3"}`}>{w.aivvp}</td>
-                    <td className={`px-4 py-2.5 text-center text-xs font-semibold ${w.mycp === "Yes" ? "text-ok" : "text-fg-3"}`}>{w.mycp}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        {/* ── Section 2 — Sunday checklist ── */}
+        {/* ── Section 1 — Sunday checklist ── */}
         <section className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-fg">Sunday Checklist</h3>
@@ -205,42 +139,39 @@ export default function SundayChecklist() {
           </div>
         </section>
 
-        {/* ── Section 3 — Quick links ── */}
+        {/* ── Section 2 — YouTube rotation ── */}
         <section className="flex flex-col gap-3">
-          <h3 className="text-sm font-semibold text-fg">Open Coordinators</h3>
-          <div className="flex flex-wrap gap-2">
-            {COORDINATOR_LINKS.map(({ key, label, url }) => (
-              <a
-                key={key}
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded-lg border border-line-2 bg-panel px-4 py-2 text-sm font-medium text-fg transition-colors hover:border-line-2 hover:brightness-125"
-              >
-                Open {label} Coordinator →
-              </a>
-            ))}
+          <h3 className="text-sm font-semibold text-fg">YouTube Rotation</h3>
+          <div className="overflow-hidden rounded-xl border border-line-2">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-line-2 bg-panel-2/50">
+                  <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-fg-2">Week</th>
+                  <th className="px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-fg-2">AIVVP YouTube</th>
+                  <th className="px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-fg-2">MYCP YouTube</th>
+                </tr>
+              </thead>
+              <tbody>
+                {weeks.map((w) => (
+                  <tr
+                    key={w.weekNum}
+                    className={`border-b border-line last:border-0 ${w.isCurrent ? "bg-panel-2" : "bg-panel"}`}
+                  >
+                    <td className="px-4 py-2.5 text-xs text-fg">
+                      {w.label}
+                      {w.isCurrent && (
+                        <span className="ml-2 rounded-full bg-fg px-1.5 py-0.5 text-[12px] font-medium text-bg">
+                          this week
+                        </span>
+                      )}
+                    </td>
+                    <td className={`px-4 py-2.5 text-center text-xs font-semibold ${w.aivvp === "Yes" ? "text-ok" : "text-fg-3"}`}>{w.aivvp}</td>
+                    <td className={`px-4 py-2.5 text-center text-xs font-semibold ${w.mycp === "Yes" ? "text-ok" : "text-fg-3"}`}>{w.mycp}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </section>
-
-        {/* ── Section 4 — Cowork brief ── */}
-        <section>
-          <button
-            onClick={() => setBriefOpen(o => !o)}
-            className={`flex w-full items-center justify-between border border-line-2 bg-panel-2/50 px-4 py-3 text-left text-sm font-medium text-fg-2 transition-colors hover:brightness-125 ${
-              briefOpen ? "rounded-t-xl" : "rounded-xl"
-            }`}
-          >
-            <span>Cowork brief — media posts only (Instagram / TikTok / Pinterest / YouTube)</span>
-            <span className="text-xs text-fg-3">{briefOpen ? "▲" : "▼"}</span>
-          </button>
-          {briefOpen && (
-            <div className="rounded-b-xl border border-t-0 border-line-2 bg-panel px-5 py-4">
-              <pre className="whitespace-pre-wrap font-sans text-xs leading-relaxed text-fg-2">
-                {COWORK_BRIEF}
-              </pre>
-            </div>
-          )}
         </section>
 
       </div>

@@ -13,15 +13,14 @@ export const SITES: Site[] = [
     description: "Hyperlocal news & community for Old Oak Common regeneration",
     github: "https://github.com/Damaka72/oldoaktown",
     admin: "https://oldoaktown.co.uk/admin",
-    socialAgent: "https://oldoaktown.co.uk/social-agent",
     initials: "OO",
     marketingPlan: {
       blotato: {
         status: 'active' as const,
         statusLabel: 'Active',
         platform: 'Instagram',
-        schedule: '1 post/day',
-        nextAction: 'Continue weekly scheduling in Blotato',
+        schedule: 'Daily, Monday to Saturday',
+        nextAction: 'Approve this week\'s posts in the Sunday review; Cowork schedules them',
       },
       beehiiv: {
         status: 'in_progress' as const,
@@ -38,7 +37,6 @@ export const SITES: Site[] = [
     description: "Career development, coaching and PRIME/OPERATE frameworks",
     github: "https://github.com/Damaka72/Masteryourcareerpath",
     admin: "https://masteryourcareerpath.com/admin",
-    socialAgent: "https://masteryourcareerpath.com/social-agent",
     initials: "MY",
     driveFolders: [
       { label: "Drive: MYCP Root", url: "https://drive.google.com/drive/folders/1-MQvh4R896EVtO5NucFDvtctppSOaiqd" },
@@ -50,8 +48,8 @@ export const SITES: Site[] = [
         status: 'active' as const,
         statusLabel: 'Active',
         platform: 'Instagram',
-        schedule: '1 post/day',
-        nextAction: 'Continue weekly scheduling in Blotato',
+        schedule: 'Daily, Monday to Saturday',
+        nextAction: 'Approve this week\'s posts in the Sunday review; Cowork schedules them',
       },
       beehiiv: {
         status: 'in_progress' as const,
@@ -68,15 +66,14 @@ export const SITES: Site[] = [
     description: "AI-powered prompts for creating viral video content",
     github: "https://github.com/Damaka72/ai-viral-video-prompts",
     admin: "https://aiviralvideoprompts.com/admin",
-    socialAgent: "https://aiviralvideoprompts.com/social-agent",
     initials: "AI",
     marketingPlan: {
       blotato: {
         status: 'active' as const,
         statusLabel: 'Active',
         platform: 'Instagram + TikTok + Pinterest + YouTube',
-        schedule: '1 post/day',
-        nextAction: 'Continue weekly scheduling in Blotato',
+        schedule: 'Daily, Monday to Saturday',
+        nextAction: 'Approve this week\'s posts in the Sunday review; Cowork schedules them',
       },
       beehiiv: {
         status: 'in_progress' as const,
@@ -102,7 +99,6 @@ export const SITES: Site[] = [
     description: "Personal consultancy site — procurement & commercial leadership",
     github: "https://github.com/Damaka72/didi-anolue-landing-page",
     admin: "https://didianolue.co.uk/admin",
-    socialAgent: "https://didianolue.co.uk/social-agent",
     initials: "DA",
     marketingPlan: {
       blotato: {

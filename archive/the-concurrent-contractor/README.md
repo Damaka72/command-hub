@@ -19,7 +19,7 @@
 
 - **Database:** no tables, rows or migrations were dropped or changed. Existing `content_library`, `actions_log`, `weekly_plan` and review-queue rows for `theconcurrentcontractor` remain in Supabase; the hub just no longer shows or creates them. The `actions_log` migration still lists the old site id in its check constraint, which is harmless.
 - **The live site, its repository and its Vercel project:** nothing was changed there.
-- **Historical documents** (`SITE-AUDIT.md`, `COWORK.md`, `IMPLEMENTATION.md`, `AGENT-IMPLEMENTATION.md`, `REPURPOSING-RECIPES.md`, `WORKSHOP-MIGRATION.md`): left as a record of how things stood. They mention the site by name; they are not read by the app.
+- **Historical documents** (`SITE-AUDIT.md`, the May 2026 `COWORK.md`, `IMPLEMENTATION.md`, `AGENT-IMPLEMENTATION.md`): moved to `archive/legacy-docs/` as a record of how things stood. `REPURPOSING-RECIPES.md` and `WORKSHOP-MIGRATION.md` stay at the repo root. They mention the site by name; none is read by the app.
 
 ## To restore it
 

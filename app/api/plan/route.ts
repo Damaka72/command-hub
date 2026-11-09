@@ -3,8 +3,8 @@
 //      as a template), the available pillars, and any research briefs for the week.
 // POST /api/plan — upserts the weekly plan into Supabase, keyed on week_commencing.
 //
-// The source of truth is the Supabase `weekly_plan` table. The old fs-backed
-// content-coordinator.json is kept only as an offline pipeline fallback.
+// The source of truth is the Supabase `weekly_plan` table. It is Didi's weekly
+// focus: Cowork's Saturday run reads it to decide what the focus posts lean on.
 
 import { NextResponse } from 'next/server';
 import { getSupabase } from '@/app/lib/supabase';

@@ -39,15 +39,11 @@ const SITE_ORDER = [
 
 export default function PlanPage() {
   const { week }                                = useWeek();
-  const [coordinator, setCoordinator]           = useState<CoordinatorData | null>(null);
   const [pillars, setPillars]                   = useState<PillarsData>({});
   const [form, setForm]                         = useState<CoordinatorData | null>(null);
   const [briefs, setBriefs]                     = useState<Record<string, string>>({});
   const [status, setStatus]                     = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [errorMsg, setErrorMsg]                 = useState('');
-  const [busy, setBusy]                         = useState<string | null>(null);
-  const [researchError, setResearchError]       = useState<Record<string, string>>({});
-  const [researchNote, setResearchNote]         = useState<Record<string, string>>({});
 
   // Reload the plan, pillars and research briefs whenever the shared week
   // changes (WeekContext — UX spec §5). The API falls back to the latest
@@ -57,7 +53,6 @@ export default function PlanPage() {
     fetch(`/api/plan?week=${week}`)
       .then(r => r.json())
       .then(data => {
-        setCoordinator(data.coordinator);
         setPillars(data.pillars);
         setBriefs(data.briefs ?? {});
         const fresh = JSON.parse(JSON.stringify(data.coordinator));
@@ -118,67 +113,11 @@ export default function PlanPage() {
         const err = await res.json();
         throw new Error(err.error || 'Save failed');
       }
-      setCoordinator(form);
       setStatus('saved');
       setTimeout(() => setStatus('idle'), 3000);
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : String(err));
       setStatus('error');
-    }
-  }
-
-  async function generateBrief(siteId: string) {
-    const week = form?.weekCommencing;
-    if (!week) return;
-    if ((briefs[siteId] ?? '').trim() && !window.confirm('Replace the current research brief with a freshly generated one?')) {
-      return;
-    }
-    setBusy(`research-${siteId}`);
-    setResearchError(prev => ({ ...prev, [siteId]: '' }));
-    setResearchNote(prev => ({ ...prev, [siteId]: '' }));
-    try {
-      const res = await fetch('/api/research', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ siteId, week, action: 'generate' }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        if (data.error === 'out_of_credits') {
-          throw new Error("Out of Anthropic credits, and the Blotato and Perplexity fallbacks couldn't complete either — write the brief yourself below, or paste research from another tool (ChatGPT, Perplexity, Gemini).");
-        }
-        throw new Error(data.error || 'Research generation failed');
-      }
-      setBriefs(prev => ({ ...prev, [siteId]: data.brief ?? '' }));
-      const fallbackNote: Record<string, string> = {
-        blotato_perplexity_fallback: "Generated via Blotato's Perplexity research — Anthropic credits were unavailable. Worth a skim before relying on it.",
-        perplexity_api_fallback: "Generated via the Perplexity API fallback — Anthropic and Blotato credits were unavailable. Worth a skim before relying on it.",
-      };
-      setResearchNote(prev => ({ ...prev, [siteId]: fallbackNote[data.source] ?? '' }));
-    } catch (err) {
-      setResearchError(prev => ({ ...prev, [siteId]: err instanceof Error ? err.message : String(err) }));
-    } finally {
-      setBusy(null);
-    }
-  }
-
-  async function saveBrief(siteId: string) {
-    const week = form?.weekCommencing;
-    if (!week) return;
-    setBusy(`save-research-${siteId}`);
-    setResearchError(prev => ({ ...prev, [siteId]: '' }));
-    try {
-      const res = await fetch('/api/research', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ siteId, week, action: 'save', brief: briefs[siteId] ?? '' }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Save failed');
-    } catch (err) {
-      setResearchError(prev => ({ ...prev, [siteId]: err instanceof Error ? err.message : String(err) }));
-    } finally {
-      setBusy(null);
     }
   }
 
@@ -207,7 +146,7 @@ export default function PlanPage() {
       <div className="border-b border-line px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link href="/" className="text-fg-2 hover:text-fg text-sm">← Dashboard</Link>
-          <h1 className="text-lg font-semibold text-fg">Weekly Content Plan</h1>
+          <h1 className="text-lg font-semibold text-fg">Weekly focus</h1>
         </div>
         <div className="flex items-center gap-3">
           <WeekSelector />
@@ -222,12 +161,21 @@ export default function PlanPage() {
                 : 'bg-accent hover:brightness-125 text-on-solid disabled:opacity-50'
             }`}
           >
-            {status === 'saving' ? 'Saving…' : status === 'saved' ? '✓ Saved' : status === 'error' ? 'Error — retry' : 'Save Plan'}
+            {status === 'saving' ? 'Saving…' : status === 'saved' ? '✓ Saved' : status === 'error' ? 'Error — retry' : 'Save focus'}
           </button>
         </div>
       </div>
 
       <div className="max-w-4xl mx-auto px-6 py-8 space-y-8">
+        <div className="bg-panel border border-line-2 rounded-xl p-5 text-sm text-fg-2 space-y-1">
+          <p className="text-fg font-medium">This is where you steer the week</p>
+          <p>
+            Cowork researches and drafts on its own every Saturday at 06:55. Set a pillar, a theme or a note here
+            for anything you want it to put extra attention on in the focus posts. Leave a site blank and Cowork
+            chooses. Save before Saturday 06:55.
+          </p>
+        </div>
+
         {/* Campaign objective */}
         <div className="bg-panel border border-line-2 rounded-xl p-5">
           <div className="flex items-start gap-6 flex-wrap">
@@ -253,42 +201,19 @@ export default function PlanPage() {
             <div key={siteId} className="bg-panel border border-line-2 rounded-xl p-5 space-y-4">
               <h2 className="text-sm font-semibold text-fg">{SITE_LABELS[siteId] ?? siteId}</h2>
 
-              {/* Research brief for the selected week — generatable + editable */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="block text-xs font-medium text-fg-2 uppercase tracking-wide">Research brief for this week</label>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => generateBrief(siteId)}
-                      disabled={busy !== null}
-                      className="rounded-lg bg-accent hover:brightness-125 text-on-solid px-3 py-1.5 text-xs font-medium disabled:opacity-50"
-                      title="Search the web for what's actually happening right now, relevant to this site's audience"
-                    >
-                      {busy === `research-${siteId}` ? 'Researching…' : '🔎 Generate research brief'}
-                    </button>
-                    <button
-                      onClick={() => saveBrief(siteId)}
-                      disabled={busy !== null}
-                      className="rounded-lg bg-panel-3 hover:brightness-125 text-fg px-3 py-1.5 text-xs font-medium disabled:opacity-50"
-                    >
-                      {busy === `save-research-${siteId}` ? 'Saving…' : 'Save brief'}
-                    </button>
-                  </div>
+              {/* Research brief for the selected week: written by Cowork, read-only here */}
+              <details className="rounded-lg border border-line-2 bg-panel-2">
+                <summary className="cursor-pointer list-none px-3 py-2 text-xs font-medium text-fg-2 uppercase tracking-wide">
+                  Cowork&apos;s research brief for this week {briefs[siteId] ? '' : '(none yet)'}
+                </summary>
+                <div className="px-3 pb-3">
+                  {briefs[siteId] ? (
+                    <p className="text-xs text-fg font-sans leading-relaxed whitespace-pre-wrap">{briefs[siteId]}</p>
+                  ) : (
+                    <p className="text-xs text-fg-3">Cowork writes this on Saturday at 06:55.</p>
+                  )}
                 </div>
-                <textarea
-                  value={briefs[siteId] ?? ''}
-                  onChange={e => setBriefs(prev => ({ ...prev, [siteId]: e.target.value }))}
-                  rows={6}
-                  placeholder="Hit 🔎 Generate research brief to search the web for what's happening this week for this audience — or write the brief yourself. It feeds this week's content pipeline."
-                  className="w-full bg-panel-2 border border-line-2 rounded-lg px-3 py-2 text-fg text-xs focus:outline-none focus:border-accent/70 font-sans leading-relaxed whitespace-pre-wrap"
-                />
-                {researchError[siteId] && (
-                  <p className="text-xs text-bad">{researchError[siteId]}</p>
-                )}
-                {researchNote[siteId] && (
-                  <p className="text-xs text-warn">{researchNote[siteId]}</p>
-                )}
-              </div>
+              </details>
 
               {/* Pillar selector */}
               <div>
@@ -349,7 +274,7 @@ export default function PlanPage() {
         {/* Instruction */}
         <div className="bg-panel border border-line-2 rounded-xl p-5 text-sm text-fg-2 space-y-1">
           <p className="text-fg font-medium">After saving</p>
-          <p>Run the weekly pipeline to generate this week&apos;s drafts — 5 per site (Monday–Friday). Drafts appear in the <a href="/review" className="text-accent-text hover:text-accent-text underline">Review</a> queue, where you edit, approve, and push approved posts to Blotato.</p>
+          <p>Nothing else to run. Cowork reads this on Saturday, drafts the week and checks it, and the posts appear in the <a href="/review" className="text-accent-text hover:text-accent-text underline">Sunday review</a> for you to approve.</p>
         </div>
       </div>
     </div>

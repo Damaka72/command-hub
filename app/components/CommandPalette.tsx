@@ -10,7 +10,7 @@ import { PIPELINE_SITE_ORDER, siteColor } from '../lib/siteColors';
 // navigation, Enter to run, Escape to close. Single-key shortcuts (W/M/H/1-4)
 // fire the same commands when no input is focused anywhere on the page.
 
-type Mode = 'list' | 'confirm-pipeline' | 'confirm-push' | 'new-task';
+type Mode = 'list' | 'new-task';
 
 interface Command {
   id:        string;
@@ -64,34 +64,6 @@ export default function CommandPalette() {
     setSelected(0);
   }, []);
 
-  const runPipeline = useCallback(async () => {
-    setBusyMsg('Triggering pipeline…');
-    try {
-      const res = await fetch('/api/pipeline', { method: 'POST' });
-      const json = await res.json();
-      setBusyMsg(json.ok ? 'Pipeline triggered.' : `Could not trigger: ${json.reason ?? 'unknown error'}`);
-    } catch {
-      setBusyMsg('Could not reach the trigger endpoint.');
-    }
-    setTimeout(close, 1500);
-  }, [close]);
-
-  const runPush = useCallback(async () => {
-    setBusyMsg('Pushing approved posts…');
-    try {
-      const res = await fetch('/api/review/push', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ week }),
-      });
-      const json = await res.json();
-      setBusyMsg(res.ok ? `Pushed ${json.pushed ?? 0}, failed ${json.failed ?? 0}, skipped ${json.skipped ?? 0}.` : (json.error ?? 'Push failed'));
-    } catch {
-      setBusyMsg('Could not reach the push endpoint.');
-    }
-    setTimeout(close, 2000);
-  }, [week, close]);
-
   const submitTask = useCallback(async () => {
     const text = taskText.trim();
     if (!text) return;
@@ -119,10 +91,8 @@ export default function CommandPalette() {
       shortcut: String(i + 1),
       run: () => { setSiteId(id); close(); },
     })),
-    { id: 'run-pipeline', label: 'Run content pipeline',      run: () => setMode('confirm-pipeline') },
-    { id: 'push-blotato', label: 'Push approved to Blotato',  run: () => setMode('confirm-push') },
     { id: 'new-task',     label: 'New task',                 run: () => setMode('new-task') },
-    { id: 'review-queue', label: 'Open review queue',         run: () => { window.location.href = `/review?week=${week}`; } },
+    { id: 'review-queue', label: 'Open Sunday review',        run: () => { window.location.href = `/review?week=${week}`; } },
   ], [setSiteId, close, week]);
 
   const filtered = useMemo(() => {
@@ -218,38 +188,6 @@ export default function CommandPalette() {
               ))}
             </div>
           </>
-        )}
-
-        {(mode === 'confirm-pipeline' || mode === 'confirm-push') && (
-          <div className="flex flex-col gap-3 p-4">
-            <p className="text-sm" style={{ color: 'var(--fg)' }}>
-              {mode === 'confirm-pipeline'
-                ? 'Trigger this week’s content pipeline run?'
-                : `Push approved posts to Blotato for week ${week}?`}
-            </p>
-            {busyMsg ? (
-              <p className="text-xs" style={{ color: 'var(--fg-2)' }}>{busyMsg}</p>
-            ) : (
-              <div className="flex gap-2">
-                <button
-                  autoFocus
-                  onClick={mode === 'confirm-pipeline' ? runPipeline : runPush}
-                  onKeyDown={e => e.key === 'Enter' && (mode === 'confirm-pipeline' ? runPipeline() : runPush())}
-                  className="rounded-lg px-3 py-1.5 text-xs font-semibold"
-                  style={{ background: 'var(--hub-accent)', color: 'var(--hub-accent-ink)' }}
-                >
-                  Yes, go
-                </button>
-                <button
-                  onClick={close}
-                  className="rounded-lg px-3 py-1.5 text-xs"
-                  style={{ background: 'var(--panel-2)', color: 'var(--fg-2)' }}
-                >
-                  Cancel
-                </button>
-              </div>
-            )}
-          </div>
         )}
 
         {mode === 'new-task' && (

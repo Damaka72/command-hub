@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import fs from 'fs';
-import path from 'path';
 import { BLOTATO_SITE_ACCOUNTS } from '@/agents/accounts';
 
 let _supabase: ReturnType<typeof createClient> | null = null;
@@ -29,51 +27,6 @@ export interface ReadinessItem {
   reason: string;
 }
 
-export interface CoordinatorData {
-  weekCommencing: string;
-  weeklyTheme: string;
-  campaignObjective: string;
-  setAt: string;
-}
-
-export interface SubagentStatus {
-  lastRun: string | null;
-  status: 'idle' | 'running' | 'complete' | 'error' | 'never_run';
-  briefGenerated: boolean;
-  briefSummary: string | null;
-}
-
-export interface GraderVerdict {
-  rubricName: string;
-  verdict: 'pass' | 'fail' | 'retry' | 'never_run';
-  retryCount: number;
-  failedCriterion: string | null;
-  lastRun: string | null;
-}
-
-export interface PortfolioCoordinator {
-  lastRun: string | null;
-  sourceFile: string;
-  weeklyTheme: string | null;
-  weekCommencing: string | null;
-  campaignObjective: string | null;
-  batchStatus: {
-    approved: number;
-    pending: number;
-    failed: number;
-    readyForReview: boolean;
-  };
-}
-
-export interface DraftItem {
-  siteId: string;
-  platform: string;
-  graderVerdict: 'pass' | 'fail' | 'retry';
-  retryCount: number;
-  failedCriterion: string | null;
-  contentSnippet: string | null;
-}
-
 export interface RevenueConfig {
   source: string;       // 'json_file' | 'gumroad_api' | 'booking_manual'
   label: string;
@@ -86,14 +39,11 @@ export interface SiteDetail {
   up: boolean;
   deploy: { state: string; ago: string; commitMessage: string } | null;
   revenue: RevenueMetrics | null;
-  coordinator: CoordinatorData | null;
   readiness: ReadinessItem[];
   monthlyRevenue: number | null;
   scheduledCount: number;
   outstanding: { overdueFollowUps: number; awaitingApproval: number; };
   revenueConfig: RevenueConfig | null;
-  subagentStatus: SubagentStatus | null;
-  graderVerdict: GraderVerdict | null;
 }
 
 export interface WeekReview {
@@ -103,12 +53,16 @@ export interface WeekReview {
   needsMedia: number;
   draft: number;
   rejected: number;
+  // Brand gate verdicts on this week's rows (draft or approved, not yet pushed).
+  // All zero until Cowork starts writing gate_verdict.
+  ready: number;
+  flagged: number;
+  blocked: number;
+  unchecked: number;
 }
 
 export interface StatusResponse {
   sites: Record<string, SiteDetail>;
-  portfolioCoordinator: PortfolioCoordinator | null;
-  reviewQueue: DraftItem[];
   weekReview: WeekReview | null;
 }
 
@@ -124,7 +78,6 @@ interface SiteConfig {
   newsletterConnected: boolean;
   revenueProvider: string | null;
   revenueConnected: boolean;
-  servesMostData: boolean; // false for Next.js sites that don't serve data/ publicly
 }
 
 const SITES: SiteConfig[] = [
@@ -137,7 +90,6 @@ const SITES: SiteConfig[] = [
     newsletterConnected: false,
     revenueProvider: 'Stripe',
     revenueConnected: true,
-    servesMostData: true,
   },
   {
     id: 'masteryourcareerpath',
@@ -148,7 +100,6 @@ const SITES: SiteConfig[] = [
     newsletterConnected: false,
     revenueProvider: 'MYCP platform',
     revenueConnected: false,
-    servesMostData: true,
   },
   {
     id: 'aiviralvideoprompts',
@@ -159,7 +110,6 @@ const SITES: SiteConfig[] = [
     newsletterConnected: false,
     revenueProvider: 'Gumroad',
     revenueConnected: false,
-    servesMostData: true,
   },
   {
     id: 'world-of-contracts',
@@ -170,7 +120,6 @@ const SITES: SiteConfig[] = [
     newsletterConnected: false,
     revenueProvider: null,
     revenueConnected: false,
-    servesMostData: false,
   },
   {
     id: 'didianolue',
@@ -181,7 +130,6 @@ const SITES: SiteConfig[] = [
     newsletterConnected: false,
     revenueProvider: null,
     revenueConnected: false,
-    servesMostData: true,
   },
 ];
 
@@ -203,16 +151,6 @@ async function safeFetch(url: string, timeoutMs = 4000): Promise<Record<string, 
     if (!res.ok) return null;
     return await res.json();
   } catch { return null; }
-}
-
-function readLocalJson<T>(filePath: string): T | null {
-  try {
-    const full = path.join(process.cwd(), filePath);
-    if (!fs.existsSync(full)) return null;
-    return JSON.parse(fs.readFileSync(full, 'utf-8')) as T;
-  } catch {
-    return null;
-  }
 }
 
 async function checkUptime(url: string): Promise<boolean> {
@@ -239,18 +177,6 @@ async function checkVercel(projectId: string | null): Promise<{ state: string; a
       commitMessage: (d.meta?.githubCommitMessage ?? '').split('\n')[0].slice(0, 60),
     };
   } catch { return null; }
-}
-
-async function fetchCoordinator(siteUrl: string, site: SiteConfig): Promise<CoordinatorData | null> {
-  if (!site.servesMostData) return null;
-  const data = await safeFetch(`${siteUrl}/data/content-coordinator.json`);
-  if (!data || !data.weeklyTheme) return null;
-  return {
-    weekCommencing:    (data.weekCommencing    as string) ?? '',
-    weeklyTheme:       (data.weeklyTheme       as string) ?? '',
-    campaignObjective: (data.campaignObjective as string) ?? '',
-    setAt:             (data.setAt             as string) ?? '',
-  };
 }
 
 async function fetchRevenueConfig(siteUrl: string): Promise<RevenueConfig | null> {
@@ -312,81 +238,13 @@ async function fetchBlotatoScheduledCounts(): Promise<Record<string, number>> {
   } catch { return {}; }
 }
 
-async function fetchSubagentStatus(siteId: string): Promise<SubagentStatus | null> {
-  // 1. Local file (written by npm run pipeline on this machine)
-  const local = readLocalJson<SubagentStatus>(`data/sites/${siteId}/subagent-status.json`);
-  if (local) return local;
-  // 2. Supabase (written by pipeline, readable on Vercel)
-  const { data: rawRow0 } = await getSupabase()
-    .from('pipeline_site_data')
-    .select('subagent_status')
-    .eq('site_id', siteId)
-    .single();
-  const row0 = rawRow0 as unknown as { subagent_status: unknown } | null;
-  if (row0?.subagent_status) return row0.subagent_status as SubagentStatus;
-  return null;
-}
-
-async function fetchGraderVerdict(siteId: string): Promise<GraderVerdict | null> {
-  // 1. Local file
-  const local = readLocalJson<GraderVerdict>(`data/sites/${siteId}/grader-verdict.json`);
-  if (local) return local;
-  // 2. Supabase
-  const { data: rawRow1 } = await getSupabase()
-    .from('pipeline_site_data')
-    .select('grader_verdict')
-    .eq('site_id', siteId)
-    .single();
-  const row1 = rawRow1 as unknown as { grader_verdict: unknown } | null;
-  if (row1?.grader_verdict) return row1.grader_verdict as GraderVerdict;
-  return null;
-}
-
-async function fetchPortfolioCoordinator(): Promise<PortfolioCoordinator | null> {
-  // Read from local file first, then fall back to the live site
-  const local = readLocalJson<{ weeklyTheme?: string; weekCommencing?: string; campaignObjective?: string; setAt?: string }>('data/content-coordinator.json');
-  const src = local ?? await safeFetch('https://didianolue.co.uk/data/content-coordinator.json');
-  if (!src) return null;
-  const approved = typeof (src as Record<string, unknown>).approved === 'number' ? (src as Record<string, unknown>).approved as number : 0;
-  const pending  = typeof (src as Record<string, unknown>).pending  === 'number' ? (src as Record<string, unknown>).pending  as number : 0;
-  const failed   = typeof (src as Record<string, unknown>).failed   === 'number' ? (src as Record<string, unknown>).failed   as number : 0;
-  return {
-    lastRun:           ((src as Record<string, unknown>).setAt          as string) ?? null,
-    sourceFile:        'content-coordinator.json',
-    weeklyTheme:       ((src as Record<string, unknown>).weeklyTheme    as string) ?? null,
-    weekCommencing:    ((src as Record<string, unknown>).weekCommencing as string) ?? null,
-    campaignObjective: ((src as Record<string, unknown>).campaignObjective as string) ?? null,
-    batchStatus: { approved, pending, failed, readyForReview: pending === 0 && approved > 0 },
-  };
-}
-
-async function fetchReviewQueue(): Promise<DraftItem[]> {
-  const siteIds = ['masteryourcareerpath', 'oldoaktown', 'aiviralvideoprompts'];
-  const allItems: DraftItem[] = [];
-
-  for (const siteId of siteIds) {
-    // 1. Local file
-    const local = readLocalJson<{ drafts: DraftItem[] }>(`data/sites/${siteId}/review-queue.json`);
-    if (local?.drafts) { allItems.push(...local.drafts); continue; }
-    // 2. Supabase
-    const { data: rawRow2 } = await getSupabase()
-      .from('pipeline_site_data')
-      .select('review_queue')
-      .eq('site_id', siteId)
-      .single();
-    const row2 = rawRow2 as unknown as { review_queue: unknown } | null;
-    if (row2?.review_queue) {
-      const q = row2.review_queue as { drafts?: DraftItem[] };
-      if (q.drafts?.length) { allItems.push(...q.drafts); continue; }
-    }
-  }
-
-  return allItems;
-}
-
-// Review status for the most recent week in the content library (approved +
-// pushed drive the Portfolio "Batch" metric).
+// Review status for the most recent week in the content library. Counts by
+// status, plus the Brand gate's verdicts on posts that are still in play.
 async function fetchWeekReview(): Promise<WeekReview | null> {
+  const empty: WeekReview = {
+    week: null, approved: 0, pushed: 0, needsMedia: 0, draft: 0, rejected: 0,
+    ready: 0, flagged: 0, blocked: 0, unchecked: 0,
+  };
   try {
     const supabase = getSupabase();
     const { data: latest } = await supabase
@@ -396,14 +254,19 @@ async function fetchWeekReview(): Promise<WeekReview | null> {
       .limit(1)
       .maybeSingle();
     const week = (latest as { week_commencing?: string } | null)?.week_commencing ?? null;
-    if (!week) return { week: null, approved: 0, pushed: 0, needsMedia: 0, draft: 0, rejected: 0 };
+    if (!week) return empty;
 
+    // select('*'): gate_verdict may not exist until its migration is applied.
     const { data } = await supabase
       .from('content_library')
-      .select('status')
+      .select('*')
       .eq('week_commencing', week);
-    const rows = (data ?? []) as { status: string }[];
-    const c = (s: string) => rows.filter(r => r.status === s).length;
+    const rows = (data ?? []) as { status: string; site_id: string; gate_verdict?: string | null }[];
+    // Only the three active brands count; rows for retired brands are ignored.
+    const live = rows.filter(r => ['masteryourcareerpath', 'oldoaktown', 'aiviralvideoprompts'].includes(r.site_id));
+    const c = (s: string) => live.filter(r => r.status === s).length;
+    const inPlay = live.filter(r => r.status === 'draft' || r.status === 'approved_needs_media');
+    const g = (v: string) => inPlay.filter(r => r.gate_verdict === v).length;
     return {
       week,
       approved:   c('approved'),
@@ -411,6 +274,10 @@ async function fetchWeekReview(): Promise<WeekReview | null> {
       needsMedia: c('approved_needs_media'),
       draft:      c('draft'),
       rejected:   c('rejected'),
+      ready:      g('ready'),
+      flagged:    g('flagged'),
+      blocked:    g('blocked'),
+      unchecked:  inPlay.filter(r => !r.gate_verdict).length,
     };
   } catch {
     return null;
@@ -418,12 +285,9 @@ async function fetchWeekReview(): Promise<WeekReview | null> {
 }
 
 function computeReadiness(
-  coordinator: CoordinatorData | null,
   site: SiteConfig,
   contentActive: boolean,
 ): ReadinessItem[] {
-  const themeSet = !!(coordinator?.weeklyTheme);
-
   return [
     {
       label:  'Content scheduled in Blotato',
@@ -448,34 +312,24 @@ function computeReadiness(
           ? `${site.revenueProvider} not yet connected`
           : 'No revenue source configured',
     },
-    {
-      label:  'Weekly theme set',
-      ok:     themeSet,
-      reason: themeSet ? `"${coordinator!.weeklyTheme}"` : 'Set this week\'s theme in the weekly plan',
-    },
   ];
 }
 
 // ─── Main handler ─────────────────────────────────────────────────────────────
 
 export async function GET() {
-  const [blotatoCounts, portfolioCoordinator, reviewQueue, weekReview] = await Promise.all([
+  const [blotatoCounts, weekReview] = await Promise.all([
     fetchBlotatoScheduledCounts(),
-    fetchPortfolioCoordinator(),
-    fetchReviewQueue(),
     fetchWeekReview(),
   ]);
 
   const results = await Promise.all(
     SITES.map(async (site): Promise<[string, SiteDetail]> => {
-      // Parallel: uptime + Vercel deploy + coordinator + revenue config + pipeline status
-      const [up, deploy, coordinator, revenueConfig, subagentStatus, graderVerdict] = await Promise.all([
+      // Parallel: uptime + Vercel deploy + revenue config
+      const [up, deploy, revenueConfig] = await Promise.all([
         checkUptime(site.url),
         checkVercel(site.vercelProjectId),
-        fetchCoordinator(site.url, site),
         fetchRevenueConfig(site.url),
-        fetchSubagentStatus(site.id),
-        fetchGraderVerdict(site.id),
       ]);
 
       const monthlyRevenue = await (
@@ -487,28 +341,23 @@ export async function GET() {
       const scheduledCount = blotatoCounts[site.id] ?? 0;
       const contentActive  = scheduledCount > 0;
       const revenue: RevenueMetrics = { model: site.revenueModel, contentActive };
-      const readiness      = computeReadiness(coordinator, site, contentActive);
+      const readiness      = computeReadiness(site, contentActive);
 
       return [site.id, {
         up,
         deploy,
         revenue,
-        coordinator,
         readiness,
         monthlyRevenue,
         scheduledCount,
         outstanding: { overdueFollowUps: 0, awaitingApproval: 0 },
         revenueConfig,
-        subagentStatus,
-        graderVerdict,
       }];
     })
   );
 
   const response: StatusResponse = {
     sites: Object.fromEntries(results),
-    portfolioCoordinator,
-    reviewQueue,
     weekReview,
   };
   return NextResponse.json(response, {

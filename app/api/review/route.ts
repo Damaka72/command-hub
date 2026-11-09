@@ -31,9 +31,13 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'week query param is required' }, { status: 400 });
     }
 
+    // select('*') on purpose: the Brand gate and layer columns (migration
+    // 20261109120000) may not exist yet, and an explicit column list would make
+    // this whole query fail until they do. The page treats missing ones as
+    // "not yet checked".
     const { data, error } = await supabase
       .from('content_library')
-      .select('id, site_id, week_commencing, day_name, platform, grader_verdict, status, content, edited_content, media_urls, approved_at, blotato_submission_id, scheduled_for, push_error, asset_type, creation_tool, drive_file_id, asset_duration_s, aspect_ratio, creation_requested_at')
+      .select('*')
       .eq('week_commencing', week);
     if (error) throw error;
 
@@ -64,19 +68,33 @@ export async function PATCH(request: Request) {
 
     const supabase = getSupabase();
 
+    const { data: current } = await supabase
+      .from('content_library')
+      .select('*')
+      .eq('id', id)
+      .single();
+
     // A row parked as approved_needs_media clears to approved the moment it
     // actually has media — whether that URL was pasted by hand here or attached
     // by a creation run via /api/library/asset. Mirrors the same check the bulk
     // 'approve' action below uses.
     if (Array.isArray(update.media_urls) && (update.media_urls as string[]).length > 0) {
-      const { data: current } = await supabase
-        .from('content_library')
-        .select('status')
-        .eq('id', id)
-        .single();
       if (current?.status === 'approved_needs_media') {
         update.status = 'approved';
       }
+    }
+
+    // Any change to the wording invalidates the Brand gate's verdict: send the post
+    // back to "not yet checked" so Cowork re-checks the new text. Only touches the
+    // gate columns when they exist (migration 20261109120000).
+    if (
+      current && 'gate_verdict' in current && current.gate_verdict &&
+      update.edited_content !== undefined &&
+      update.edited_content !== (current.edited_content ?? current.content)
+    ) {
+      update.gate_verdict    = null;
+      update.gate_reason     = null;
+      update.gate_checked_at = null;
     }
 
     const { error } = await supabase
@@ -125,11 +143,15 @@ export async function POST(request: Request) {
       // by platform alone. Everything else approves straight through.
       const { data, error: selErr } = await supabase
         .from('content_library')
-        .select('id, platform, media_urls')
+        .select('*')
         .in('id', ids);
       if (selErr) throw selErr;
 
-      const rows = (data ?? []) as { id: string; platform: string; media_urls: unknown }[];
+      // A post the Brand gate has blocked can never be approved, whatever the
+      // page sends. It has to be fixed (and re-checked) first.
+      const allRows = (data ?? []) as { id: string; platform: string; media_urls: unknown; gate_verdict?: string | null }[];
+      const blockedIds = allRows.filter(r => r.gate_verdict === 'blocked').map(r => r.id);
+      const rows = allRows.filter(r => r.gate_verdict !== 'blocked');
       const now = new Date().toISOString();
 
       // A row satisfies the media requirement when media_urls holds at least one
@@ -158,7 +180,12 @@ export async function POST(request: Request) {
           .in('id', otherIds);
         if (error) throw error;
       }
-      return NextResponse.json({ ok: true, approved: otherIds.length, approvedNeedsMedia: mediaIds.length });
+      return NextResponse.json({
+        ok: true,
+        approved: otherIds.length,
+        approvedNeedsMedia: mediaIds.length,
+        skippedBlocked: blockedIds.length,
+      });
     }
 
     return NextResponse.json({ error: `Unknown action: ${action}` }, { status: 400 });

@@ -1,7 +1,9 @@
 // ── The weekly rhythm, as one source of truth ────────────────────────────
-// Saturday: research + draft. Sunday: post + schedule. Mon–Thu: it publishes
-// itself. Friday: today's post still goes out, then review the week's
-// numbers before Saturday starts again. Used by TodayFocus (the Home
+// Saturday: Cowork researches, drafts and checks. Sunday: Didi decides on the
+// flagged posts and approves the rest (about 15 minutes); Cowork schedules.
+// Mon–Thu: it publishes itself (Wednesday: Cowork's news check). Friday:
+// today's post still goes out, then review the week's numbers before Saturday
+// starts again. Used by TodayFocus (the Home
 // orientation banner) and the header's day hints, so a newcomer sees the
 // same story everywhere in the Hub.
 
@@ -31,26 +33,26 @@ export const WEEKLY_RHYTHM: RhythmDay[] = [
     dayOfWeek: 6,
     dayName: 'Saturday',
     dayShort: 'Sat',
-    who: 'you',
-    stepLabel: 'Draft',
-    badge: 'Research & draft',
-    title: "Research this week, then set the plan",
-    description: "Generate each site's research brief and pick a content pillar and theme for the week on Weekly Plan — that's what the pipeline reads when you run it.",
-    primary: { label: 'Open Weekly Plan', href: '/plan' },
-    accent: 'var(--hub-accent-text)',
-    accentBg: 'var(--hub-accent-dim)',
-    accentBorder: 'var(--hub-accent)',
+    who: 'auto',
+    stepLabel: 'Cowork drafts',
+    badge: 'Cowork researches & drafts',
+    title: "Cowork researches, drafts and checks the week",
+    description: "At 06:55 Cowork researches each brand, drafts the week, runs the Brand gate and makes the cards. Nothing to do unless you want to steer it: set your weekly focus before then.",
+    primary: { label: 'Set weekly focus', href: '/plan' },
+    accent: 'var(--ok)',
+    accentBg: 'color-mix(in srgb, var(--ok) 10%, transparent)',
+    accentBorder: 'color-mix(in srgb, var(--ok) 30%, transparent)',
   },
   {
     dayOfWeek: 0,
     dayName: 'Sunday',
     dayShort: 'Sun',
     who: 'you',
-    stepLabel: 'Post & schedule',
-    badge: 'Post & schedule',
-    title: 'Review drafts, approve, and push to Blotato',
-    description: "Edit and approve this week's drafts in the Review Queue, then push. Use the Sunday checklist in there for media posts, and finish off the newsletters.",
-    primary: { label: 'Open Review Queue', href: '/review' },
+    stepLabel: 'Review',
+    badge: 'Sunday review, 15 minutes',
+    title: 'Decide the flagged posts, approve the rest',
+    description: "Open the Sunday review. Decide the flagged and blocked posts, approve everything ready in one action, and check the media list. Cowork schedules what you approve. Then finish the newsletters.",
+    primary: { label: 'Open Sunday review', href: '/review' },
     secondary: { label: 'Newsletters', href: '/newsletters' },
     accent: 'var(--hub-accent-text)',
     accentBg: 'var(--hub-accent-dim)',
@@ -87,10 +89,10 @@ export const WEEKLY_RHYTHM: RhythmDay[] = [
     dayName: 'Wednesday',
     dayShort: 'Wed',
     who: 'auto',
-    stepLabel: 'Publishing',
-    badge: 'Publishing',
-    title: "Today's posts go out automatically",
-    description: "Blotato publishes what you approved on Sunday, on schedule — nothing to do here. Just a quick check below that sites are up and nothing's stuck.",
+    stepLabel: 'News check',
+    badge: 'Publishing + news check',
+    title: "Today's posts go out, and Cowork checks the news",
+    description: "At 07:00 Cowork looks for real news for each brand. If it drafts a reactive post you'll see it in the Sunday review page to say yes or no today. If nothing real has happened, it says so and posts nothing extra.",
     accent: 'var(--ok)',
     accentBg: 'color-mix(in srgb, var(--ok) 10%, transparent)',
     accentBorder: 'color-mix(in srgb, var(--ok) 30%, transparent)',

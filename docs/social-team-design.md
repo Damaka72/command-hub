@@ -29,7 +29,7 @@ Updated 9 Nov 2026 after Didi's answers. Brands in scope: Old Oak Town (OOT), AI
 
 ## 3. What already works and stays
 
-- **Saturday weekend run** (trigger "Weekend content brief and drafts"): research briefs, drafts, free Blotato cards, newsletter drafts, one log entry per site. It never publishes. Shoestring rules stay: about $30 a month ceiling, 100 Blotato credits per run, no Higgsfield, no HyperFrames.
+- **Saturday weekend run** (trigger "Weekend content brief and drafts"): research briefs, drafts, free Blotato cards, newsletter drafts, one log entry per site. It never publishes. Shoestring rules stay: about $30 a month ceiling, 100 Blotato credits per run, no Higgsfield (no credits). HyperFrames, which is free, moves onto the visual ladder wherever a session can run it (see section 5 and `docs/cowork-operating-guide.md`); the live Saturday prompt currently still says not to use it.
 - **OOT events discovery** (Mondays 07:00): verified events into `public.events` as `pending`.
 - **Morning brief** (weekdays 06:17).
 - **Hub**: review queue, the one push route (`/api/review/push`, the only publisher), Friday report, weekly rhythm.

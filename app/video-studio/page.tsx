@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 // ── Video Studio ──────────────────────────────────────────────────────────────
-// The room where video gets made. It lists every video tool Didi can use, what
-// each costs, when to pick it, and how to ask Claude / Cowork to use it. The
-// video-producer agent reads the same rules: budget and video type decide the
-// tool, and naming a tool always overrides.
+// The room where video gets made. It explains how media reaches a post (the
+// weekly flow), then lists every video tool Didi can use, what each costs, when
+// to pick it, and how to ask Claude / Cowork to use it. Two modes:
+//   * Automatic: Cowork's weekly run and media desk follow a fixed, cheap ladder.
+//   * On request: Didi names a tool and it wins.
 
 type Cost = "free" | "credits" | "subscription" | "included";
 
@@ -28,11 +29,11 @@ const TOOLS: Tool[] = [
     id: "hyperframes",
     name: "HyperFrames",
     cost: "free",
-    costNote: "Free, open source",
-    runsOn: "Local (Dev folder, renders to MP4)",
-    makes: "Custom explainers, promos, title cards, captioned clips, animated overlays, slideshows",
-    bestFor: "Anything designed: branded explainers, product walkthroughs, data or text-led motion. Full control of look and timing.",
-    avoid: "Photoreal footage of people or places. It animates designs, it does not generate footage.",
+    costNote: "Free, open source. No credits",
+    runsOn: "Your computer (Dev folder), or any session with FFmpeg and Chrome. A 10-second 9:16 video renders in about 5 seconds",
+    makes: "Branded text cards and carousel slides (as still images), 9:16 reels, explainers, promos, captioned clips, slide decks, animated overlays",
+    bestFor: "Anything designed, in the exact brand colours and fonts (Blotato's free templates cannot match them). Carousels, Instagram and TikTok reels, explainers, slides. Full control of look and timing, and it costs nothing.",
+    avoid: "Photoreal footage of people or places: it animates designs, it does not generate footage. Narration and music need a separate audio file, because local voice and music are not installed.",
     ask: "Use HyperFrames to make a 45-second explainer about [topic] for [site], 9:16.",
   },
   {
@@ -103,7 +104,7 @@ const CLAUDE_TOOLS: Tool[] = [
     costNote: "Included with the Claude plan",
     runsOn: "Inside Claude (claude.ai), downloads as PowerPoint or PDF",
     makes: "16:9 presentation decks you can page through, edit and download",
-    bestFor: "Skool community sessions, consulting proposals and talks, and carousels built as slides first.",
+    bestFor: "Community training sessions, consulting proposals and talks, and carousels built as slides first.",
     avoid: "Short vertical video. Use HyperFrames for anything that needs to move.",
     ask: "Use Claude Slides to make a 10-slide deck on [topic] for [site], with speaker notes.",
   },
@@ -135,12 +136,13 @@ const COST_LABEL: Record<Cost, string> = {
 };
 
 const RULES: { title: string; body: string }[] = [
-  { title: "Name a tool and it wins", body: "If you say which tool to use, the agent uses it. The rules below only apply when you leave it open." },
-  { title: "Free first", body: "With no budget stated, the agent chooses between HyperFrames and short-video-maker. It only reaches for credit or subscription tools when the video needs something they alone can do." },
-  { title: "Paid only for what free cannot do", body: "Face-to-camera with Didi's likeness, product ads from a URL and cinematic AI footage go to Higgsfield. Scheduling-ready carousels and infographics go to Blotato." },
-  { title: "Old Oak Town is factual", body: "Real uploaded photos only. Never AI-generated imagery or stock footage. Blotato Visuals with real photos, or HyperFrames with real photos as the source." },
-  { title: "No promotions unless confirmed", body: "No prices or offers in a video unless Didi has confirmed the campaign is live that week." },
-  { title: "Check before scheduling", body: "Run finished videos through the Higgsfield virality predictor when credits allow, then send to the Review queue." },
+  { title: "The weekly ladder", body: "Automatic runs go down this list and stop at the first rung that does the job. 1. A Blotato free text card or carousel (0 credits) when a simple card is enough. 2. HyperFrames (free) when it needs exact brand colours and fonts, or is a carousel, reel or explainer, whenever the session can run it. 3. A Blotato AI story video (about 1 credit a scene, capped at 100 credits a run) for narrated multi-scene video. 4. A video brief for you to film. Higgsfield is not used: there are no credits." },
+  { title: "Name a tool and it wins", body: "If you ask for a specific tool in a session, it is used. The rules below apply when you leave it open." },
+  { title: "HyperFrames needs FFmpeg and Chrome", body: "It runs on your computer and in any session set up with them. A session that cannot run it drops to the next rung, never skips the post. short-video-maker runs only on your computer, so it is for sessions you run there." },
+  { title: "Paid only for what free cannot do", body: "Face-to-camera with your likeness, product ads from a URL and cinematic AI footage need Higgsfield, which only runs when it has credits and you ask for it." },
+  { title: "Old Oak Town is factual", body: "Typographic cards, or your own real photos. Never AI-generated imagery or stock footage." },
+  { title: "No promotions unless confirmed", body: "No prices or offers in a video unless you have confirmed the campaign is live that week." },
+  { title: "Check before scheduling", body: "Run finished videos through the Higgsfield virality predictor when credits allow, then they appear in the Sunday review." },
 ];
 
 const BY_TYPE: { need: string; free: string; paid: string }[] = [
@@ -152,15 +154,15 @@ const BY_TYPE: { need: string; free: string; paid: string }[] = [
   { need: "Local area slideshow (Old Oak Town)", free: "HyperFrames with real photos", paid: "Blotato Image Slideshow with real photos" },
   { need: "Reframe 16:9 to 9:16", free: "HyperFrames or ffmpeg", paid: "Higgsfield Reframe" },
   { need: "Landing page, poster or social visual set", free: "Claude Design (in plan)", paid: "Blotato Visuals" },
-  { need: "Presentation deck (Skool session, proposal, talk)", free: "Claude Slides (in plan)", paid: "None needed" },
+  { need: "Presentation deck (training session, proposal, talk)", free: "Claude Slides (in plan)", paid: "None needed" },
   { need: "Sourced performance report for a site", free: "Claude Dashboard (in plan)", paid: "None needed" },
 ];
 
 const BY_SITE: { site: string; url: string; note: string }[] = [
   { site: "Didi Anolue", url: "didianolue.co.uk", note: "LinkedIn, X. Authority and expertise. Talking-head style and repurposed posts." },
-  { site: "Master Your Career Path", url: "masteryourcareerpath.com", note: "LinkedIn, Instagram, TikTok. Tips, product promos (only if a campaign is confirmed), 9:16 talking-head." },
-  { site: "Old Oak Town", url: "oldoaktown.co.uk", note: "Real photos only. No AI imagery, no stock footage, no invented events or statistics." },
-  { site: "AI Viral Video Prompts", url: "aiviralvideoprompts.com", note: "TikTok, Instagram, X. The natural home for showcasing AI video tools." },
+  { site: "Master Your Career Path", url: "masteryourcareerpath.com", note: "LinkedIn, Instagram, TikTok, Facebook. Tips, product promos (only if a campaign is confirmed), 9:16 talking-head." },
+  { site: "Old Oak Town", url: "oldoaktown.co.uk", note: "Typographic cards or real photos only. No AI imagery, no stock footage, no invented events or statistics." },
+  { site: "AI Viral Video Prompts", url: "aiviralvideoprompts.com", note: "TikTok, Instagram, Facebook, LinkedIn. The natural home for showcasing AI video tools." },
 ];
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -248,7 +250,7 @@ export default function VideoStudioPage() {
                 Video Studio
               </h1>
               <p className="mt-1 text-sm text-fg-2">
-                Every video tool in one place · what each costs · which to pick
+                How video reaches a post · every tool · what each costs
               </p>
             </div>
             <Link
@@ -263,11 +265,42 @@ export default function VideoStudioPage() {
 
       <main className="mx-auto max-w-4xl px-6 py-10 flex flex-col gap-12">
 
-        <Section title="How to use it">
+        <Section title="How video reaches a post">
+          <ol className="flex flex-col gap-3 list-decimal pl-5">
+            <li className="text-sm leading-relaxed text-fg-2">
+              <span className="font-semibold text-fg">Saturday 06:55. </span>
+              Cowork drafts the week and makes what it can for free: text cards and carousels from Blotato&apos;s free
+              templates or HyperFrames, plus one or two AI story videos. A weekly run never spends more than 100 Blotato
+              credits.
+            </li>
+            <li className="text-sm leading-relaxed text-fg-2">
+              <span className="font-semibold text-fg">Only you can film some. </span>
+              Face-to-camera posts arrive as a video brief: a script and shot list. In the Sunday review they sit under
+              Needs media, marked Needs filming.
+            </li>
+            <li className="text-sm leading-relaxed text-fg-2">
+              <span className="font-semibold text-fg">Anything else missing media. </span>
+              Press Ask Cowork to create it on the post. That records the request. Cowork&apos;s media desk picks it up
+              when you tell Cowork to run the media desk, and on its Sunday morning retry. It uses the cheapest tool that
+              does the job and attaches the result to the post.
+            </li>
+            <li className="text-sm leading-relaxed text-fg-2">
+              <span className="font-semibold text-fg">You film the briefs. </span>
+              Upload the video anywhere public and paste its link into the post&apos;s media links.
+            </li>
+            <li className="text-sm leading-relaxed text-fg-2">
+              <span className="font-semibold text-fg">Then review. </span>
+              A post with its media attached goes through the Brand gate and appears in the Sunday review.
+              You approve; Cowork schedules.
+            </li>
+          </ol>
+        </Section>
+
+        <Section title="Asking for a video yourself">
           <Prose>
-            Describe the video you want to Claude or Cowork, in plain words. The video-producer agent picks the tool
-            from the rules below. To choose yourself, name the tool in your request (the example prompts on each card
-            show how). Finished videos go to the Review queue before anything is scheduled.
+            Describe the video you want to Claude or Cowork, in plain words. If you name a tool, it uses that tool. If you
+            leave it open, it chooses from the rules below. Finished videos are attached to a post and appear in the Sunday
+            review before anything is scheduled.
           </Prose>
         </Section>
 
