@@ -5,18 +5,18 @@ Cowork's scheduled runs cannot read this repo, so each prompt below is self-cont
 says `[SHARED RULES]`, paste section 2 at the top of it. Where it says "paste its steps here", paste the
 numbered steps from section 6.
 
-Status: **a draft for Didi to approve.** Nothing here has been applied to any live Cowork task.
+Status (9 Nov 2026): **Prompt A is applied** to the existing "Weekend content brief and drafts" task, and the database migration is applied. Prompts B to E are **not yet created**: a scheduled task created from a Claude Code session cannot carry connectors, so it would run without Supabase or Blotato. Create them in Cowork (the claude.ai routines screen), where connectors can be attached. Ready-to-paste text for each is in `docs/cowork-prompts/`.
 
-## 1. One-time setup (about 20 minutes, or ask Claude to do steps 2 to 6)
+## 1. One-time setup (about 20 minutes)
 
 | # | Step | Where |
 |---|---|---|
-| 1 | Apply the database migration (section 7). It adds the Brand gate and layer columns. Until then every post shows as "not yet checked". | Supabase SQL editor, project "The Old Oak Town" |
-| 2 | Replace the prompt of **Weekend content brief and drafts** with Prompt A. It stays Saturday 06:55. | Cowork scheduled tasks |
+| 1 | **Done.** The database migration (section 7) is applied: the Brand gate and layer columns exist. | Supabase |
+| 2 | **Done.** The prompt of **Weekend content brief and drafts** is now Prompt A. It stays Saturday 06:55. | Cowork scheduled tasks |
 | 3 | Create **Monthly base posts** with Prompt B. Saturday 05:13, so it finishes before the weekly run at 06:55 reads the base rows. | Cowork scheduled tasks |
-| 4 | Create **Wednesday news check** with Prompt C. Wednesday 07:00. | Cowork scheduled tasks |
-| 5 | Create **Schedule approved posts** with Prompt D, three times: Sunday 19:00, Monday 05:30, Wednesday 10:30. | Cowork scheduled tasks |
-| 6 | Create **Media desk** with Prompt E. Every day at 07:30 (it does nothing when the worklist is empty), and on demand by saying "run the media desk". | Cowork scheduled tasks |
+| 4 | Create **Wednesday news check** with Prompt C. Wednesday 06:41. | Cowork scheduled tasks |
+| 5 | Create **Schedule approved posts** with Prompt D, three times: Sunday 18:38, Monday 05:08, Wednesday 10:08. | Cowork scheduled tasks |
+| 6 | Create **Media desk** with Prompt E. Every day at 07:20 (it does nothing when the worklist is empty), and on demand by saying "run the media desk". | Cowork scheduled tasks |
 | 7 | Replace the `video-batch-producer` skill with the `media-desk` skill (section 5). It still reads files from the retired pipeline. | Cowork skills |
 | 8 | Delete the two switched-off tasks: **Command hub pipeline reminder** and **Command Hub: routine repurpose sweep**. | Cowork scheduled tasks |
 | 9 | Decide where HyperFrames runs for scheduled tasks (section 6). | Cowork environment |
@@ -161,8 +161,7 @@ STEP 5 - Visuals, cheapest rung that does the job, in this order:
     Paper Background' (/base/v2/quote-card/77f65d2b-48cc-4adb-bfbb-5bc86f8c01bd/v1, 4:5) for
     carousels. They cannot match brand colours exactly.
 (b) HyperFrames (free) when HyperFrames passed the preflight: for a card or carousel in the exact
-    brand colours and fonts, a 9:16 reel or an explainer. See section 6 of docs/cowork-operating-guide.md
-    (paste its steps here). Upload each render with blotato_create_presigned_upload_url and use
+    brand colours and fonts, a 9:16 reel or an explainer. Follow the HYPERFRAMES STEPS at the end of this prompt. Upload each render with blotato_create_presigned_upload_url and use
     the public URL.
 (c) Blotato 'AI Story Video' (/base/v2/ai-story-video/5903fe43-514d-40ee-a060-0d6628c5f8fd/v1)
     with aiImageModel replicate/black-forest-labs/flux-schnell, animateAiImages false, AI
@@ -224,13 +223,20 @@ repeat an angle within the month:
 Adapt per platform (see CADENCE). Insert rows as 'draft' with layer 'base', week_commencing set
 to each Monday, and run the BRAND GATE on every row. Visuals: free Blotato cards or, if
 "npx hyperframes doctor" passes, HyperFrames cards in the exact brand colours; OOT typographic
-cards only. No videos in the base layer. Cost ceiling 0 credits.
+cards only. No videos in the base layer. Cost ceiling 0 credits. Brand colours: MYCP navy
+#1B3A8C, gold #F5A623, Playfair Display headings, Plus Jakarta Sans body. AIVVP dark #0C0C0C to
+#1A1A2E, teal #4ECDC4, coral #FF6B6B, Inter. OOT green #2D5016, brown #8B4513, cream #F5F5DC,
+dark grey #333333. Free Blotato templates: 'Single Centered Text Quote'
+(9f4e66cd-b784-4c02-b2ce-e6d0765fd4c0) for text cards; 'Quote Card Carousel with Monocolor Paper
+Background' (/base/v2/quote-card/77f65d2b-48cc-4adb-bfbb-5bc86f8c01bd/v1, 4:5) for carousels.
+Upload any HyperFrames render with blotato_create_presigned_upload_url and store the public URL
+in media_urls, with asset_type and creation_tool set.
 
 Insert one actions_log row per brand (source 'cowork_session', action starting
 '[monthly-base]') and finish with the REPORT, including how many weeks and rows were created.
 ```
 
-### Prompt C: Wednesday news check (Wednesday 07:00)
+### Prompt C: Wednesday news check (Wednesday 06:41)
 
 ```
 [SHARED RULES]
@@ -243,15 +249,16 @@ week_commencing this week's Monday), adapted per platform (LinkedIn, Facebook; I
 with a free card). Insert as 'draft' and run the BRAND GATE. If there is nothing real, write
 nothing and say "Nothing worth posting" for that brand: never pad.
 
-Visuals: free Blotato card or HyperFrames card only. No video, no credits.
+Visuals: free Blotato card only ('Single Centered Text Quote',
+9f4e66cd-b784-4c02-b2ce-e6d0765fd4c0). No video, no credits. OOT: typographic cards only.
 
 Then notify Didi in one short message listing each flex post (brand, platform, the first line)
 and that she can approve or reject it in the hub's Sunday review page today. The Schedule
-approved posts task runs at 10:30. Insert one actions_log row (source 'cowork_session', action
+approved posts task runs at 10:08. Insert one actions_log row (source 'cowork_session', action
 starting '[wednesday-check]') and finish with the REPORT.
 ```
 
-### Prompt D: Schedule approved posts (Sunday 19:00, Monday 05:30, Wednesday 10:30)
+### Prompt D: Schedule approved posts (Sunday 18:38, Monday 05:08, Wednesday 10:08)
 
 ```
 [SHARED RULES]
@@ -286,7 +293,7 @@ appears. Report a table: brand, day, platform, scheduled time, status, anything 
 Insert one actions_log row (source 'cowork_session', action starting '[scheduler]').
 ```
 
-### Prompt E: Media desk (every day 07:30, and on demand)
+### Prompt E: Media desk (every day 07:20, and on demand)
 
 ```
 [SHARED RULES]
@@ -304,8 +311,7 @@ then the rest in day order. Stop when the weekly cap is reached: 100 Blotato cre
 For each row, climb this ladder and stop at the first rung that does the job:
 1. Blotato free text card or carousel templates (0 credits).
 2. HyperFrames (free), if "npx hyperframes doctor" passes: exact brand colours and fonts, cards,
-   carousels, 9:16 reels, explainers. Follow section 6 of docs/cowork-operating-guide.md (paste
-   its steps here).
+   carousels, 9:16 reels, explainers. Follow the HYPERFRAMES STEPS at the end of this prompt.
 3. Blotato 'AI Story Video': about 1 credit a scene, for narrated multi-scene video.
 4. If nothing above fits, leave the row as it is and report why.
 Never use Higgsfield. OOT: typographic cards only, never AI imagery or stock footage.
