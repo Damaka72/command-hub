@@ -1,0 +1,181 @@
+{
+  "siteId": "the-naija-food-guide",
+  "name": "The Naija Food Guide",
+  "description": "UK directory of verified Nigerian restaurants and licensed caterers",
+  "url": "https://thenaijafoodguide.co.uk",
+  "repo": "Damaka72/thenaijafoodguide",
+  "accent": "#008751",
+  "tasks": [
+    {
+      "id": "photos-database",
+      "area": "Photo submissions: built",
+      "title": "Database tables, security rules and storage buckets added",
+      "detail": "Applied to the live Supabase project. Additive only.",
+      "status": "done",
+      "owner": "claude",
+      "next": false,
+      "order": 10
+    },
+    {
+      "id": "photos-form",
+      "area": "Photo submissions: built",
+      "title": "Owner photo form at /submit-photos",
+      "detail": "Up to 8 photos, direct uploads, iPhone HEIC supported.",
+      "status": "done",
+      "owner": "claude",
+      "next": false,
+      "order": 20
+    },
+    {
+      "id": "photos-admin",
+      "area": "Photo submissions: built",
+      "title": "Admin review page at /admin/photos",
+      "detail": "Approve, reject with a reason, hero, reorder, replace, remove.",
+      "status": "done",
+      "owner": "claude",
+      "next": false,
+      "order": 30
+    },
+    {
+      "id": "photos-listing",
+      "area": "Photo submissions: built",
+      "title": "Listing page gallery and green and white placeholder",
+      "detail": "Basic listings show no photos; Silver and Gold do.",
+      "status": "done",
+      "owner": "claude",
+      "next": false,
+      "order": 40
+    },
+    {
+      "id": "photos-turnstile",
+      "area": "Photo submissions: switch on",
+      "title": "Create a Cloudflare Turnstile widget and copy its two keys",
+      "detail": "dash.cloudflare.com > Turnstile > Add widget. Hostnames: thenaijafoodguide.co.uk and vercel.app. Managed mode.",
+      "status": "todo",
+      "owner": "didi",
+      "next": true,
+      "when": "Before launch",
+      "order": 50
+    },
+    {
+      "id": "photos-resend-domain",
+      "area": "Photo submissions: switch on",
+      "title": "Sign up to Resend and verify thenaijafoodguide.co.uk",
+      "detail": "resend.com > Domains > Add domain, add the DNS records it shows, then press Verify.",
+      "status": "todo",
+      "owner": "didi",
+      "next": true,
+      "when": "Before launch",
+      "order": 60
+    },
+    {
+      "id": "photos-resend-key",
+      "area": "Photo submissions: switch on",
+      "title": "Create a Resend API key",
+      "detail": "resend.com > API Keys > Create API key.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "when": "Before launch",
+      "order": 70
+    },
+    {
+      "id": "photos-vercel-vars",
+      "area": "Photo submissions: switch on",
+      "title": "Add the five variables in Vercel (Production and Preview)",
+      "detail": "NEXT_PUBLIC_TURNSTILE_SITE_KEY, TURNSTILE_SECRET_KEY, RESEND_API_KEY, EMAIL_FROM, CRON_SECRET (any long random text). Never paste keys into a chat.",
+      "status": "todo",
+      "owner": "didi",
+      "next": true,
+      "when": "Before launch",
+      "order": 80
+    },
+    {
+      "id": "photos-vercel-preview-vars",
+      "area": "Photo submissions: switch on",
+      "title": "Check SUPABASE_SERVICE_ROLE_KEY and ADMIN_EMAILS are ticked for Preview",
+      "detail": "Otherwise the preview says uploads are not switched on yet.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "when": "Before launch",
+      "order": 90
+    },
+    {
+      "id": "photos-redeploy",
+      "area": "Photo submissions: switch on",
+      "title": "Redeploy the branch claude/new-session-w4z1tc in Vercel",
+      "detail": "Deployments > latest for the branch > Redeploy. New variables only apply after a redeploy.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "when": "Before launch",
+      "order": 100
+    },
+    {
+      "id": "photos-test-submit",
+      "area": "Photo submissions: test and launch",
+      "title": "On a real phone, send two or three photos from the preview link",
+      "detail": "Include one large photo (about 9 MB). Check the thank-you page and the confirmation email.",
+      "status": "todo",
+      "owner": "didi",
+      "next": true,
+      "when": "Before launch",
+      "order": 110
+    },
+    {
+      "id": "photos-test-admin",
+      "area": "Photo submissions: test and launch",
+      "title": "Approve one photo and reject another at /admin/photos",
+      "detail": "Check the decision email arrives and the approved photo shows on the listing within a minute.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "when": "Before launch",
+      "order": 120
+    },
+    {
+      "id": "photos-test-manage",
+      "area": "Photo submissions: test and launch",
+      "title": "Try reorder, set hero and remove under Published photos",
+      "detail": "Remove the test photos when finished: the preview uses the real database.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "when": "Before launch",
+      "order": 130
+    },
+    {
+      "id": "photos-pull-request",
+      "area": "Photo submissions: test and launch",
+      "title": "Open the pull request for the photo feature",
+      "detail": "Tell Claude when the phone test has passed.",
+      "status": "todo",
+      "owner": "claude",
+      "next": false,
+      "when": "After testing",
+      "order": 140
+    },
+    {
+      "id": "photos-merge",
+      "area": "Photo submissions: test and launch",
+      "title": "Merge the pull request on GitHub to publish it",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "when": "After testing",
+      "order": 150
+    },
+    {
+      "id": "photos-legal-review",
+      "area": "Photo submissions: test and launch",
+      "title": "Have a legal adviser review the privacy policy wording",
+      "detail": "The page is still marked as draft, including the new photo retention wording.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "when": "Before launch",
+      "order": 160
+    }
+  ]
+}
