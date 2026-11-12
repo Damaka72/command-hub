@@ -1,5 +1,10 @@
 # Repurposing recipes
 
+> **Status (November 2026):** the recipes below still describe valid ways to turn one asset into another, but
+> the automatic "routine repurpose sweep" that was meant to run them is switched off. Media is now made by
+> Cowork's weekly run and its media desk (see `docs/cowork-operating-guide.md`). HyperFrames is a free tool
+> for several of these recipes. Use these recipes when you ask for a repurposed cut by hand.
+
 Phase 4 of the unified content-creation scope. A "recipe" is a small, narrow
 spec for turning one existing `content_library` asset into a new derived one.
 Recipes are what the Phase 3 automation Routine (see below) and any manual

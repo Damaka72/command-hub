@@ -2,15 +2,13 @@
 
 import { useCallback, useEffect, useState } from "react";
 import DailyBriefing from "../components/DailyBriefing";
-import AutomationStatus from "../components/AutomationStatus";
 import TodayFocus from "../components/TodayFocus";
 import SidebarTasks from "../components/SidebarTasks";
 import CollapsibleSitePanel from "../components/CollapsibleSitePanel";
 import HomeTrackers from "../components/HomeTrackers";
 import { useWeek } from "../context/WeekContext";
-import type { SiteDetail, StatusResponse, DraftItem, WeekReview } from "../api/status/route";
+import type { SiteDetail, StatusResponse, WeekReview } from "../api/status/route";
 import type { HomeResponse } from "../api/home/route";
-import { PIPELINE_SITE_COUNT } from "@/agents/site-configs";
 import { SITES } from "../lib/sites";
 
 const OPEN_PANELS_KEY = "hub:sitePanelsOpen";
@@ -22,8 +20,8 @@ const OPEN_PANELS_KEY = "hub:sitePanelsOpen";
 // All four share one accent treatment (not a different hue per page) — the
 // day hint is what tells them apart, not color.
 const RHYTHM_NAV = [
-  { href: "/plan",        label: "Weekly Plan",  hint: "Sat–Sun" },
-  { href: "/review",      label: "Review",       hint: "Sun" },
+  { href: "/plan",        label: "Weekly focus",   hint: "Sat" },
+  { href: "/review",      label: "Sunday review",  hint: "Sun" },
   { href: "/newsletters", label: "Newsletters",  hint: "Sun" },
   { href: "/friday",      label: "Friday",       hint: "Fri" },
 ] as const;
@@ -51,7 +49,7 @@ function Divider() {
   return <span style={{ color: 'var(--hub-border-hi)' }} aria-hidden="true">|</span>;
 }
 
-function PortfolioBar({ statusMap, reviewQueue, weekReview }: { statusMap: StatusMap; reviewQueue: DraftItem[]; weekReview: WeekReview | null }) {
+function PortfolioBar({ statusMap, weekReview }: { statusMap: StatusMap; weekReview: WeekReview | null }) {
   const statuses = Object.values(statusMap);
 
   const allRevenueNull = statuses.every(s => s.monthlyRevenue === null);
@@ -59,8 +57,8 @@ function PortfolioBar({ statusMap, reviewQueue, weekReview }: { statusMap: Statu
     ? null
     : statuses.reduce((sum, s) => sum + (s.monthlyRevenue ?? 0), 0);
 
-  // Pipeline activity: how many of the pipeline sites have drafts in this week's review queue.
-  const pipelineSites = new Set(reviewQueue.map(d => d.siteId)).size;
+  // Posts waiting on Didi this week: flagged or blocked by the Brand gate.
+  const toDecide = (weekReview?.flagged ?? 0) + (weekReview?.blocked ?? 0);
 
   const outstanding = statuses.reduce(
     (sum, s) => sum + s.outstanding.overdueFollowUps + s.outstanding.awaitingApproval, 0
@@ -85,15 +83,9 @@ function PortfolioBar({ statusMap, reviewQueue, weekReview }: { statusMap: Statu
         <Divider />
 
         <span className="flex items-center gap-1.5 text-xs">
-          <span style={{ color: 'var(--hub-text-3)' }}>Pipeline</span>
-          <span className="font-semibold" style={{
-            color: pipelineSites === PIPELINE_SITE_COUNT
-              ? 'var(--ok)'
-              : pipelineSites > 0
-                ? 'var(--warn)'
-                : 'var(--hub-text-3)',
-          }}>
-            {pipelineSites}/{PIPELINE_SITE_COUNT} sites
+          <span style={{ color: 'var(--hub-text-3)' }}>To decide</span>
+          <span className="font-semibold" style={{ color: toDecide > 0 ? 'var(--bad)' : 'var(--hub-text-3)' }}>
+            {toDecide} post{toDecide === 1 ? '' : 's'}
           </span>
         </span>
 
@@ -126,7 +118,7 @@ function PortfolioBar({ statusMap, reviewQueue, weekReview }: { statusMap: Statu
                 ? 'var(--warn)'
                 : 'var(--hub-text-3)',
           }}>
-            {weekReview?.approved ?? 0} approved · {weekReview?.pushed ?? 0} pushed
+            {weekReview?.approved ?? 0} approved · {weekReview?.pushed ?? 0} scheduled
           </span>
         </span>
       </div>
@@ -169,7 +161,7 @@ export default function OpsPage() {
     fetch('/api/status')
       .then(r => r.json())
       .then((d: StatusResponse) => { setStatusMap(d); setLastUpdated(new Date()); })
-      .catch(() => setStatusMap(prev => prev ?? { sites: {}, portfolioCoordinator: null, reviewQueue: [], weekReview: null }))
+      .catch(() => setStatusMap(prev => prev ?? { sites: {}, weekReview: null }))
       .finally(() => setRefreshing(false));
   }, []);
 
@@ -311,7 +303,7 @@ export default function OpsPage() {
         <div className="flex flex-1 min-w-0 flex-col overflow-y-auto">
 
           {statusMap && Object.keys(statusMap.sites).length > 0 && (
-            <PortfolioBar statusMap={statusMap.sites} reviewQueue={statusMap.reviewQueue} weekReview={statusMap.weekReview} />
+            <PortfolioBar statusMap={statusMap.sites} weekReview={statusMap.weekReview} />
           )}
 
           <main className="flex-1 px-4 py-6 sm:px-6 sm:py-8">
@@ -325,18 +317,8 @@ export default function OpsPage() {
               <TodayFocus />
             </div>
 
-            {/* Is the automation working: coordinator, subagents, pipeline run, activity */}
-            {statusMap && (
-              <div className="mb-6">
-                <AutomationStatus
-                  portfolioCoordinator={statusMap.portfolioCoordinator}
-                  sites={statusMap.sites}
-                />
-              </div>
-            )}
-
             {/* ── Collapsible site panels (UX spec §3.4) ── */}
-            <h2 className="mb-3 text-lg font-bold" style={{ color: 'var(--fg)' }}>Content pipeline and operations</h2>
+            <h2 className="mb-3 text-lg font-bold" style={{ color: 'var(--fg)' }}>Sites and operations</h2>
             <div className="flex flex-col gap-3">
               {sites.map((site) => (
                 <CollapsibleSitePanel
@@ -344,7 +326,6 @@ export default function OpsPage() {
                   site={site}
                   status={statusMap?.sites[site.id]}
                   homeStat={homeData?.sites[site.id]}
-                  reviewQueue={statusMap?.reviewQueue ?? []}
                   week={week}
                   open={openPanels.has(site.id)}
                   onToggle={() => togglePanel(site.id)}

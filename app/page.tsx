@@ -6,8 +6,8 @@
 // app/components/hub/, then add it to SECTIONS below (and to JUMP in
 // FaithHeader.tsx if it should get a jump link). See data/hub/README.md.
 //
-// The previous operations dashboard (content pipeline, automation status,
-// per-site panels) now lives at /ops, unchanged.
+// The operations dashboard (revenue, deploys, trackers, per-site panels)
+// lives at /ops.
 
 import type { ComponentType } from 'react';
 import FaithHeader from './components/hub/FaithHeader';

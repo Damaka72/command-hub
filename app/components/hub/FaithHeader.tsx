@@ -17,14 +17,14 @@ import { useNow } from './useNow';
 const WORD_FOR_TODAY_URL = 'https://www.ucb.co.uk/word-for-today';
 
 const NAV = [
-  { href: '/plan', label: 'Weekly Plan' },
-  { href: '/review', label: 'Review' },
+  { href: '/plan', label: 'Weekly focus' },
+  { href: '/review', label: 'Sunday review' },
   { href: '/newsletters', label: 'Newsletters' },
   { href: '/friday', label: 'Friday' },
   { href: '/library', label: 'Library' },
   { href: '/social', label: 'Social' },
   { href: '/video-studio', label: 'Video Studio' },
-  { href: '/ops', label: 'Content pipeline' },
+  { href: '/ops', label: 'Operations' },
   { href: '/guide', label: 'Ops Guide' },
 ];
 

@@ -4,7 +4,7 @@ import SiteCard, { type Site } from './SiteCard';
 import ProgressRing from './ui/ProgressRing';
 import StatusPill from './ui/StatusPill';
 import { alpha, siteColor } from '@/app/lib/siteColors';
-import type { SiteDetail, DraftItem } from '../api/status/route';
+import type { SiteDetail } from '../api/status/route';
 import type { HomeSiteStat } from '../api/home/route';
 
 // Replaces the stacked site cards on the home page (UX spec §3.4). The
@@ -48,7 +48,6 @@ export default function CollapsibleSitePanel({
   site,
   status,
   homeStat,
-  reviewQueue,
   week,
   open,
   onToggle,
@@ -56,7 +55,6 @@ export default function CollapsibleSitePanel({
   site: Site;
   status?: SiteDetail;
   homeStat?: HomeSiteStat;
-  reviewQueue: DraftItem[];
   week: string;
   open: boolean;
   onToggle: () => void;
@@ -149,7 +147,7 @@ export default function CollapsibleSitePanel({
             </div>
 
             {/* Full existing site detail — unchanged, nested one level deeper */}
-            <SiteCard site={site} status={status} reviewQueue={reviewQueue} />
+            <SiteCard site={site} status={status} />
           </div>
         </div>
       </div>

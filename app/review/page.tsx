@@ -1,244 +1,73 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+// ── Sunday review ─────────────────────────────────────────────────────────────
+// The one place Didi sees and approves the week's posts. Cowork does the work
+// behind it: it researches, drafts, runs the Brand gate and (later) schedules.
+//
+// Read top to bottom, most important first:
+//   1. Needs your decision  - flagged, blocked and failed posts, with the reason
+//   2. Ready to approve     - the Brand gate passed them; one action approves all
+//   3. Not yet checked      - drafts the Brand gate has not looked at
+//   4. Needs media          - Instagram / TikTok posts with no image or video yet
+//   5. Approved             - waiting for Cowork to schedule them
+//   6. Scheduled            - done
+//   7. Rejected             - collapsed
+
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { useWeek } from '../context/WeekContext';
 import WeekSelector from '../components/WeekSelector';
 import SundayChecklist from '../components/SundayChecklist';
-import Link from 'next/link';
-
-interface Row {
-  id:                    string;
-  site_id:               string;
-  week_commencing:       string;
-  day_name:              string;
-  platform:              string;
-  grader_verdict:        string | null;
-  status:                string;
-  content:               string;
-  edited_content:        string | null;
-  media_urls:            string[] | null;
-  approved_at:           string | null;
-  blotato_submission_id: string | null;
-  scheduled_for:         string | null;
-  push_error:            string | null;
-  asset_type:            string | null;
-  creation_tool:         string | null;
-  drive_file_id:         string | null;
-  asset_duration_s:      number | null;
-  aspect_ratio:          string | null;
-  creation_requested_at: string | null;
-}
-
-// A short "3h ago" / "2d ago" label for the Create-requested marker.
-function agoLabel(iso: string): string {
-  const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
-  if (s < 60)   return 'just now';
-  if (s < 3600) return `${Math.floor(s / 60)}m ago`;
-  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
-  return `${Math.floor(s / 86400)}d ago`;
-}
-
-// Inline preview for a row's first media URL — video gets a muted player,
-// image gets an <img>; both fall back to a plain link if the asset type is
-// unknown or the URL fails to render (Drive's direct-download bridge can be
-// slow or occasionally challenge automated fetches).
-function MediaPreview({ row }: { row: Row }) {
-  const [broken, setBroken] = useState(false);
-  const url = (row.media_urls ?? [])[0];
-  if (!url) return null;
-
-  if (!broken && row.asset_type === 'video') {
-    return (
-      <video
-        src={url}
-        controls
-        muted
-        className="w-full max-w-[220px] rounded-lg border border-line-2 bg-bg"
-        onError={() => setBroken(true)}
-      />
-    );
-  }
-  if (!broken && (row.asset_type === 'image' || row.asset_type === 'carousel')) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        src={url}
-        alt=""
-        className="max-h-[160px] rounded-lg border border-line-2 object-cover"
-        onError={() => setBroken(true)}
-      />
-    );
-  }
-  return (
-    <a href={url} target="_blank" rel="noopener noreferrer" className="text-xs text-accent-text hover:underline break-all">
-      {url}
-    </a>
-  );
-}
-
-// Platforms that can't publish without media attached (mirrors the push route /
-// accounts.ts). Used only for UI hinting here.
-const MEDIA_PLATFORMS = new Set(['Instagram', 'TikTok', 'Pinterest', 'YouTube']);
-
-// Mirrors PushResult / the summary shape from /api/review/push. Unlike media
-// creation, pushing is synchronous — the whole batch completes within one
-// request — so there's no polling here, just an in-flight state while the
-// request is out, then the real per-row results the API already computes but
-// the UI used to throw away.
-interface PushResultRow {
-  id:       string;
-  siteId:   string;
-  platform: string;
-  day:      string;
-  status:   'pushed' | 'failed' | 'skipped';
-  error?:   string;
-}
-interface PushSummary {
-  pushed:  number;
-  failed:  number;
-  skipped: number;
-  results: PushResultRow[];
-}
-
-function PushStatusBanner({
-  busy, total, summary, onDismiss,
-}: {
-  busy:    boolean;
-  total:   number | undefined;
-  summary: PushSummary | undefined;
-  onDismiss: () => void;
-}) {
-  if (busy) {
-    return (
-      <div className="rounded-lg border border-accent/70 bg-accent-dim px-4 py-3 space-y-1">
-        <div className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-accent animate-pulse" />
-          <p className="text-accent-text text-xs font-semibold uppercase tracking-wide">
-            Pushing to Blotato{total !== undefined ? ` — ${total} item${total === 1 ? '' : 's'}` : '…'}
-          </p>
-        </div>
-        <p className="text-accent-text text-[13px]">Scheduling and calling Blotato for each post — can take a few seconds per item.</p>
-      </div>
-    );
-  }
-  if (!summary) return null;
-
-  const { pushed, failed, skipped, results } = summary;
-  const failedRows  = results.filter(r => r.status === 'failed');
-  const skippedRows = results.filter(r => r.status === 'skipped');
-  const allGood = failed === 0 && skipped === 0;
-
-  return (
-    <div className={`rounded-lg border px-4 py-3 space-y-2 ${allGood ? 'border-ok/60 bg-ok/15' : 'border-warn/60 bg-warn/15'}`}>
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <p className={`text-xs font-semibold uppercase tracking-wide ${allGood ? 'text-ok' : 'text-warn'}`}>
-          {allGood ? '✓' : '⚠'} {pushed} pushed{failed > 0 ? ` · ${failed} failed` : ''}{skipped > 0 ? ` · ${skipped} skipped` : ''}
-        </p>
-        <button
-          onClick={onDismiss}
-          className={`text-[13px] shrink-0 ${allGood ? 'text-ok hover:text-ok' : 'text-warn hover:text-warn'}`}
-        >
-          Dismiss
-        </button>
-      </div>
-      {(failedRows.length > 0 || skippedRows.length > 0) && (
-        <div className="space-y-1">
-          {failedRows.map(r => (
-            <p key={r.id} className="text-[13px] text-bad">✗ {r.day} {r.platform} — {r.error ?? 'failed'}</p>
-          ))}
-          {skippedRows.map(r => (
-            <p key={r.id} className="text-[13px] text-warn">– {r.day} {r.platform} — {r.error ?? 'skipped'}</p>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// Parse a textarea's worth of URLs (one per line, or comma-separated) into a
-// clean array; and render an array back into that textarea form.
-function parseMediaUrls(raw: string): string[] {
-  return raw.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
-}
+import PostCard from './PostCard';
+import CompactRow from './CompactRow';
+import {
+  BUCKET_LABEL, classify, compareRows, summarise,
+  type Bucket, type ReviewRow,
+} from './classify';
 
 const SITE_LABELS: Record<string, string> = {
-  masteryourcareerpath:    'Master Your Career Path',
-  oldoaktown:              'Old Oak Town',
-  aiviralvideoprompts:     'AI Viral Video Prompts',
+  masteryourcareerpath: 'Master Your Career Path',
+  oldoaktown:           'Old Oak Town',
+  aiviralvideoprompts:  'AI Viral Video Prompts',
 };
-const SITE_ORDER = ['masteryourcareerpath', 'oldoaktown', 'aiviralvideoprompts'];
-const DAY_ORDER: Record<string, number> = { Monday: 1, Tuesday: 2, Wednesday: 3, Thursday: 4, Friday: 5 };
+const LIVE_SITES = Object.keys(SITE_LABELS);
 
-const STATUS_PILL: Record<string, string> = {
-  draft:                'bg-panel-3 text-fg',
-  approved:             'bg-ok/15 text-ok',
-  approved_needs_media: 'bg-warn/15 text-warn',
-  rejected:             'bg-bad/15 text-bad',
-  pushed:               'bg-accent-dim text-accent-text',
-  failed:               'bg-bad/15 text-bad',
-};
-const STATUS_LABEL: Record<string, string> = {
-  draft: 'Draft', approved: 'Approved', approved_needs_media: 'Needs media',
-  rejected: 'Rejected', pushed: 'Pushed', failed: 'Failed',
-};
+interface PushResultRow {
+  id: string; siteId: string; platform: string; day: string;
+  status: 'pushed' | 'failed' | 'skipped'; error?: string;
+}
+interface PushSummary {
+  pushed: number; failed: number; skipped: number; results: PushResultRow[];
+}
+
+function Section({
+  title, count, hint, tone = 'plain', defaultOpen = true, children,
+}: {
+  title: string; count: number; hint?: string;
+  tone?: 'plain' | 'attention' | 'good'; defaultOpen?: boolean; children: React.ReactNode;
+}) {
+  const toneClass = tone === 'attention' ? 'text-warn' : tone === 'good' ? 'text-ok' : 'text-fg';
+  return (
+    <details open={defaultOpen} className="group space-y-4">
+      <summary className="cursor-pointer list-none flex items-baseline gap-3 flex-wrap">
+        <h2 className={`text-base font-semibold ${toneClass}`}>{title}</h2>
+        <span className="text-sm text-fg-3">{count}</span>
+        {hint && <span className="text-[13px] text-fg-3">{hint}</span>}
+      </summary>
+      <div className="space-y-4">{children}</div>
+    </details>
+  );
+}
 
 export default function ReviewPage() {
-  const { week }             = useWeek();
-  const [sundayOpen, setSundayOpen] = useState(false);
-  const [rows, setRows]     = useState<Row[]>([]);
-  const [edits, setEdits]   = useState<Record<string, string>>({});
-  const [mediaEdits, setMediaEdits] = useState<Record<string, string>>({});
+  const { week } = useWeek();
+  const [rows, setRows]       = useState<ReviewRow[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError]   = useState('');
-  const [busy, setBusy]     = useState<string | null>(null); // label of the in-flight action
-
-  // Creation is requested here but actually produced out-of-band by the video
-  // producer, which calls back via /api/library/asset once an asset is ready.
-  // We track in-flight batches client-side (site → row ids) so we can show a
-  // progress bar while polling, keyed off creation_requested_at / media_urls
-  // rather than any job id — there is no job to ask, only row state. A ref
-  // mirrors the state so fetch callbacks (useCallback with a `[]` dep list)
-  // always reconcile against the latest batches, not a stale closure.
-  const [creatingIds, setCreatingIds]     = useState<Record<string, string[]>>({});
-  const [justCompleted, setJustCompleted] = useState<Record<string, Row[]>>({});
-  const creatingIdsRef = useRef<Record<string, string[]>>({});
-
-  // Push status, keyed by the same busy label ('push-all' or `push-${siteId}`).
-  // pushTotal is captured at click time (from current rows) so the in-flight
-  // banner can show a count immediately, before the synchronous request
-  // returns; pushSummary holds the real per-row results once it does.
-  const [pushTotal, setPushTotal]     = useState<Record<string, number>>({});
-  const [pushSummary, setPushSummary] = useState<Record<string, PushSummary>>({});
-
-  // Given a fresh row set: seed any newly-pending (requested, no media yet)
-  // rows into the tracked batches, and move any batch that's now fully done
-  // into justCompleted. Called from fetch callbacks, not effect bodies, so
-  // it's free to update state as needed.
-  const reconcileCreating = useCallback((freshRows: Row[]) => {
-    const next: Record<string, string[]> = {};
-    for (const [siteId, ids] of Object.entries(creatingIdsRef.current)) next[siteId] = [...ids];
-    for (const row of freshRows) {
-      if (row.status === 'approved_needs_media' && row.creation_requested_at && !(row.media_urls?.length)) {
-        const existing = next[row.site_id] ?? [];
-        if (!existing.includes(row.id)) next[row.site_id] = [...existing, row.id];
-      }
-    }
-
-    const newlyDone: Record<string, Row[]> = {};
-    for (const [siteId, ids] of Object.entries(next)) {
-      const batchRows = freshRows.filter(r => ids.includes(r.id));
-      if (batchRows.length === ids.length && batchRows.every(r => (r.media_urls?.length ?? 0) > 0)) {
-        newlyDone[siteId] = batchRows;
-        delete next[siteId];
-      }
-    }
-
-    creatingIdsRef.current = next;
-    setCreatingIds(next);
-    if (Object.keys(newlyDone).length > 0) {
-      setJustCompleted(prev => ({ ...prev, ...newlyDone }));
-    }
-  }, []);
+  const [error, setError]     = useState('');
+  const [notice, setNotice]   = useState('');
+  const [busy, setBusy]       = useState<string | null>(null);
+  const [checklistOpen, setChecklistOpen] = useState(false);
+  const [pushSummary, setPushSummary]     = useState<PushSummary | undefined>();
 
   const load = useCallback((w: string) => {
     setLoading(true);
@@ -247,405 +76,335 @@ export default function ReviewPage() {
       .then(r => r.json())
       .then(data => {
         if (data.error) throw new Error(data.error);
-        const freshRows: Row[] = data.rows ?? [];
-        setRows(freshRows);
-        setEdits({});
-        setMediaEdits({});
-        // Pick up rows already mid-creation — whether just requested here or
-        // (after a page reload) still pending from an earlier visit — so the
-        // progress bar survives a refresh instead of only appearing on click.
-        reconcileCreating(freshRows);
+        setRows(data.rows ?? []);
       })
       .catch(err => setError(err instanceof Error ? err.message : String(err)))
       .finally(() => setLoading(false));
-  }, [reconcileCreating]);
+  }, []);
 
-  // Lighter refresh used while polling an in-flight batch — updates row state
-  // (so progress + previews advance) without clobbering whatever the user is
-  // mid-typing elsewhere on the page the way a full load() would.
-  const pollRows = useCallback((w: string) => {
-    fetch(`/api/review?week=${w}`)
-      .then(r => r.json())
-      .then(data => {
-        if (data.error) return;
-        const freshRows: Row[] = data.rows ?? [];
-        setRows(freshRows);
-        reconcileCreating(freshRows);
-      })
-      .catch(() => {});
-  }, [reconcileCreating]);
-
+  // Loading from an external source on mount and when the week changes.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load(week); }, [week, load]);
 
-  // Poll while any site has an in-flight creation batch.
+  // Cowork works while this tab is in the background: refresh when Didi comes back.
   useEffect(() => {
-    if (Object.keys(creatingIds).length === 0) return;
-    const t = setInterval(() => pollRows(week), 6_000);
-    return () => clearInterval(t);
-  }, [creatingIds, week, pollRows]);
+    const onVisible = () => { if (document.visibilityState === 'visible') load(week); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [week, load]);
 
-  const textFor  = (row: Row) => edits[row.id] ?? row.edited_content ?? row.content;
-  const mediaFor = (row: Row) => mediaEdits[row.id] ?? (row.media_urls ?? []).join('\n');
+  const { live, hiddenCount } = useMemo(() => {
+    const live = rows.filter(r => LIVE_SITES.includes(r.site_id));
+    return { live, hiddenCount: rows.length - live.length };
+  }, [rows]);
 
-  async function saveEdit(row: Row) {
-    setBusy(`save-${row.id}`);
-    const mediaUrls = parseMediaUrls(mediaFor(row));
-    try {
-      const res = await fetch('/api/review', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: row.id, editedContent: textFor(row), mediaUrls }),
-      });
-      if (!res.ok) throw new Error((await res.json()).error || 'Save failed');
-      setRows(prev => prev.map(r => r.id === row.id ? { ...r, edited_content: textFor(row), media_urls: mediaUrls } : r));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    } finally { setBusy(null); }
-  }
+  const byBucket = useMemo(() => {
+    const m = {} as Record<Bucket, ReviewRow[]>;
+    for (const b of Object.keys(BUCKET_LABEL) as Bucket[]) m[b] = [];
+    for (const r of live) m[classify(r)].push(r);
+    for (const b of Object.keys(m) as Bucket[]) m[b].sort(compareRows);
+    return m;
+  }, [live]);
 
-  async function setStatus(action: 'approve' | 'reject' | 'request_creation', ids: string[], label: string) {
+  const counts = useMemo(() => summarise(live), [live]);
+
+  async function act(action: 'approve' | 'reject' | 'request_creation', ids: string[], label: string) {
     if (!ids.length) return;
     setBusy(label);
+    setError('');
+    setNotice('');
     try {
       const res = await fetch('/api/review', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action, ids }),
       });
-      if (!res.ok) throw new Error((await res.json()).error || 'Update failed');
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Update failed');
+      if (action === 'approve') {
+        const n = (data.approved ?? 0) + (data.approvedNeedsMedia ?? 0);
+        setNotice(`${n} approved${data.skippedBlocked ? ` · ${data.skippedBlocked} blocked and left alone` : ''}. Cowork schedules approved posts.`);
+      }
       load(week);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally { setBusy(null); }
   }
 
-  async function push(siteId: string | undefined, label: string) {
-    setBusy(label);
+  async function saveEdit(row: ReviewRow, text: string, mediaUrls: string[]) {
+    setBusy(`save-${row.id}`);
     setError('');
-    const eligible = rows.filter(r =>
-      (!siteId || r.site_id === siteId) && (r.status === 'approved' || r.status === 'approved_needs_media'));
-    setPushTotal(prev => ({ ...prev, [label]: eligible.length }));
-    setPushSummary(prev => { const next = { ...prev }; delete next[label]; return next; });
+    try {
+      const textChanged = text !== (row.edited_content ?? row.content);
+      const res = await fetch('/api/review', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: row.id, editedContent: textChanged ? text : undefined, mediaUrls }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error || 'Save failed');
+      if (textChanged && row.gate_verdict) {
+        setNotice('Saved. The edit goes back to the Brand gate for a re-check.');
+      }
+      load(week);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally { setBusy(null); }
+  }
+
+  // Fallback publisher. The normal path is Cowork scheduling approved rows.
+  async function pushFromHub() {
+    setBusy('push');
+    setError('');
+    setPushSummary(undefined);
     try {
       const res = await fetch('/api/review/push', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ week, siteId }),
+        body: JSON.stringify({ week }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Push failed');
-      setPushSummary(prev => ({
-        ...prev,
-        [label]: { pushed: data.pushed, failed: data.failed, skipped: data.skipped, results: data.results ?? [] },
-      }));
+      setPushSummary({ pushed: data.pushed, failed: data.failed, skipped: data.skipped, results: data.results ?? [] });
       load(week);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally { setBusy(null); }
   }
 
-  const bySite = SITE_ORDER
-    .map(siteId => ({ siteId, items: rows.filter(r => r.site_id === siteId) }))
+  const isBusy = busy !== null;
+  const decision = [...byBucket.blocked, ...byBucket.flagged, ...byBucket.failed].sort(compareRows);
+  const mediaRows = [...byBucket.needs_media, ...byBucket.filming].sort(compareRows);
+  const readyBySite = LIVE_SITES
+    .map(siteId => ({ siteId, items: byBucket.ready.filter(r => r.site_id === siteId) }))
     .filter(g => g.items.length > 0);
+
+  // Posts grouped under a brand heading, as one-line rows that expand.
+  const grouped = (rows: ReviewRow[]) =>
+    LIVE_SITES
+      .map(siteId => ({ siteId, items: rows.filter(r => r.site_id === siteId) }))
+      .filter(g => g.items.length > 0)
+      .map(({ siteId, items }) => (
+        <div key={siteId} className="space-y-2">
+          <h3 className="text-sm font-medium text-fg-2">{SITE_LABELS[siteId]} <span className="text-fg-3 font-normal">· {items.length}</span></h3>
+          {items.map(r => card(r, false, true))}
+        </div>
+      ));
+
+  const card = (row: ReviewRow, showSite: boolean, compact = false) => {
+    const el = (
+    <PostCard
+      key={`${row.id}-${row.edited_content ?? ''}-${(row.media_urls ?? []).join('|')}-${row.status}`}
+      row={row}
+      bucket={classify(row)}
+      siteLabel={showSite ? SITE_LABELS[row.site_id] ?? row.site_id : undefined}
+      busy={isBusy}
+      onSave={saveEdit}
+      onApprove={id => act('approve', [id], `approve-${id}`)}
+      onReject={id => act('reject', [id], `reject-${id}`)}
+      onRequestCreation={id => act('request_creation', [id], `create-${id}`)}
+    />
+    );
+    return compact
+      ? <CompactRow key={row.id} row={row} siteLabel={showSite ? SITE_LABELS[row.site_id] ?? row.site_id : undefined}>{el}</CompactRow>
+      : el;
+  };
 
   return (
     <div className="min-h-screen bg-bg text-fg">
       <div className="border-b border-line px-6 py-4 flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-4">
           <Link href="/" className="text-fg-2 hover:text-fg text-sm">← Dashboard</Link>
-          <h1 className="text-lg font-semibold text-fg">Review Queue</h1>
+          <h1 className="text-lg font-semibold text-fg">Sunday review</h1>
         </div>
         <div className="flex items-center gap-3">
           <WeekSelector />
           <button
-            onClick={() => setSundayOpen(o => !o)}
-            className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-colors ${
-              sundayOpen ? 'bg-panel-3 text-fg' : 'bg-panel-2 hover:brightness-125 text-fg border border-line-2'
-            }`}
+            onClick={() => load(week)}
+            disabled={loading}
+            className="rounded-lg px-3 py-1.5 text-sm bg-panel-2 hover:brightness-125 text-fg border border-line-2 disabled:opacity-50"
           >
-            {sundayOpen ? '▲ Sunday checklist' : '▼ Sunday checklist'}
+            {loading ? 'Refreshing…' : 'Refresh'}
           </button>
           <button
-            onClick={() => push(undefined, 'push-all')}
-            disabled={busy !== null}
-            className="rounded-lg bg-accent hover:brightness-125 text-on-solid px-4 py-1.5 text-sm font-medium disabled:opacity-50"
+            onClick={() => setChecklistOpen(o => !o)}
+            className={`rounded-lg px-4 py-1.5 text-sm font-medium transition-colors ${
+              checklistOpen ? 'bg-panel-3 text-fg' : 'bg-panel-2 hover:brightness-125 text-fg border border-line-2'
+            }`}
           >
-            {busy === 'push-all' ? 'Pushing…' : 'Push approved to Blotato'}
+            {checklistOpen ? '▲ Checklist' : '▼ Checklist'}
           </button>
         </div>
       </div>
 
       <div className="max-w-4xl mx-auto px-6 py-8 space-y-8">
-        {sundayOpen && <SundayChecklist />}
-        {error && (
-          <div className="bg-bad/15 border border-bad/60 rounded-lg p-4 text-bad text-sm">{error}</div>
-        )}
-        <PushStatusBanner
-          busy={busy === 'push-all'}
-          total={pushTotal['push-all']}
-          summary={pushSummary['push-all']}
-          onDismiss={() => setPushSummary(prev => { const next = { ...prev }; delete next['push-all']; return next; })}
-        />
-        {loading && <p className="text-fg-2 text-sm">Loading…</p>}
-        {!loading && bySite.length === 0 && (
-          <p className="text-fg-2 text-sm">No content in the library for week commencing {week}. Run the pipeline for this week, then refresh.</p>
-        )}
+        {checklistOpen && <SundayChecklist />}
 
-        {bySite.map(({ siteId, items }) => {
-          const sorted    = [...items].sort((a, b) => (DAY_ORDER[a.day_name] ?? 9) - (DAY_ORDER[b.day_name] ?? 9));
-          const draftIds  = items.filter(r => r.status === 'draft').map(r => r.id);
-          // Needs-media rows still waiting on a URL (once one is pasted + saved they
-          // become pushable and drop off this list).
-          const needsMedia = items.filter(r => r.status === 'approved_needs_media' && !(r.media_urls?.length));
-          const notYetRequested = needsMedia.filter(r => !r.creation_requested_at);
-          const counts = items.reduce((m, r) => { m[r.status] = (m[r.status] ?? 0) + 1; return m; }, {} as Record<string, number>);
+        {error && <div className="bg-bad/15 border border-bad/60 rounded-lg p-4 text-bad text-sm">{error}</div>}
+        {notice && !error && <div className="bg-ok/15 border border-ok/60 rounded-lg p-4 text-ok text-sm">{notice}</div>}
 
-          // In-flight creation batch for this site, if any, plus its last
-          // completed batch (kept around until dismissed).
-          const activeIds     = creatingIds[siteId] ?? [];
-          const creatingRows  = activeIds.length ? items.filter(r => activeIds.includes(r.id)) : [];
-          const creatingDone  = creatingRows.filter(r => (r.media_urls?.length ?? 0) > 0).length;
-          const creatingTotal = creatingRows.length;
-          const creatingPct   = creatingTotal ? Math.round((creatingDone / creatingTotal) * 100) : 0;
-          const completedBatch = justCompleted[siteId];
-
-          return (
-            <div key={siteId} className="space-y-4">
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <div className="flex items-center gap-3">
-                  <h2 className="text-base font-semibold text-fg">{SITE_LABELS[siteId] ?? siteId}</h2>
-                  <span className="text-xs text-fg-3">
-                    {Object.entries(counts).map(([s, n]) => `${n} ${STATUS_LABEL[s] ?? s}`).join(' · ')}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setStatus('approve', draftIds, `approve-all-${siteId}`)}
-                    disabled={busy !== null || draftIds.length === 0}
-                    className="rounded-lg bg-ok hover:brightness-125 text-on-solid px-3 py-1.5 text-xs font-medium disabled:opacity-40"
-                  >
-                    {busy === `approve-all-${siteId}` ? 'Approving…' : `Approve all drafts (${draftIds.length})`}
-                  </button>
-                  <button
-                    onClick={() => push(siteId, `push-${siteId}`)}
-                    disabled={busy !== null}
-                    className="rounded-lg bg-accent hover:brightness-125 text-on-solid px-3 py-1.5 text-xs font-medium disabled:opacity-50"
-                  >
-                    {busy === `push-${siteId}` ? 'Pushing…' : 'Push approved'}
-                  </button>
-                </div>
-              </div>
-
-              <PushStatusBanner
-                busy={busy === `push-${siteId}`}
-                total={pushTotal[`push-${siteId}`]}
-                summary={pushSummary[`push-${siteId}`]}
-                onDismiss={() => setPushSummary(prev => { const next = { ...prev }; delete next[`push-${siteId}`]; return next; })}
-              />
-
-              {/* In-flight creation progress — appears the moment Create all is
-                  clicked and survives a page reload while it's still running. */}
-              {creatingTotal > 0 && (
-                <div className="rounded-lg border border-warn/60 bg-warn/15 px-4 py-3 space-y-2">
-                  <div className="flex items-center justify-between gap-3 flex-wrap">
-                    <div className="flex items-center gap-2">
-                      <span className="h-2 w-2 rounded-full bg-warn animate-pulse" />
-                      <p className="text-warn text-xs font-semibold uppercase tracking-wide">
-                        Creating media… {creatingDone}/{creatingTotal}
-                      </p>
-                    </div>
-                    <span className="text-warn text-[13px]">Runs via the video producer — can take a few minutes</span>
-                  </div>
-                  <div
-                    role="progressbar"
-                    aria-valuenow={creatingPct}
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-label={`Creating media: ${creatingDone} of ${creatingTotal} ready`}
-                    className="h-1.5 w-full rounded-full bg-warn/15 overflow-hidden"
-                  >
-                    <div
-                      className="h-full rounded-full bg-warn transition-all duration-700 ease-out"
-                      style={{ width: `${creatingPct}%` }}
-                    />
-                  </div>
-                  <p className="text-warn text-[13px]">
-                    {creatingRows.map(r => `${r.day_name} ${r.platform}${(r.media_urls?.length ?? 0) > 0 ? ' ✓' : ''}`).join(' · ')}
-                  </p>
-                </div>
-              )}
-
-              {/* Just-finished summary — shows where each asset actually landed. */}
-              {creatingTotal === 0 && completedBatch && completedBatch.length > 0 && (
-                <div className="rounded-lg border border-ok/60 bg-ok/15 px-4 py-3 space-y-2">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-ok text-xs font-semibold uppercase tracking-wide">
-                      ✓ {completedBatch.length} media stored
-                    </p>
-                    <button
-                      onClick={() => setJustCompleted(prev => { const next = { ...prev }; delete next[siteId]; return next; })}
-                      className="text-ok hover:text-ok text-[13px]"
-                    >
-                      Dismiss
-                    </button>
-                  </div>
-                  <div className="space-y-1">
-                    {completedBatch.map(r => (
-                      <div key={r.id} className="flex items-center justify-between gap-2 text-[13px] text-ok">
-                        <span>{r.day_name} {r.platform}</span>
-                        {r.media_urls?.[0] && (
-                          <a href={r.media_urls[0]} target="_blank" rel="noopener noreferrer" className="text-ok hover:underline shrink-0">
-                            Stored{r.creation_tool ? ` · ${r.asset_type ?? 'asset'} via ${r.creation_tool}` : ''} →
-                          </a>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Needs-media strip — items not yet requested */}
-              {notYetRequested.length > 0 && (
-                <div className="rounded-lg border border-warn/60 bg-warn/15 px-4 py-3">
-                  <div className="flex items-start justify-between gap-3 flex-wrap">
-                    <div>
-                      <p className="text-warn text-xs font-semibold uppercase tracking-wide mb-1">Needs media</p>
-                      <p className="text-warn text-xs">
-                        {notYetRequested.map(r => `${r.day_name} ${r.platform}`).join(' · ')}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => setStatus('request_creation', notYetRequested.map(r => r.id), `create-all-${siteId}`)}
-                      disabled={busy !== null}
-                      className="rounded-lg bg-warn hover:brightness-125 text-on-solid px-3 py-1.5 text-xs font-medium disabled:opacity-40 shrink-0"
-                    >
-                      {busy === `create-all-${siteId}` ? 'Requesting…' : 'Create all'}
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Items */}
-              {sorted.map(row => (
-                <div key={row.id} className="bg-panel border border-line-2 rounded-xl p-4 space-y-3">
-                  <div className="flex items-center justify-between flex-wrap gap-2">
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="font-medium text-fg">{row.day_name}</span>
-                      <span className="text-fg-3">·</span>
-                      <span className="text-fg">{row.platform}</span>
-                      {row.grader_verdict && (
-                        <span className={`text-xs ${row.grader_verdict === 'pass' ? 'text-ok' : 'text-bad'}`}>
-                          grader: {row.grader_verdict}
-                        </span>
-                      )}
-                    </div>
-                    <span className={`rounded-full px-2.5 py-0.5 text-[13px] font-medium ${STATUS_PILL[row.status] ?? 'bg-panel-3 text-fg'}`}>
-                      {STATUS_LABEL[row.status] ?? row.status}
-                    </span>
-                  </div>
-
-                  <textarea
-                    value={textFor(row)}
-                    onChange={e => setEdits(prev => ({ ...prev, [row.id]: e.target.value }))}
-                    rows={6}
-                    className="w-full bg-panel-2 border border-line-2 rounded-lg px-3 py-2 text-fg text-sm focus:outline-none focus:border-accent/70"
-                  />
-
-                  {/* Existing media, previewed inline rather than just as a URL. */}
-                  {(row.media_urls?.length ?? 0) > 0 && (
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <MediaPreview row={row} />
-                      {row.creation_tool && (
-                        <span className="text-[13px] text-fg-3">
-                          {row.asset_type ?? 'asset'} · {row.creation_tool}
-                          {row.aspect_ratio ? ` · ${row.aspect_ratio}` : ''}
-                          {row.asset_duration_s ? ` · ${Math.round(row.asset_duration_s)}s` : ''}
-                        </span>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Media URLs — public image/video links, one per line. Required
-                      for Instagram/TikTok; optional (but supported) for LinkedIn/Facebook. */}
-                  {row.status !== 'pushed' && (
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between gap-2 flex-wrap">
-                        <label className="block text-[13px] uppercase tracking-wide text-fg-2">
-                          Media URLs {MEDIA_PLATFORMS.has(row.platform)
-                            ? <span className="text-warn">· required for {row.platform}</span>
-                            : <span className="text-fg-3">· optional image/video</span>}
-                          <span className="text-fg-3"> · generate with Media Gen, Higgsfield, Blotato, or HyperFrames</span>
-                        </label>
-                        {MEDIA_PLATFORMS.has(row.platform) && !(row.media_urls?.length) && (
-                          row.creation_requested_at ? (
-                            <span className="text-[13px] text-warn shrink-0">Requested {agoLabel(row.creation_requested_at)}</span>
-                          ) : (
-                            <button
-                              onClick={() => setStatus('request_creation', [row.id], `create-${row.id}`)}
-                              disabled={busy !== null}
-                              className="rounded-lg bg-warn hover:brightness-125 text-on-solid px-2.5 py-1 text-[13px] font-medium disabled:opacity-50 shrink-0"
-                            >
-                              {busy === `create-${row.id}` ? 'Requesting…' : 'Create'}
-                            </button>
-                          )
-                        )}
-                      </div>
-                      <textarea
-                        value={mediaFor(row)}
-                        onChange={e => setMediaEdits(prev => ({ ...prev, [row.id]: e.target.value }))}
-                        rows={2}
-                        placeholder={row.platform === 'TikTok'
-                          ? 'https://…/video.mp4  (one per line)'
-                          : 'https://…/image.jpg  (one per line; a video URL posts as a reel on Instagram)'}
-                        className="w-full bg-panel-2 border border-line-2 rounded-lg px-3 py-2 text-fg text-xs font-mono focus:outline-none focus:border-accent/70"
-                      />
-                    </div>
-                  )}
-
-                  {row.status === 'pushed' && (row.media_urls?.length ?? 0) > 0 && (
-                    <p className="text-[13px] text-accent-text break-all">Media: {row.media_urls!.join(', ')}</p>
-                  )}
-
-                  {row.status === 'pushed' && (
-                    <p className="text-xs text-accent-text">
-                      Pushed{row.scheduled_for ? ` · scheduled ${new Date(row.scheduled_for).toLocaleString('en-GB')}` : ''}
-                      {row.blotato_submission_id ? ` · id ${row.blotato_submission_id}` : ''}
-                    </p>
-                  )}
-                  {row.status !== 'pushed' && row.push_error && (
-                    <p className="text-xs text-bad">
-                      {row.status === 'rejected' ? 'Grader: ' : 'Push error: '}{row.push_error}
-                    </p>
-                  )}
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => saveEdit(row)}
-                      disabled={busy !== null}
-                      className="rounded-lg bg-panel-3 hover:brightness-125 text-fg px-3 py-1.5 text-xs font-medium disabled:opacity-50"
-                    >
-                      {busy === `save-${row.id}` ? 'Saving…' : 'Save'}
-                    </button>
-                    <button
-                      onClick={() => setStatus('approve', [row.id], `approve-${row.id}`)}
-                      disabled={busy !== null || row.status === 'pushed'}
-                      className="rounded-lg bg-ok hover:brightness-125 text-on-solid px-3 py-1.5 text-xs font-medium disabled:opacity-40"
-                    >
-                      Approve
-                    </button>
-                    <button
-                      onClick={() => setStatus('reject', [row.id], `reject-${row.id}`)}
-                      disabled={busy !== null || row.status === 'pushed'}
-                      className="rounded-lg bg-bad/15 hover:brightness-125 text-on-solid px-3 py-1.5 text-xs font-medium disabled:opacity-40"
-                    >
-                      Reject
-                    </button>
-                  </div>
-                </div>
-              ))}
+        {/* Summary: the whole week at a glance */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3" aria-label="Week summary">
+          {([
+            ['Needs your decision', counts.blocked + counts.flagged + counts.failed, 'text-warn'],
+            ['Ready to approve',    counts.ready,                                     'text-ok'],
+            ['Not yet checked',     counts.unchecked,                                 'text-fg-2'],
+            ['Needs media',         counts.needs_media + counts.filming,              'text-warn'],
+            ['Approved',            counts.approved,                                  'text-ok'],
+            ['Scheduled',           counts.scheduled,                                 'text-accent-text'],
+            ['Rejected',            counts.rejected,                                  'text-fg-3'],
+          ] as const).map(([label, n, tone]) => (
+            <div key={label} className="rounded-xl border border-line-2 bg-panel px-4 py-3">
+              <p className={`text-2xl font-semibold ${tone}`}>{n}</p>
+              <p className="text-[13px] text-fg-3">{label}</p>
             </div>
-          );
-        })}
+          ))}
+        </div>
+
+        {!loading && live.length === 0 && (
+          <p className="text-fg-2 text-sm">
+            Nothing drafted for week commencing {week} yet. Cowork researches and drafts on Saturday at 06:55.
+          </p>
+        )}
+
+        {decision.length > 0 && (
+          <Section title="Needs your decision" count={decision.length} tone="attention"
+            hint="Flagged, blocked or failed. Read the reason on each card.">
+            {decision.map(r => card(r, true))}
+          </Section>
+        )}
+
+        {readyBySite.length > 0 && (
+          <Section title="Ready to approve" count={byBucket.ready.length} tone="good"
+            hint="The Brand gate passed these. One click approves them all.">
+            <div className="flex items-center gap-3 flex-wrap">
+              <button
+                onClick={() => act('approve', byBucket.ready.map(r => r.id), 'approve-all-ready')}
+                disabled={isBusy}
+                className="rounded-lg bg-ok hover:brightness-125 text-on-solid px-4 py-2 text-sm font-medium disabled:opacity-40"
+              >
+                {busy === 'approve-all-ready' ? 'Approving…' : `Approve all ready (${byBucket.ready.length})`}
+              </button>
+              <span className="text-[13px] text-fg-3">
+                This is your sign-off. Nothing publishes without it, and blocked posts are never included.
+              </span>
+            </div>
+            {readyBySite.map(({ siteId, items }) => (
+              <details key={siteId} className="rounded-xl border border-line-2 bg-panel">
+                <summary className="cursor-pointer list-none px-4 py-3 flex items-center justify-between gap-3 flex-wrap">
+                  <span className="text-sm font-medium text-fg">
+                    {SITE_LABELS[siteId]} <span className="text-fg-3 font-normal">· {items.length} ready</span>
+                  </span>
+                  <button
+                    onClick={e => { e.preventDefault(); act('approve', items.map(r => r.id), `approve-ready-${siteId}`); }}
+                    disabled={isBusy}
+                    className="rounded-lg bg-ok/15 hover:brightness-125 text-ok px-3 py-1 text-xs font-medium disabled:opacity-40"
+                  >
+                    Approve these {items.length}
+                  </button>
+                </summary>
+                <div className="space-y-2 p-4 pt-0">{items.map(r => card(r, false, true))}</div>
+              </details>
+            ))}
+          </Section>
+        )}
+
+        {byBucket.unchecked.length > 0 && (
+          <Section title="Not yet checked" count={byBucket.unchecked.length}
+            hint="Cowork's Brand gate has not looked at these. Ask Cowork to check them, or approve one at a time.">
+            {grouped(byBucket.unchecked)}
+          </Section>
+        )}
+
+        {mediaRows.length > 0 && (
+          <Section title="Needs media" count={mediaRows.length} tone="attention"
+            hint="Instagram and TikTok cannot publish without an image or video.">
+            <p className="text-[13px] text-fg-3">
+              Cowork&apos;s media desk makes the first group every morning at 07:30, or straight away if you tell Cowork to
+              run the media desk. Only you can film the second. How video gets made is on the{' '}
+              <Link href="/video-studio" className="text-accent-text underline">Video Studio</Link> page.
+            </p>
+            {byBucket.needs_media.length > 0 && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <h3 className="text-sm font-medium text-fg">Cowork can make · {byBucket.needs_media.length}</h3>
+                  {byBucket.needs_media.some(r => !r.creation_requested_at) && (
+                    <button
+                      onClick={() => act('request_creation', byBucket.needs_media.filter(r => !r.creation_requested_at).map(r => r.id), 'create-all')}
+                      disabled={isBusy}
+                      className="rounded-lg bg-warn hover:brightness-125 text-on-solid px-3 py-1 text-xs font-medium disabled:opacity-50"
+                    >
+                      {busy === 'create-all' ? 'Asking…' : `Ask Cowork to create all (${byBucket.needs_media.filter(r => !r.creation_requested_at).length})`}
+                    </button>
+                  )}
+                </div>
+                {grouped(byBucket.needs_media)}
+              </div>
+            )}
+            {byBucket.filming.length > 0 && (
+              <div className="space-y-3">
+                <h3 className="text-sm font-medium text-fg">You film · {byBucket.filming.length}</h3>
+                {grouped(byBucket.filming)}
+              </div>
+            )}
+          </Section>
+        )}
+
+        {byBucket.approved.length > 0 && (
+          <Section title="Approved, waiting for Cowork to schedule" count={byBucket.approved.length}
+            hint="Tell Cowork 'schedule this week' and these go into Blotato.">
+            {grouped(byBucket.approved)}
+          </Section>
+        )}
+
+        {byBucket.scheduled.length > 0 && (
+          <Section title="Scheduled" count={byBucket.scheduled.length} defaultOpen={false}>
+            {grouped(byBucket.scheduled)}
+          </Section>
+        )}
+
+        {byBucket.rejected.length > 0 && (
+          <Section title="Rejected" count={byBucket.rejected.length} defaultOpen={false}>
+            {grouped(byBucket.rejected)}
+          </Section>
+        )}
+
+        {hiddenCount > 0 && (
+          <p className="text-[13px] text-fg-3">
+            {hiddenCount} post{hiddenCount === 1 ? '' : 's'} for brands that are no longer active {hiddenCount === 1 ? 'is' : 'are'} hidden from this view.
+          </p>
+        )}
+
+        {/* Fallback: the normal route is Cowork scheduling approved posts. */}
+        <details className="rounded-xl border border-line-2 bg-panel">
+          <summary className="cursor-pointer list-none px-4 py-3 text-sm text-fg-2">
+            Fallback: schedule approved posts from the hub
+          </summary>
+          <div className="space-y-3 p-4 pt-0">
+            <p className="text-[13px] text-fg-3">
+              Normally Cowork schedules approved posts in Blotato. If it cannot, this does the same from here.
+              A post whose slot has passed today goes out in 10 minutes. A post for a day that is already over is skipped, never moved a week later.
+            </p>
+            <button
+              onClick={pushFromHub}
+              disabled={isBusy || counts.approved === 0}
+              className="rounded-lg bg-accent hover:brightness-125 text-on-solid px-4 py-1.5 text-sm font-medium disabled:opacity-50"
+            >
+              {busy === 'push' ? 'Scheduling…' : `Schedule ${counts.approved} approved from the hub`}
+            </button>
+            {pushSummary && (
+              <div className={`rounded-lg border px-4 py-3 space-y-1 text-[13px] ${pushSummary.failed === 0 && pushSummary.skipped === 0 ? 'border-ok/60 bg-ok/15 text-ok' : 'border-warn/60 bg-warn/15 text-warn'}`}>
+                <p className="font-semibold">
+                  {pushSummary.pushed} scheduled
+                  {pushSummary.failed > 0 ? ` · ${pushSummary.failed} failed` : ''}
+                  {pushSummary.skipped > 0 ? ` · ${pushSummary.skipped} skipped` : ''}
+                </p>
+                {pushSummary.results.filter(r => r.status !== 'pushed').map(r => (
+                  <p key={r.id}>{r.status === 'failed' ? '✗' : '–'} {SITE_LABELS[r.siteId] ?? r.siteId} · {r.day} {r.platform}: {r.error ?? r.status}</p>
+                ))}
+              </div>
+            )}
+          </div>
+        </details>
       </div>
     </div>
   );

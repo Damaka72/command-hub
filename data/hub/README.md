@@ -2,7 +2,7 @@
 
 The home page (`/`) is a morning paper: Faith, Health check, Today, Overnight, Insights.
 Its content comes from the files here and a few API routes. The old operations dashboard
-(content pipeline, automation status, per-site panels) lives at `/ops`.
+(revenue, deploys, trackers, per-site panels) lives at `/ops`.
 
 ## Files
 

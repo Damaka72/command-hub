@@ -2,12 +2,17 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useWeek } from "../context/WeekContext";
+import { MEDIA_PLATFORMS, hasMedia, isFilmingBrief, type ReviewRow } from "../review/classify";
 
 // ── Video Studio ──────────────────────────────────────────────────────────────
-// The room where video gets made. It lists every video tool Didi can use, what
-// each costs, when to pick it, and how to ask Claude / Cowork to use it. The
-// video-producer agent reads the same rules: budget and video type decide the
-// tool, and naming a tool always overrides.
+// The room where video gets made. It explains how media reaches a post (the
+// weekly flow), then lists every video tool Didi can use, what each costs, when
+// to pick it, and how to ask Claude / Cowork to use it. The page leads with this
+// week's media and the weekly ladder; the tool catalogue is collapsed reference.
+// Two modes:
+//   * Automatic: Cowork's weekly run and media desk follow a fixed, cheap ladder.
+//   * On request: Didi names a tool and it wins.
 
 type Cost = "free" | "credits" | "subscription" | "included";
 
@@ -28,11 +33,11 @@ const TOOLS: Tool[] = [
     id: "hyperframes",
     name: "HyperFrames",
     cost: "free",
-    costNote: "Free, open source",
-    runsOn: "Local (Dev folder, renders to MP4)",
-    makes: "Custom explainers, promos, title cards, captioned clips, animated overlays, slideshows",
-    bestFor: "Anything designed: branded explainers, product walkthroughs, data or text-led motion. Full control of look and timing.",
-    avoid: "Photoreal footage of people or places. It animates designs, it does not generate footage.",
+    costNote: "Free, open source. No credits",
+    runsOn: "Your computer (Dev folder), or any session with FFmpeg and Chrome. A 10-second 9:16 video renders in about 5 seconds",
+    makes: "Branded text cards and carousel slides (as still images), 9:16 reels, explainers, promos, captioned clips, slide decks, animated overlays",
+    bestFor: "Anything designed, in the exact brand colours and fonts (Blotato's free templates cannot match them). Carousels, Instagram and TikTok reels, explainers, slides. Full control of look and timing, and it costs nothing.",
+    avoid: "Photoreal footage of people or places: it animates designs, it does not generate footage. Narration and music need a separate audio file, because local voice and music are not installed.",
     ask: "Use HyperFrames to make a 45-second explainer about [topic] for [site], 9:16.",
   },
   {
@@ -76,7 +81,7 @@ const TOOLS: Tool[] = [
     runsOn: "Hosted, feeds Blotato scheduling",
     makes: "Carousels, infographics, quote cards, slideshows, AI story videos, combine clips",
     bestFor: "Text-led content that goes straight to scheduling. Old Oak Town, using real uploaded photos.",
-    avoid: "Anything you need if the subscription has lapsed. See the fallback table below.",
+    avoid: "Anything you need once the subscription lapses: the free column under Choosing a tool covers that.",
     ask: "Use Blotato Visuals to make a Tutorial Carousel: [topic] for [site].",
   },
 ];
@@ -103,7 +108,7 @@ const CLAUDE_TOOLS: Tool[] = [
     costNote: "Included with the Claude plan",
     runsOn: "Inside Claude (claude.ai), downloads as PowerPoint or PDF",
     makes: "16:9 presentation decks you can page through, edit and download",
-    bestFor: "Skool community sessions, consulting proposals and talks, and carousels built as slides first.",
+    bestFor: "Community training sessions, consulting proposals and talks, and carousels built as slides first.",
     avoid: "Short vertical video. Use HyperFrames for anything that needs to move.",
     ask: "Use Claude Slides to make a 10-slide deck on [topic] for [site], with speaker notes.",
   },
@@ -135,12 +140,13 @@ const COST_LABEL: Record<Cost, string> = {
 };
 
 const RULES: { title: string; body: string }[] = [
-  { title: "Name a tool and it wins", body: "If you say which tool to use, the agent uses it. The rules below only apply when you leave it open." },
-  { title: "Free first", body: "With no budget stated, the agent chooses between HyperFrames and short-video-maker. It only reaches for credit or subscription tools when the video needs something they alone can do." },
-  { title: "Paid only for what free cannot do", body: "Face-to-camera with Didi's likeness, product ads from a URL and cinematic AI footage go to Higgsfield. Scheduling-ready carousels and infographics go to Blotato." },
-  { title: "Old Oak Town is factual", body: "Real uploaded photos only. Never AI-generated imagery or stock footage. Blotato Visuals with real photos, or HyperFrames with real photos as the source." },
-  { title: "No promotions unless confirmed", body: "No prices or offers in a video unless Didi has confirmed the campaign is live that week." },
-  { title: "Check before scheduling", body: "Run finished videos through the Higgsfield virality predictor when credits allow, then send to the Review queue." },
+  { title: "The weekly ladder", body: "Automatic runs go down this list and stop at the first rung that does the job. 1. A Blotato free text card or carousel (0 credits) when a simple card is enough. 2. HyperFrames (free) when it needs exact brand colours and fonts, or is a carousel, reel or explainer, whenever the session can run it. 3. A Blotato AI story video (about 1 credit a scene, capped at 100 credits a run) for narrated multi-scene video. 4. A video brief for you to film. Higgsfield is not used: there are no credits." },
+  { title: "Name a tool and it wins", body: "If you ask for a specific tool in a session, it is used. The rules below apply when you leave it open." },
+  { title: "HyperFrames needs FFmpeg and Chrome", body: "It runs on your computer and in any session set up with them. A session that cannot run it drops to the next rung, never skips the post. short-video-maker runs only on your computer, so it is for sessions you run there." },
+  { title: "Paid only for what free cannot do", body: "Face-to-camera with your likeness, product ads from a URL and cinematic AI footage need Higgsfield, which only runs when it has credits and you ask for it." },
+  { title: "Old Oak Town is factual", body: "Typographic cards, or your own real photos. Never AI-generated imagery or stock footage." },
+  { title: "No promotions unless confirmed", body: "No prices or offers in a video unless you have confirmed the campaign is live that week." },
+  { title: "Check before scheduling", body: "Run finished videos through the Higgsfield virality predictor when credits allow, then they appear in the Sunday review." },
 ];
 
 const BY_TYPE: { need: string; free: string; paid: string }[] = [
@@ -152,15 +158,15 @@ const BY_TYPE: { need: string; free: string; paid: string }[] = [
   { need: "Local area slideshow (Old Oak Town)", free: "HyperFrames with real photos", paid: "Blotato Image Slideshow with real photos" },
   { need: "Reframe 16:9 to 9:16", free: "HyperFrames or ffmpeg", paid: "Higgsfield Reframe" },
   { need: "Landing page, poster or social visual set", free: "Claude Design (in plan)", paid: "Blotato Visuals" },
-  { need: "Presentation deck (Skool session, proposal, talk)", free: "Claude Slides (in plan)", paid: "None needed" },
+  { need: "Presentation deck (training session, proposal, talk)", free: "Claude Slides (in plan)", paid: "None needed" },
   { need: "Sourced performance report for a site", free: "Claude Dashboard (in plan)", paid: "None needed" },
 ];
 
 const BY_SITE: { site: string; url: string; note: string }[] = [
   { site: "Didi Anolue", url: "didianolue.co.uk", note: "LinkedIn, X. Authority and expertise. Talking-head style and repurposed posts." },
-  { site: "Master Your Career Path", url: "masteryourcareerpath.com", note: "LinkedIn, Instagram, TikTok. Tips, product promos (only if a campaign is confirmed), 9:16 talking-head." },
-  { site: "Old Oak Town", url: "oldoaktown.co.uk", note: "Real photos only. No AI imagery, no stock footage, no invented events or statistics." },
-  { site: "AI Viral Video Prompts", url: "aiviralvideoprompts.com", note: "TikTok, Instagram, X. The natural home for showcasing AI video tools." },
+  { site: "Master Your Career Path", url: "masteryourcareerpath.com", note: "LinkedIn, Instagram, TikTok, Facebook. Tips, product promos (only if a campaign is confirmed), 9:16 talking-head." },
+  { site: "Old Oak Town", url: "oldoaktown.co.uk", note: "Typographic cards or real photos only. No AI imagery, no stock footage, no invented events or statistics." },
+  { site: "AI Viral Video Prompts", url: "aiviralvideoprompts.com", note: "TikTok, Instagram, Facebook, LinkedIn. The natural home for showcasing AI video tools." },
 ];
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -235,6 +241,105 @@ function StatusDot({ up }: { up: boolean | null }) {
   );
 }
 
+const LADDER: { n: number; name: string; cost: string; note: string }[] = [
+  { n: 1, name: "Blotato free card", cost: "0 credits", note: "Simple text cards and carousels. Quick, but brand colours are only approximate." },
+  { n: 2, name: "HyperFrames", cost: "Free", note: "Exact brand colours and fonts: cards, carousels, reels, explainers. Needs FFmpeg and Chrome." },
+  { n: 3, name: "AI story video", cost: "About 1 credit a scene, 100 a week at most", note: "Narrated multi-scene video made in Blotato." },
+  { n: 4, name: "You film it", cost: "Your time", note: "Face to camera. It arrives as a script and shot list." },
+];
+
+const LIVE_BRANDS: { id: string; name: string }[] = [
+  { id: "masteryourcareerpath", name: "Master Your Career Path" },
+  { id: "oldoaktown",           name: "Old Oak Town" },
+  { id: "aiviralvideoprompts",  name: "AI Viral Video Prompts" },
+];
+
+// This week's media, straight from the posts: how many need an image or video, how
+// many are made, how many Cowork can still make, and how many only you can film.
+function ThisWeeksMedia() {
+  const { week } = useWeek();
+  const [rows, setRows]     = useState<ReviewRow[] | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`/api/review?week=${week}`)
+      .then(r => r.json())
+      .then(d => {
+        if (cancelled) return;
+        if (d.error) setFailed(true); else { setFailed(false); setRows(d.rows ?? []); }
+      })
+      .catch(() => { if (!cancelled) setFailed(true); });
+    return () => { cancelled = true; };
+  }, [week]);
+
+  if (failed) return <Prose>Could not load this week&apos;s posts.</Prose>;
+  if (rows === null) return <Prose>Loading this week&apos;s posts…</Prose>;
+
+  const stats = LIVE_BRANDS.map(b => {
+    const mine = rows.filter(r => r.site_id === b.id && MEDIA_PLATFORMS.has(r.platform) && r.status !== "rejected");
+    const missing = mine.filter(r => !hasMedia(r));
+    return {
+      name: b.name,
+      total: mine.length,
+      made: mine.length - missing.length,
+      cowork: missing.filter(r => !isFilmingBrief(r)).length,
+      filming: missing.filter(r => isFilmingBrief(r)).length,
+    };
+  });
+  const total = stats.reduce((n, x) => n + x.total, 0);
+  const weekLabel = new Date(`${week}T12:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+
+  if (total === 0) {
+    return <Prose>No Instagram or TikTok posts drafted for the week of {weekLabel} yet. Cowork drafts on Saturday at 06:55.</Prose>;
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="overflow-x-auto rounded-xl border border-line">
+        <table className="w-full text-left text-xs">
+          <thead className="bg-panel-2 text-fg">
+            <tr>
+              <th className="px-4 py-2 font-semibold">Brand</th>
+              <th className="px-4 py-2 font-semibold">Need media</th>
+              <th className="px-4 py-2 font-semibold">Made</th>
+              <th className="px-4 py-2 font-semibold">Cowork can make</th>
+              <th className="px-4 py-2 font-semibold">You film</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-line bg-panel text-fg-2">
+            {stats.map(x => (
+              <tr key={x.name}>
+                <td className="px-4 py-2 font-medium text-fg">{x.name}</td>
+                <td className="px-4 py-2">{x.total}</td>
+                <td className={`px-4 py-2 ${x.made === x.total && x.total > 0 ? "text-ok font-semibold" : ""}`}>{x.made}</td>
+                <td className={`px-4 py-2 ${x.cowork > 0 ? "text-warn font-semibold" : ""}`}>{x.cowork}</td>
+                <td className={`px-4 py-2 ${x.filming > 0 ? "text-warn font-semibold" : ""}`}>{x.filming}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <Prose>
+        Week of {weekLabel}. &ldquo;Cowork can make&rdquo; is picked up by the media desk every morning at 07:30. &ldquo;You film&rdquo; are
+        scripts only you can do. <Link href={`/review?week=${week}`} className="text-accent-text underline">Open the Sunday review →</Link>
+      </Prose>
+    </div>
+  );
+}
+
+function Disclosure({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
+  return (
+    <details className="group rounded-xl border border-line bg-panel">
+      <summary className="cursor-pointer list-none flex items-baseline justify-between gap-3 px-5 py-3">
+        <span className="text-sm font-semibold text-fg">{title}</span>
+        {hint && <span className="text-xs text-fg-3">{hint}</span>}
+      </summary>
+      <div className="flex flex-col gap-4 px-5 pb-5 pt-1">{children}</div>
+    </details>
+  );
+}
+
 export default function VideoStudioPage() {
   const shortVideoUp = useLocalToolStatus();
 
@@ -248,7 +353,7 @@ export default function VideoStudioPage() {
                 Video Studio
               </h1>
               <p className="mt-1 text-sm text-fg-2">
-                Every video tool in one place · what each costs · which to pick
+                How video reaches a post · every tool · what each costs
               </p>
             </div>
             <Link
@@ -261,94 +366,113 @@ export default function VideoStudioPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-4xl px-6 py-10 flex flex-col gap-12">
+      <main className="mx-auto max-w-4xl px-6 py-10 flex flex-col gap-10">
 
-        <Section title="How to use it">
+        <Section title="This week's media">
+          <ThisWeeksMedia />
+        </Section>
+
+        <Section title="How media gets made">
           <Prose>
-            Describe the video you want to Claude or Cowork, in plain words. The video-producer agent picks the tool
-            from the rules below. To choose yourself, name the tool in your request (the example prompts on each card
-            show how). Finished videos go to the Review queue before anything is scheduled.
+            Cowork starts at the top and stops at the first rung that does the job. It never uses Higgsfield: there are no credits.
           </Prose>
-        </Section>
-
-        <Section title="The tools">
-          <div className="grid gap-4 sm:grid-cols-2">
-            {TOOLS.map(t => (
-              <ToolCard key={t.id} t={t}>
-                {t.id === "short-video-maker" && <StatusDot up={shortVideoUp} />}
-              </ToolCard>
-            ))}
-          </div>
-        </Section>
-
-        <Section title="Claude's own creative tools">
-          <Prose>
-            These run inside Claude, not in this hub, so the hub cannot embed them. Ask for them in Claude or Cowork and
-            the result is kept as an artifact you can edit and share. They are covered by the Claude plan, so there are no
-            extra credits to track. Claude Motion (short animations) is a Team and Enterprise beta only, so it is left
-            out here: HyperFrames above does the same job for free.
-          </Prose>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {CLAUDE_TOOLS.map(t => (
-              <ToolCard key={t.id} t={t} />
-            ))}
-          </div>
-        </Section>
-
-        <Section title="How the agent chooses">
-          <ul className="flex flex-col gap-3">
-            {RULES.map(r => (
-              <li key={r.title} className="text-sm leading-relaxed text-fg-2">
-                <span className="font-semibold text-fg">{r.title}. </span>{r.body}
+          <ol className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {LADDER.map(r => (
+              <li key={r.n} className="flex flex-col gap-1.5 rounded-xl border border-line bg-panel p-4">
+                <span className="text-xs font-semibold text-accent-text">Step {r.n}</span>
+                <span className="text-sm font-bold text-fg">{r.name}</span>
+                <span className="text-xs font-medium text-ok">{r.cost}</span>
+                <span className="text-xs leading-relaxed text-fg-2">{r.note}</span>
               </li>
             ))}
-          </ul>
+          </ol>
+          <Prose>
+            Cowork makes what it can every Saturday, and again every morning at 07:30 for any post still missing media. A post
+            missing media has an Ask Cowork to create it button in the Sunday review. Old Oak Town only ever gets typographic
+            cards or your own real photos, never AI imagery.
+          </Prose>
         </Section>
 
-        <Section title="By need: free or paid">
-          <div className="overflow-x-auto rounded-xl border border-line">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-panel-2 text-fg">
-                <tr>
-                  <th className="px-4 py-2 font-semibold">You need</th>
-                  <th className="px-4 py-2 font-semibold">Free route</th>
-                  <th className="px-4 py-2 font-semibold">Paid route</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-line bg-panel text-fg-2">
-                {BY_TYPE.map(r => (
-                  <tr key={r.need}>
-                    <td className="px-4 py-2 font-medium text-fg">{r.need}</td>
-                    <td className="px-4 py-2">{r.free}</td>
-                    <td className="px-4 py-2">{r.paid}</td>
+        <Section title="Asking for a video yourself">
+          <Prose>
+            Describe it to Claude or Cowork in plain words. If you name a tool, it uses that tool. If you leave it open, it
+            follows the steps above, and the finished video is attached to a post and appears in the Sunday review before
+            anything is scheduled.
+          </Prose>
+        </Section>
+
+        <Section title="Reference">
+          <Disclosure title="Every video tool" hint="Cost, where it runs, what it is for">
+            <div className="grid gap-4 sm:grid-cols-2">
+              {TOOLS.map(t => (
+                <ToolCard key={t.id} t={t}>
+                  {t.id === "short-video-maker" && <StatusDot up={shortVideoUp} />}
+                </ToolCard>
+              ))}
+            </div>
+          </Disclosure>
+
+          <Disclosure title="Claude's own creative tools" hint="Design, Slides, Dashboard">
+            <Prose>
+              These run inside Claude, not in this hub. Ask for them in Claude or Cowork and the result is kept as an artifact you
+              can edit and share. They are covered by the Claude plan, so there are no extra credits to track.
+            </Prose>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {CLAUDE_TOOLS.map(t => (
+                <ToolCard key={t.id} t={t} />
+              ))}
+            </div>
+          </Disclosure>
+
+          <Disclosure title="Choosing a tool" hint="Rules, by need, by brand">
+            <ul className="flex flex-col gap-3">
+              {RULES.map(r => (
+                <li key={r.title} className="text-sm leading-relaxed text-fg-2">
+                  <span className="font-semibold text-fg">{r.title}. </span>{r.body}
+                </li>
+              ))}
+            </ul>
+            <div className="overflow-x-auto rounded-xl border border-line">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-panel-2 text-fg">
+                  <tr>
+                    <th className="px-4 py-2 font-semibold">You need</th>
+                    <th className="px-4 py-2 font-semibold">Free route</th>
+                    <th className="px-4 py-2 font-semibold">Paid route</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <Prose>
-            If Blotato lapses, its carousels and infographics move to HyperFrames, and scheduling moves to wherever posts are
-            published next. Everything in the free column keeps working with no subscription.
-          </Prose>
-        </Section>
+                </thead>
+                <tbody className="divide-y divide-line bg-panel text-fg-2">
+                  {BY_TYPE.map(r => (
+                    <tr key={r.need}>
+                      <td className="px-4 py-2 font-medium text-fg">{r.need}</td>
+                      <td className="px-4 py-2">{r.free}</td>
+                      <td className="px-4 py-2">{r.paid}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <ul className="flex flex-col gap-3">
+              {BY_SITE.map(x => (
+                <li key={x.url} className="text-sm leading-relaxed text-fg-2">
+                  <span className="font-semibold text-fg">{x.site}</span>
+                  <span className="text-fg-3"> · {x.url} · </span>{x.note}
+                </li>
+              ))}
+            </ul>
+            <Prose>
+              If Blotato lapses, its carousels and infographics move to HyperFrames, and scheduling moves to wherever posts are
+              published next. Everything in the free column keeps working with no subscription.
+            </Prose>
+          </Disclosure>
 
-        <Section title="By site">
-          <ul className="flex flex-col gap-3">
-            {BY_SITE.map(s => (
-              <li key={s.url} className="text-sm leading-relaxed text-fg-2">
-                <span className="font-semibold text-fg">{s.site}</span>
-                <span className="text-fg-3"> · {s.url} · </span>{s.note}
-              </li>
-            ))}
-          </ul>
-        </Section>
-
-        <Section title="Starting short-video-maker">
-          <Prose>
-            It runs in Docker on Didi&apos;s computer. If the status light above is red, open Docker Desktop, wait for
-            &ldquo;Engine running&rdquo;, then run <code className="rounded px-1 py-0.5 text-[0.85em] bg-panel-2">docker compose up -d</code> in
-            the <code className="rounded px-1 py-0.5 text-[0.85em] bg-panel-2">short-video-maker</code> folder. The light only works from the same computer.
-          </Prose>
+          <Disclosure title="Starting short-video-maker" hint="Only on your own computer">
+            <Prose>
+              It runs in Docker on Didi&apos;s computer. If the status light on its card is red, open Docker Desktop, wait for
+              &ldquo;Engine running&rdquo;, then run <code className="rounded px-1 py-0.5 text-[0.85em] bg-panel-2">docker compose up -d</code> in
+              the <code className="rounded px-1 py-0.5 text-[0.85em] bg-panel-2">short-video-maker</code> folder. The light only works from the same computer.
+            </Prose>
+          </Disclosure>
         </Section>
 
       </main>

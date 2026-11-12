@@ -3,7 +3,7 @@
     { "id": "five-proof", "kind": "think", "prompt": "On Christmas Day, what is the one piece of proof from the £5 Challenge you would want to point to: a number, a screenshot, a story?", "about": "£5 Challenge" },
     { "id": "shoestring-advice", "kind": "advice", "prompt": "Who has built a YouTube channel on a tight budget and would tell you honestly what they would do differently in their first ten episodes?", "about": "Boss Moves", "withWhom": "A creator a few steps ahead of you" },
     { "id": "bbb-accountability", "kind": "discuss", "prompt": "Build Back Better runs to February. Who could you ask to check in with you monthly on the preparation season?", "about": "Build Back Better", "withWhom": "A trusted peer or mentor" },
-    { "id": "operate-waitlist", "kind": "think", "prompt": "OPERATE is waitlist-only. What is the waitlist telling you so far: who is joining and what are they asking for?", "about": "Master Your Career Path" },
+    { "id": "operate-waitlist", "kind": "think", "prompt": "OPERATE is live. Who has joined so far, and what are they asking for?", "about": "Master Your Career Path" },
     { "id": "waygate-ownership", "kind": "discuss", "prompt": "Hexagon Waygate is live. Is it clear with the client who owns what from here, and have you said it out loud?", "about": "Hexagon Waygate", "withWhom": "Your Hexagon contact" },
     { "id": "nlft-exit", "kind": "discuss", "prompt": "What would a good Atos DTP exit look like for the people at NLFT? Have you asked them rather than assumed?", "about": "Atos DTP Exit", "withWhom": "NLFT stakeholders" },
     { "id": "global-test", "kind": "think", "prompt": "These brands are built to travel. Which one could you test with a non-UK audience this month?", "about": "All sites" },

@@ -1,6 +1,9 @@
-// ── Site definitions, prompts and rubrics ───────────────────────────────────────────────
-// Each site has: its audience, its tone, its platforms, its subagent system
-// prompt, and its grader rubric. Edit these to tune agent behaviour.
+// ── Site configuration still used by the hub ────────────────────────────────────────────
+// Old Oak Town's voice and verified facts (used by the "Promote" action in
+// app/lib/oldoaktown-promote.ts) and the content-pillar helper. The weekly drafting
+// pipeline that used the other brands' prompts and rubrics has been retired:
+// Cowork researches, drafts and checks the week (docs/social-team-design.md), and
+// brand rules live in Cowork's brand-reject-lists skill, not in this repo.
 
 import { ContentPillarsFile } from './types.js';
 import contentPillarsData from '../data/content-pillars.json';
@@ -61,66 +64,6 @@ const OOT_VERIFIED_FACTS = [
 
 export const SITE_CONFIGS: SiteConfig[] = [
   {
-    id: 'masteryourcareerpath',
-    name: 'Master Your Career Path',
-    url: 'masteryourcareerpath.com',
-    platforms: ['LinkedIn', 'Instagram', 'TikTok'],
-    primaryPlatform: 'LinkedIn',
-    automateBlotato: true,
-    blotatoPlatforms: ['LinkedIn', 'Instagram', 'TikTok', 'Facebook'],
-    audience: 'Four segments: graduates entering the job market; early to mid-career professionals levelling up or negotiating better; career changers pivoting industries or roles; contractors and freelancers managing their own trajectory. Primarily in professional services. Common thread: action-oriented people who want to take control of their career.',
-    tone: 'Encouraging, practical, aspirational — not motivational fluff',
-    rubricName: 'Career transformation rubric',
-    passChecks: [
-      'Speaks clearly to at least one of the four audience segments',
-      'Delivers a practical, actionable insight — not vague inspiration',
-      'Drives toward a product, the PRIME membership community, or a framework by name (PRIME, or OPERATE as coming soon)',
-      'Drives toward a product, the Master Your Career Path community, or a framework by name (PRIME or OPERATE)',
-    ],
-    failCheck: 'Fails if purely motivational with no practical content, or if it invents products not in the confirmed list',
-    subagentSystemPrompt: `You are writing content for Master Your Career Path, a career development platform.
-
-The platform is built around two proprietary frameworks:
-- PRIME: Profile, Research, Interview mindset, Money mastery, Engage. It is for everyone, at every career stage and in every working arrangement (employees, contractors, temps, freelancers), because anyone looking for a job or a new contract is going through these steps. Never position PRIME as only for early-career people.
-- OPERATE: helps professionals build sustainable income as contractors or freelancers (relevant for contractors and freelancers)
-
-The audience has four distinct segments — each post should speak clearly to at least one:
-1. Graduates — just entering the job market, need to stand out and land their first role
-2. Early to mid-career professionals — a few years in, want to level up, get promoted, or negotiate better
-3. Career changers — pivoting industries or roles, need to reposition their skills and story
-4. Contractors and freelancers — managing their own trajectory, rates, and client relationships
-Common thread: action-oriented people who want to take control of their career rather than leave it to chance.
-
-Content pillars:
-${pillarBlock('masteryourcareerpath')}
-
-Confirmed products (only reference these — do not invent free resources or other products):
-- PRIME Monthly Membership (access to the MYCP community and platform): £27 per month
-- PRIME One-Off: £67 (buy PRIME once, no subscription)
-- PRIME Cohort: £375, a group programme run over four to six weeks, once per quarter
-- CV-to-Website course: £97
-- Free tier: the free community and the free career values quiz
-- OPERATE is NOT for sale: it is waitlist-only, coming soon. Never give it a price or imply it is available.
-
-Tone: Encouraging, practical, and aspirational — but grounded. Not motivational fluff. Always show how the advice connects to a real career outcome for the specific segment you are speaking to.
-
-Reference PRIME or OPERATE by name when relevant to the pillar. Every post should include a path to a confirmed product or the PRIME membership community. UK English throughout.
-- PRIME Membership (Master Your Career Path community): £27/month
-- OPERATE Membership: £27/month
-- PRIME + OPERATE together: £47/month
-- PRIME one-off (lifetime access): £67
-- CV-to-Website package: £97
-- PRIME Cohort: £375 (live cohorts, run four times per year)
-
-Tone: Encouraging, practical, and aspirational — but grounded. Not motivational fluff. Always show how the advice connects to a real career outcome for the specific segment you are speaking to.
-
-Reference PRIME or OPERATE by name when relevant to the pillar. Every post should include a path to a confirmed product or the Master Your Career Path community. UK English throughout.
-
-${DIVERSITY_GUIDELINE}`,
-    researchFocus: 'Weekly, timely research across BOTH the hard and the soft side of careers, and for ALL working arrangements (permanent employees, contractors, temps and freelancers, not just permanent staff). Hard side: UK hiring market shifts, redundancy waves, in-demand skills, graduate job market conditions, AI-in-hiring news. Soft side, mapped to the PRIME elements: Profile and positioning (CVs, LinkedIn, personal brand), Research (job search and market research), Interview mindset (confidence, preparation, performance), Money mastery (salary, rates and negotiation benchmarks), and Engage (networking, visibility, relationships, workplace culture, wellbeing and burnout). Include contractor, temp and freelancer news every week (rates, IR35, agency and umbrella changes, demand for interim and temp work).',
-  },
-
-  {
     id: 'oldoaktown',
     name: 'Old Oak Town',
     url: 'oldoaktown.co.uk',
@@ -169,45 +112,6 @@ ${DIVERSITY_GUIDELINE} This applies to Old Oak Common and Park Royal too — a g
     researchFocus: 'Real, dated local news for Old Oak Common and Park Royal, West London — OPDC planning decisions, HS2/Elizabeth line construction updates, and Hammersmith & Fulham / Brent / Ealing council announcements affecting the area. Also, with particular emphasis on COMPANIES: new companies opening, moving into or expanding in the area, local business news (hiring, awards, funding, relocations, closures), and events happening in the area (community events, business and networking events, consultations, open days, markets). Zero tolerance for anything not directly sourced from search results.',
   },
 
-  {
-    id: 'aiviralvideoprompts',
-    name: 'AI Viral Video Prompts',
-    url: 'aiviralvideoprompts.com',
-    platforms: ['TikTok', 'Instagram'],
-    primaryPlatform: 'TikTok',
-    automateBlotato: true,
-    blotatoPlatforms: ['TikTok', 'Instagram', 'Facebook', 'LinkedIn'],
-    audience: 'Content creators, social media marketers, and small business owners who want to produce high-performing AI video content',
-    tone: 'Energetic, creative, results-focused — show don\'t tell',
-    rubricName: 'Conversion rubric',
-    passChecks: [
-      'Hook lands in the very first line — no warm-up sentences',
-      'Contains a specific, usable AI prompt example (not vague "use AI to...")',
-      'Ends with a clear CTA to aiviralvideoprompts.com',
-    ],
-    failCheck: 'Fails if no specific prompt example is included',
-    subagentSystemPrompt: `You are writing content for AI Viral Video Prompts, which sells AI prompt packs for video creators via Gumroad at aiviralvideoprompts.com.
-
-The audience: content creators, social media marketers, and small business owners who want results — more views, more engagement, more growth from AI-generated video content.
-
-Content pillars:
-${pillarBlock('aiviralvideoprompts')}
-
-REQUIRED in every post:
-1. Hook in the very first line — no warm-up, no "hey guys", no context-setting
-2. A specific, usable AI prompt example (copy-paste ready, not "use AI to...")
-3. A clear CTA directing people to aiviralvideoprompts.com
-4. Only mention a discount or promotion if one is specified in the brief
-
-Platform notes:
-- TikTok: 150 words max, punchy, reads like a video script caption
-- Instagram: 200 words max, include 3-5 relevant hashtags at the end
-
-UK English. Energetic but not breathless. Show the result, not the tool.
-
-${DIVERSITY_GUIDELINE}`,
-    researchFocus: 'What is trending in AI video right now: new AI video-generation model/tool releases, TikTok/Instagram/YouTube algorithm or feature changes, viral video trends and formats, and notable creator-economy news relevant to social media marketers and small business owners making AI video content. Use it to show how the prompt packs tap straight into the trend this week.',
-  },
 ];
 
 export function getSiteConfig(siteId: string): SiteConfig {
@@ -216,7 +120,3 @@ export function getSiteConfig(siteId: string): SiteConfig {
   return config;
 }
 
-// Number of sites in the content pipeline. Derived from SITE_CONFIGS so any
-// change to the site list flows through automatically (e.g. the dashboard batch
-// metric) and can't silently drift out of step.
-export const PIPELINE_SITE_COUNT = SITE_CONFIGS.length;

@@ -4,9 +4,13 @@
 // The ONLY code path allowed to publish to Blotato. Loads approved rows (and
 // approved_needs_media rows) from content_library, builds payloads from
 // agents/accounts.ts (no inline IDs), schedules each in Europe/London time
-// (LinkedIn 08:00, Facebook 10:00, Twitter/X 12:00) on its weekday in the target
-// week — next occurrence if the slot has already passed — and pushes to the
-// Blotato v2 REST API.
+// (LinkedIn 08:00, Facebook 10:00, Twitter/X 12:00, others 09:00) on its weekday
+// in the target week and pushes to the Blotato v2 REST API. A slot that has passed
+// the same day goes out 10 minutes from now; a day that is already over is skipped
+// (never rolled forward a week). Posts the Brand gate blocked are never pushed.
+//
+// This route is the hub's fallback publisher. The normal path is: Didi approves in
+// the Sunday review, then Cowork schedules the approved rows in Blotato.
 //
 // Media: each row's media_urls (public image/video URLs attached in the review
 // queue) are forwarded in content.mediaUrls. Instagram/TikTok/Pinterest/YouTube
@@ -55,20 +59,43 @@ function londonWallTimeToUtc(y: number, mIdx: number, d: number, hour: number): 
   return new Date(targetAsUtc - offset);
 }
 
-// The scheduled UTC instant for a row: its weekday in the target week at the
-// platform's London hour; if that's already passed, the next weekly occurrence.
-function scheduledUtc(weekCommencing: string, dayName: string, platform: string): Date {
+// London calendar date (YYYY-MM-DD) and hour for an instant.
+function londonNow(at: Date): { ymd: string; hour: number } {
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/London', hour12: false,
+    year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit',
+  }).formatToParts(at);
+  const get = (t: string) => parts.find(p => p.type === t)!.value;
+  return { ymd: `${get('year')}-${get('month')}-${get('day')}`, hour: Number(get('hour')) % 24 };
+}
+
+// The scheduled instant for a row, or a reason it cannot be scheduled.
+//
+//   * Slot still ahead: its weekday in the target week at the platform's London hour.
+//   * Slot already passed, but it is still that same day: post 10 minutes from
+//     now, so a date-sensitive post ("14 days to go") still goes out on the day
+//     it was written for. After 21:00 London time it is too late for that day.
+//   * That day is already over: skip it. It used to roll forward a whole week,
+//     which silently put out stale posts (a Monday countdown a week late).
+function scheduleFor(
+  weekCommencing: string, dayName: string, platform: string,
+): { at: Date } | { skip: string } {
   const hour = londonHourFor(platform);
   const [wy, wm, wd] = weekCommencing.split('-').map(Number);
-  let addDays = DAY_OFFSET[dayName] ?? 0;
-  for (let i = 0; i < 3; i++) {
-    const dt = new Date(Date.UTC(wy, wm - 1, wd + addDays));
-    const cand = londonWallTimeToUtc(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate(), hour);
-    if (cand.getTime() > Date.now()) return cand;
-    addDays += 7;
+  const dt = new Date(Date.UTC(wy, wm - 1, wd + (DAY_OFFSET[dayName] ?? 0)));
+  const y = dt.getUTCFullYear(), m = dt.getUTCMonth(), d = dt.getUTCDate();
+
+  const slot = londonWallTimeToUtc(y, m, d, hour);
+  const now = new Date();
+  if (slot.getTime() > now.getTime()) return { at: slot };
+
+  const targetYmd = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+  const today = londonNow(now);
+  if (today.ymd === targetYmd) {
+    if (today.hour >= 21) return { skip: 'Too late today (after 21:00). Edit it for another day or reject it' };
+    return { at: new Date(now.getTime() + 10 * 60 * 1000) };
   }
-  const dt = new Date(Date.UTC(wy, wm - 1, wd + addDays));
-  return londonWallTimeToUtc(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate(), hour);
+  return { skip: `${dayName}'s slot has passed. Edit the post for another day, or reject it` };
 }
 
 interface PushResult {
@@ -115,7 +142,7 @@ export async function POST(request: NextRequest) {
     // out once a media URL is attached; without one they are skipped and left as-is.
     let query = supabase
       .from('content_library')
-      .select('id, site_id, day_name, platform, content, edited_content, media_urls')
+      .select('*')
       .eq('week_commencing', week)
       .in('status', ['approved', 'approved_needs_media']);
     if (siteId) query = query.eq('site_id', siteId);
@@ -126,11 +153,23 @@ export async function POST(request: NextRequest) {
     const rows = (data ?? []) as {
       id: string; site_id: string; day_name: string; platform: string;
       content: string; edited_content: string | null; media_urls: unknown;
+      gate_verdict?: string | null;
     }[];
 
     const results: PushResult[] = [];
 
     for (const row of rows) {
+      // Defence in depth: the Brand gate's "blocked" verdict can never be published,
+      // even if a row was approved before the gate looked at it.
+      if (row.gate_verdict === 'blocked') {
+        results.push({
+          id: row.id, siteId: row.site_id, platform: row.platform, day: row.day_name,
+          status: 'skipped',
+          error: 'Blocked by the Brand gate. Fix it and have it re-checked first',
+        });
+        continue;
+      }
+
       const acct = ACCOUNT_MAP[row.site_id]?.[row.platform];
       if (acct == null) {
         // null (not a publish target) or undefined (not configured) — leave as-is.
@@ -160,7 +199,15 @@ export async function POST(request: NextRequest) {
 
       const text = row.edited_content ?? row.content;
       const target = buildTarget(acct.platform, acct.target, mediaUrls);
-      const scheduledIso = scheduledUtc(week, row.day_name, acct.platform).toISOString();
+      const when = scheduleFor(week, row.day_name, acct.platform);
+      if ('skip' in when) {
+        results.push({
+          id: row.id, siteId: row.site_id, platform: row.platform, day: row.day_name,
+          status: 'skipped', error: when.skip,
+        });
+        continue;
+      }
+      const scheduledIso = when.at.toISOString();
 
       try {
         const { postSubmissionId, error: pushErr } = await callBlotato(
