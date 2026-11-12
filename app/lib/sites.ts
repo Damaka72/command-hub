@@ -93,6 +93,16 @@ export const SITES: Site[] = [
     // Not part of the content pipeline: its work is tracked in data/trackers/world-of-contracts.json.
   },
   {
+    id: "the-naija-food-guide",
+    name: "The Naija Food Guide",
+    url: "thenaijafoodguide.co.uk",
+    description: "UK directory of verified Nigerian restaurants and licensed caterers",
+    github: "https://github.com/Damaka72/thenaijafoodguide",
+    admin: "https://thenaijafoodguide.co.uk/admin",
+    initials: "NF",
+    // Not part of the content pipeline yet: its work is tracked in data/trackers/the-naija-food-guide.json.
+  },
+  {
     id: "didianolue",
     name: "Didi Anolue",
     url: "didianolue.co.uk",

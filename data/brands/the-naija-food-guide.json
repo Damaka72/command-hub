@@ -1,0 +1,91 @@
+{
+  "siteId": "the-naija-food-guide",
+  "name": "The Naija Food Guide",
+  "url": "thenaijafoodguide.co.uk",
+  "tagline": "A UK guide to verified Nigerian restaurants and licensed caterers",
+  "source": "Read from the site's design tokens (src/app/globals.css)",
+  "colours": [
+    {
+      "name": "Naija green",
+      "hex": "#008751",
+      "role": "Main brand colour: the Nigerian flag green"
+    },
+    {
+      "name": "Light green",
+      "hex": "#2FBF7A",
+      "role": "Green for text and accents on dark backgrounds"
+    },
+    {
+      "name": "White",
+      "hex": "#FFFFFF",
+      "role": "Flag white: headlines on dark, the centre band"
+    },
+    {
+      "name": "Gold",
+      "hex": "#D9A93C",
+      "role": "Featured (Gold plan) only, and star ratings"
+    },
+    {
+      "name": "Ink",
+      "hex": "#0A100C",
+      "role": "Main dark background"
+    },
+    {
+      "name": "Panel",
+      "hex": "#0F1812",
+      "role": "Cards on the dark background"
+    },
+    {
+      "name": "Body grey",
+      "hex": "#C9D1CC",
+      "role": "Body text on dark"
+    },
+    {
+      "name": "Silver",
+      "hex": "#A7B0B8",
+      "role": "Secondary text; Silver plan label"
+    }
+  ],
+  "fonts": {
+    "display": {
+      "family": "Plus Jakarta Sans",
+      "weights": "800",
+      "use": "Headlines, tight tracking",
+      "source": "https://fonts.google.com/specimen/Plus+Jakarta+Sans"
+    },
+    "body": {
+      "family": "Plus Jakarta Sans",
+      "weights": "400, 500, 700",
+      "use": "Body copy, captions, labels",
+      "source": "https://fonts.google.com/specimen/Plus+Jakarta+Sans"
+    }
+  },
+  "card": {
+    "background": "#0A100C",
+    "headline": "#FFFFFF",
+    "accent": "#2FBF7A",
+    "body": "#C9D1CC",
+    "alt": {
+      "background": "#FFFFFF",
+      "headline": "#0C3A25",
+      "accent": "#008751",
+      "body": "#2A4034"
+    }
+  },
+  "voice": "Warm, proud and trustworthy. Celebrates the food; plain about what 'verified' means.",
+  "imagery": [
+    "Only photos sent by the business itself with permission, or your own. Never scraped from Google, TripAdvisor or Instagram.",
+    "When people appear, show a mix of nationalities and ethnicities; never one default face.",
+    "A green, white, green stripe (the flag) works as a top or bottom band on cards."
+  ],
+  "logo": "Logo is in the site's code: public/logo-map.svg (map of Nigeria in flag colours).",
+  "doNot": [
+    "Never use a restaurant's photo without its permission.",
+    "Do not present hygiene ratings as the Guide's own: they are the Food Standards Agency's.",
+    "Gold is for Featured listings only."
+  ],
+  "toConfirm": [
+    "Blotato accounts and posting slots do not exist for this brand yet.",
+    "The voice line is a first draft written for this sheet. Edit it to sound like you."
+  ]
+}

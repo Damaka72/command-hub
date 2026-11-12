@@ -29,7 +29,7 @@ const RHYTHM_NAV = [
 const UTILITY_NAV = [
   { href: "/library", label: "Library" },
   { href: "/social",  label: "Social Accounts" },
-  { href: "/video-studio", label: "Video Studio" },
+  { href: "/creative-studio", label: "Creative Studio" },
   { href: "/guide",   label: "Ops Guide" },
 ] as const;
 

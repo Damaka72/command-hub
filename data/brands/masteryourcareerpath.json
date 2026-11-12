@@ -1,0 +1,91 @@
+{
+  "siteId": "masteryourcareerpath",
+  "name": "Master Your Career Path",
+  "url": "masteryourcareerpath.com",
+  "tagline": "Take control of your career",
+  "source": "Read from the live site's home page styles (index.html)",
+  "colours": [
+    {
+      "name": "Navy",
+      "hex": "#1B3A8C",
+      "role": "Main brand colour: backgrounds, headings on light"
+    },
+    {
+      "name": "Navy dark",
+      "hex": "#122970",
+      "role": "Deep backgrounds and footers"
+    },
+    {
+      "name": "Gold",
+      "hex": "#F5A623",
+      "role": "Accent: highlights, buttons, key numbers"
+    },
+    {
+      "name": "Gold dark",
+      "hex": "#D4891A",
+      "role": "Gold on light backgrounds, hover"
+    },
+    {
+      "name": "White",
+      "hex": "#FFFFFF",
+      "role": "Text on navy; clean backgrounds"
+    },
+    {
+      "name": "Off-white",
+      "hex": "#F8F8F8",
+      "role": "Soft backgrounds"
+    },
+    {
+      "name": "Ink",
+      "hex": "#1A1A2E",
+      "role": "Body text on light"
+    },
+    {
+      "name": "Mid text",
+      "hex": "#4A4A6A",
+      "role": "Secondary text on light"
+    }
+  ],
+  "fonts": {
+    "display": {
+      "family": "Playfair Display",
+      "weights": "600, 700, 900; italic for emphasis",
+      "use": "Headlines and quotes",
+      "source": "https://fonts.google.com/specimen/Playfair+Display"
+    },
+    "body": {
+      "family": "Plus Jakarta Sans",
+      "weights": "400, 500, 700, 800",
+      "use": "Body copy, captions, labels",
+      "source": "https://fonts.google.com/specimen/Plus+Jakarta+Sans"
+    }
+  },
+  "card": {
+    "background": "#1B3A8C",
+    "headline": "#FFFFFF",
+    "accent": "#F5A623",
+    "body": "#F8F8F8",
+    "alt": {
+      "background": "#F8F8F8",
+      "headline": "#1B3A8C",
+      "accent": "#D4891A",
+      "body": "#1A1A2E"
+    }
+  },
+  "voice": "Encouraging, practical and aspirational without motivational fluff; straight-talking and peer-to-peer, never preachy.",
+  "imagery": [
+    "Real-looking professionals at work, not staged stock smiles.",
+    "When people appear, show a mix of nationalities and ethnicities; never one default face.",
+    "Simple diagrams of the PRIME and OPERATE steps work well as infographics."
+  ],
+  "logo": "Logo files exist only on Didi's computer (from the PRIME review). Add them to Drive under 99 Brand Assets.",
+  "doNot": [
+    "No motivational cliches or hustle language.",
+    "Do not mention Skool.",
+    "Do not put white text on gold: it is too faint to read."
+  ],
+  "toConfirm": [
+    "Prices in pounds or dollars on cards?",
+    "Confirm the logo version to use on social cards."
+  ]
+}

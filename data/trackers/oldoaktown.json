@@ -1,0 +1,50 @@
+{
+  "siteId": "oldoaktown",
+  "name": "Old Oak Town",
+  "description": "Hyperlocal news and community for the Old Oak Common regeneration",
+  "url": "https://oldoaktown.co.uk",
+  "repo": "Damaka72/oldoaktown",
+  "accent": "#2D5016",
+  "tasks": [
+    {
+      "id": "business-approval-api",
+      "area": "On the website",
+      "title": "Check the business approval change is live and working",
+      "detail": "The work from 3 Sep was finished but never signed off. Approve a test business in /admin.",
+      "status": "todo",
+      "owner": "didi",
+      "next": true,
+      "order": 10
+    },
+    {
+      "id": "hub-first-live-run",
+      "area": "On the website",
+      "title": "Run the Command Hub's Old Oak Town admin once on the live site",
+      "detail": "Everything else was live on 11 Oct; this was the one untested piece.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 20
+    },
+    {
+      "id": "brand-fonts",
+      "area": "Brand and content",
+      "title": "Choose the Old Oak Town fonts for social posts",
+      "detail": "The home page uses plain system fonts; the blog uses Instrument Serif and DM Sans. The brand sheet assumes the blog pair.",
+      "status": "todo",
+      "owner": "didi",
+      "next": true,
+      "order": 30
+    },
+    {
+      "id": "brand-real-photos",
+      "area": "Brand and content",
+      "title": "Put real local photos in the Drive brand folder",
+      "detail": "Old Oak Town never uses AI-made imagery, so cards and slideshows need your own photos.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 40
+    }
+  ]
+}

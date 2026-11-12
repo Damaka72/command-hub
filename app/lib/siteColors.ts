@@ -25,6 +25,7 @@ const make = (key: string, name: string, token: string): SiteColor => {
 export const SITE_COLORS: Record<string, SiteColor> = {
   masteryourcareerpath: make('MYCP',  'Master Your Career Path', 'masteryourcareerpath'),
   'world-of-contracts': make('WOC',   'World of Contracts',      'world-of-contracts'),
+  'the-naija-food-guide': make('NFG', 'The Naija Food Guide',    'the-naija-food-guide'),
   oldoaktown:           make('OOT',   'Old Oak Town',            'oldoaktown'),
   aiviralvideoprompts:  make('AIVVP', 'AI Viral Video Prompts',  'aiviralvideoprompts'),
   didianolue:           make('DIDA',  'didianolue.co.uk',        'didianolue'),

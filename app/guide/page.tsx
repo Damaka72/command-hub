@@ -88,7 +88,7 @@ const PAGES: React.ReactNode[][] = [
   ["/friday",       "Friday",         "Planned against published, revenue and subscribers."],
   ["/library",      "Library",        "Every post across weeks and months."],
   ["/social",       "Social",         "The connected accounts per brand."],
-  ["/video-studio", "Video Studio",   "How video reaches a post, and every video tool."],
+  ["/creative-studio", "Creative Studio", "Videos, presentations, infographics and carousels; the brand sheets; every tool."],
   ["/ops",          "Operations",     "Site health, deploys, revenue and trackers."],
 ];
 
@@ -107,6 +107,19 @@ const DATA: React.ReactNode[][] = [
   ["Blotato",   "Scheduling and publishing to every social account, and post analytics where the platform supports them."],
   ["Beehiiv",   "The newsletters: The Pathway, The Prompt-ly and The Oak."],
   ["Drive",     "The Command Hub Content Library: finished media, one folder per brand."],
+];
+
+// How to brief Claude: the habits that most improve what comes back.
+const BRIEFING: React.ReactNode[][] = [
+  ["Say what done looks like", "Name the result you will see, who it is for, and what to leave alone.", "\u201cThe scrollbar is too thin to see; make it easy to grab. Do not change the colours.\u201d"],
+  ["Show an example", "One example beats a paragraph of description. Paste a post, screenshot or link. For anything visual, copy the brand sheet from Creative Studio and paste it in.", "\u201cLike this post, but for World of Contracts. Brand sheet below.\u201d"],
+  ["One job per conversation", "Small, single-purpose conversations give sharper results and are easier to check.", "Start a new conversation for each separate job."],
+  ["Ask for a plan first", "For anything bigger than a quick fix. Two minutes reading a plan catches a wrong turn before an hour of building.", "\u201cShow me your plan before you start.\u201d"],
+  ["Ask for proof", "You get screenshots and test results, and a plain statement of what was not checked.", "\u201cShow me how you tested it.\u201d"],
+  ["Write standing rules down once", "Anything you repeat belongs in the project\u2019s instruction file, which Claude reads at the start of every conversation.", "\u201cAdd this to the project instructions: always use UK English.\u201d"],
+  ["Turn repeated jobs into skills", "A skill is a recipe card: written once, followed the same way every time. Sweat the assets you already have before adding a new tool.", "\u201cMake a skill for turning an approved post into a carousel.\u201d"],
+  ["Close the loop", "Work stalls on unanswered questions. Two words are enough.", "\u201cOption A.\u201d or \u201cLeave it.\u201d"],
+  ["React to the first draft", "Saying what is wrong with a draft gets further than a longer brief up front.", "\u201cToo formal. Shorter. Lead with the day rate.\u201d"],
 ];
 
 // ── Page ─────────────────────────────────────────────────────────────────────
@@ -179,7 +192,7 @@ export default function GuidePage() {
         <Section title="Media and video">
           <Prose>
             Cowork makes cards and story videos for free or very cheaply. Anything only you can film arrives as a
-            script and shot list. The whole flow is on the <Link href="/video-studio" className="text-accent-text underline">Video Studio</Link> page.
+            script and shot list. The whole flow is on the <Link href="/creative-studio" className="text-accent-text underline">Creative Studio</Link> page.
           </Prose>
         </Section>
 
@@ -193,6 +206,19 @@ export default function GuidePage() {
 
         <Section title="Where the data lives">
           <Table head={["System", "What it holds"]} rows={DATA} />
+        </Section>
+
+        <Section title="How to brief Claude">
+          <Prose>
+            Treat Claude like a skilled contractor on a building job: what you get back depends mostly on the brief, the
+            reference material and when you inspect the work. Before adding any new tool, ask: what do I want to make each
+            week that I cannot make today, and is the gap a missing tool or a missing habit?
+          </Prose>
+          <Table head={["Habit", "Why", "What to say"]} rows={BRIEFING} />
+          <Prose>
+            Start with three: say what done looks like, ask for a plan first, and close the loop. Open questions waiting on
+            you are listed on each site&rsquo;s tracker.
+          </Prose>
         </Section>
 
         <Section title="If something looks wrong">

@@ -1,0 +1,40 @@
+{
+  "siteId": "aiviralvideoprompts",
+  "name": "AI Viral Video Prompts",
+  "description": "AI-powered prompts for creating viral video content",
+  "url": "https://aiviralvideoprompts.com",
+  "repo": "Damaka72/ai-viral-video-prompts",
+  "accent": "#4ECDC4",
+  "tasks": [
+    {
+      "id": "footer-homepage",
+      "area": "On the website",
+      "title": "Check the footer and home page fixes are live",
+      "detail": "Fixed on 16 Jul and left for review, along with the footer copyright year.",
+      "status": "todo",
+      "owner": "didi",
+      "next": true,
+      "order": 10
+    },
+    {
+      "id": "brand-sheet-check",
+      "area": "Brand and content",
+      "title": "Check the brand sheet in Creative Studio",
+      "detail": "Coral, teal and navy with Inter were read from the live site. Confirm they are right for social posts.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 20
+    },
+    {
+      "id": "brand-logo",
+      "area": "Brand and content",
+      "title": "Add a logo file to the Drive brand folder",
+      "detail": "No logo file was found in the site's code.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 30
+    }
+  ]
+}

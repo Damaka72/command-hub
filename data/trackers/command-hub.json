@@ -1,0 +1,159 @@
+{
+  "siteId": "command-hub",
+  "name": "Command Hub",
+  "description": "The Hub itself and the content creation factory behind it",
+  "repo": "Damaka72/command-hub",
+  "accent": "#D97757",
+  "tasks": [
+    {
+      "id": "cowork-steps",
+      "area": "Posting process",
+      "title": "Run the Cowork steps for the new posting model",
+      "detail": "The Hub side merged on 9 Nov; the Cowork steps were left for you.",
+      "status": "todo",
+      "owner": "didi",
+      "next": true,
+      "order": 10
+    },
+    {
+      "id": "boss-publisher-answers",
+      "area": "Posting process",
+      "title": "Answer the seven questions from the BOSS Social Publisher",
+      "detail": "Blotato history, TCC scope, Didi scope, Meta page types, YouTube channels, unmapped LinkedIn pages, carousels. Waiting since 4 Nov.",
+      "status": "todo",
+      "owner": "didi",
+      "next": true,
+      "order": 20
+    },
+    {
+      "id": "agent-reach",
+      "area": "Posting process",
+      "title": "Pick a priority (a to e) for Agent-Reach",
+      "detail": "Also say whether anything is broken and confirm committing without a pull request. From 8 Nov.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 30
+    },
+    {
+      "id": "brand-sheets-review",
+      "area": "Creative Studio and brand sheets",
+      "title": "Review the six brand sheets and settle the 'to confirm' points",
+      "detail": "Each sheet lists what was read from the site and what still needs your decision.",
+      "status": "todo",
+      "owner": "didi",
+      "next": true,
+      "order": 40
+    },
+    {
+      "id": "brand-logos-drive",
+      "area": "Creative Studio and brand sheets",
+      "title": "Put each brand's logo files in Drive under 99 Brand Assets",
+      "detail": "Presentations, infographics and cards need a logo file to place.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 50
+    },
+    {
+      "id": "brand-skills",
+      "area": "Creative Studio and brand sheets",
+      "title": "Turn each brand sheet into a Cowork brand skill",
+      "detail": "So every card, deck and infographic picks up the right colours and fonts without being told.",
+      "status": "todo",
+      "owner": "both",
+      "next": false,
+      "order": 60
+    },
+    {
+      "id": "woc-nfg-join",
+      "area": "Creative Studio and brand sheets",
+      "title": "Add World of Contracts and The Naija Food Guide to the posting process",
+      "detail": "They have brand sheets now but no Blotato accounts or weekly slots in the Hub yet.",
+      "status": "todo",
+      "owner": "both",
+      "next": false,
+      "order": 70
+    },
+    {
+      "id": "first-deck-infographic",
+      "area": "Creative Studio and brand sheets",
+      "title": "Make one test presentation and one test infographic for a brand",
+      "detail": "Proves the Creative Studio flow end to end before it is relied on.",
+      "status": "todo",
+      "owner": "both",
+      "next": false,
+      "order": 80
+    },
+    {
+      "id": "overhaul-decisions",
+      "area": "The Hub itself",
+      "title": "Make the five decisions left from the restyle",
+      "detail": "Including a light-mode theme and LinkedIn attribution. From 5 Nov.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 90
+    },
+    {
+      "id": "tracker-saving",
+      "area": "The Hub itself",
+      "title": "Tick a tracker task and check it stays ticked on another device",
+      "detail": "Saving tracker changes to the database was never tested live. From 4 Nov.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 100
+    },
+    {
+      "id": "overnight-section",
+      "area": "The Hub itself",
+      "title": "Connect email and a news source to the Overnight section",
+      "detail": "The section on the home page is still an empty placeholder.",
+      "status": "todo",
+      "owner": "claude",
+      "next": false,
+      "order": 110
+    },
+    {
+      "id": "nfg-vercel-id",
+      "area": "The Hub itself",
+      "title": "Record the Naija Food Guide's Vercel project id",
+      "detail": "Until then the Hub checks the site is up but cannot show its last deploy.",
+      "status": "todo",
+      "owner": "claude",
+      "next": false,
+      "order": 120
+    },
+    {
+      "id": "plugins-merge",
+      "area": "Older loose ends (check if still needed)",
+      "title": "Claude plugins community install: merge now or wait for checks",
+      "detail": "From 30 Aug.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 130
+    },
+    {
+      "id": "vibevoice-branch",
+      "area": "Older loose ends (check if still needed)",
+      "title": "VibeVoice: open the pull request or delete the branch",
+      "detail": "From 6 Aug.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 140
+    },
+    {
+      "id": "didianolue-accounts",
+      "area": "Older loose ends (check if still needed)",
+      "title": "Decide whether to strip didianolue from the accounts list and docs",
+      "detail": "From 15 Jul.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 150
+    }
+  ]
+}

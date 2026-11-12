@@ -1,0 +1,40 @@
+{
+  "siteId": "didianolue",
+  "name": "Didi Anolue",
+  "description": "Personal consultancy site: procurement and commercial leadership",
+  "url": "https://didianolue.co.uk",
+  "repo": "Damaka72/didi-anolue-landing-page",
+  "accent": "#8A6D1F",
+  "tasks": [
+    {
+      "id": "v2-diagnose",
+      "area": "On the website",
+      "title": "Test the diagnose tool at didianolue.co.uk/v2",
+      "detail": "Type something distinctive and see whether it answers your words or falls back to a generic reply. From 17 Jul.",
+      "status": "todo",
+      "owner": "didi",
+      "next": true,
+      "order": 10
+    },
+    {
+      "id": "banner-pr27",
+      "area": "On the website",
+      "title": "Decide whether to open or close pull request #27 (top banner art and keynote pages)",
+      "detail": "From 28 Jul. I could not confirm which site this belongs to; it is listed here as the most likely.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 20
+    },
+    {
+      "id": "brand-sheet-check",
+      "area": "Brand and content",
+      "title": "Check the brand sheet in Creative Studio",
+      "detail": "Deep navy and warm gold with Inter were read from the live home page. The /v2 site may use a different look.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 30
+    }
+  ]
+}

@@ -4,8 +4,98 @@
   "description": "UK directory of verified Nigerian restaurants and licensed caterers",
   "url": "https://thenaijafoodguide.co.uk",
   "repo": "Damaka72/thenaijafoodguide",
-  "accent": "#008751",
+  "accent": "#14B8A6",
   "tasks": [
+    {
+      "id": "service-role-key",
+      "area": "Go-live basics",
+      "title": "Replace SUPABASE_SERVICE_ROLE_KEY in Vercel with the right key, then redeploy",
+      "detail": "The saved key was refused by the database on 10 Nov, so /admin loads nothing. Copy service_role from the Supabase project named The Naija Food Guide.",
+      "status": "todo",
+      "owner": "didi",
+      "next": true,
+      "order": 10
+    },
+    {
+      "id": "approve-805-claim",
+      "area": "Go-live basics",
+      "title": "Approve your own test claim for 805 Restaurant",
+      "detail": "/admin > Claims > Approve. No email is sent for claims.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 20
+    },
+    {
+      "id": "stripe-test-payment",
+      "area": "Go-live basics",
+      "title": "Make a Stripe test payment for Silver from /account",
+      "detail": "Test card 4242 4242 4242 4242.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 30
+    },
+    {
+      "id": "publish-candidates",
+      "area": "Go-live basics",
+      "title": "Review the 75 candidate listings and publish the ones that pass",
+      "detail": "Only one listing is public today, so most owners cannot find their business on the photo form.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 40
+    },
+    {
+      "id": "legal-placeholders",
+      "area": "Go-live basics",
+      "title": "Fill in the bracketed details on the legal pages",
+      "detail": "Registered business name and address on the privacy and terms pages.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 50
+    },
+    {
+      "id": "supabase-smtp",
+      "area": "Go-live basics",
+      "title": "Add a proper email sender for sign-in links",
+      "detail": "Supabase's built-in email only sends a few an hour. Resend, chosen for photo emails, can do this too.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 60
+    },
+    {
+      "id": "claim-emails",
+      "area": "Go-live basics",
+      "title": "Build approval and rejection emails for listing claims",
+      "detail": "Owners currently hear nothing when a claim is decided.",
+      "status": "todo",
+      "owner": "claude",
+      "next": false,
+      "order": 70
+    },
+    {
+      "id": "tile-design-answer",
+      "area": "Go-live basics",
+      "title": "Answer the waiting question on directory tile design and promotion",
+      "detail": "The conversation from 9 Nov is paused on a question for you.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 80
+    },
+    {
+      "id": "brand-sheet-check",
+      "area": "Brand and content",
+      "title": "Check the brand sheet in Creative Studio",
+      "detail": "Flag green, gold and Plus Jakarta Sans were read from the live site.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 90
+    },
     {
       "id": "photos-database",
       "area": "Photo submissions: built",
@@ -14,7 +104,7 @@
       "status": "done",
       "owner": "claude",
       "next": false,
-      "order": 10
+      "order": 100
     },
     {
       "id": "photos-form",
@@ -24,7 +114,7 @@
       "status": "done",
       "owner": "claude",
       "next": false,
-      "order": 20
+      "order": 110
     },
     {
       "id": "photos-admin",
@@ -34,7 +124,7 @@
       "status": "done",
       "owner": "claude",
       "next": false,
-      "order": 30
+      "order": 120
     },
     {
       "id": "photos-listing",
@@ -44,7 +134,7 @@
       "status": "done",
       "owner": "claude",
       "next": false,
-      "order": 40
+      "order": 130
     },
     {
       "id": "photos-turnstile",
@@ -55,7 +145,7 @@
       "owner": "didi",
       "next": true,
       "when": "Before launch",
-      "order": 50
+      "order": 140
     },
     {
       "id": "photos-resend-domain",
@@ -66,7 +156,7 @@
       "owner": "didi",
       "next": true,
       "when": "Before launch",
-      "order": 60
+      "order": 150
     },
     {
       "id": "photos-resend-key",
@@ -77,7 +167,7 @@
       "owner": "didi",
       "next": false,
       "when": "Before launch",
-      "order": 70
+      "order": 160
     },
     {
       "id": "photos-vercel-vars",
@@ -88,7 +178,7 @@
       "owner": "didi",
       "next": true,
       "when": "Before launch",
-      "order": 80
+      "order": 170
     },
     {
       "id": "photos-vercel-preview-vars",
@@ -99,7 +189,7 @@
       "owner": "didi",
       "next": false,
       "when": "Before launch",
-      "order": 90
+      "order": 180
     },
     {
       "id": "photos-redeploy",
@@ -110,7 +200,7 @@
       "owner": "didi",
       "next": false,
       "when": "Before launch",
-      "order": 100
+      "order": 190
     },
     {
       "id": "photos-test-submit",
@@ -121,7 +211,7 @@
       "owner": "didi",
       "next": true,
       "when": "Before launch",
-      "order": 110
+      "order": 200
     },
     {
       "id": "photos-test-admin",
@@ -132,7 +222,7 @@
       "owner": "didi",
       "next": false,
       "when": "Before launch",
-      "order": 120
+      "order": 210
     },
     {
       "id": "photos-test-manage",
@@ -143,7 +233,7 @@
       "owner": "didi",
       "next": false,
       "when": "Before launch",
-      "order": 130
+      "order": 220
     },
     {
       "id": "photos-pull-request",
@@ -154,7 +244,7 @@
       "owner": "claude",
       "next": false,
       "when": "After testing",
-      "order": 140
+      "order": 230
     },
     {
       "id": "photos-merge",
@@ -164,7 +254,7 @@
       "owner": "didi",
       "next": false,
       "when": "After testing",
-      "order": 150
+      "order": 240
     },
     {
       "id": "photos-legal-review",
@@ -175,7 +265,7 @@
       "owner": "didi",
       "next": false,
       "when": "Before launch",
-      "order": 160
+      "order": 250
     }
   ]
 }

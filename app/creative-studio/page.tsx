@@ -4,12 +4,13 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useWeek } from "../context/WeekContext";
 import { MEDIA_PLATFORMS, hasMedia, isFilmingBrief, type ReviewRow } from "../review/classify";
+import BrandSheets from "./BrandSheets";
 
-// ── Video Studio ──────────────────────────────────────────────────────────────
-// The room where video gets made. It explains how media reaches a post (the
-// weekly flow), then lists every video tool Didi can use, what each costs, when
-// to pick it, and how to ask Claude / Cowork to use it. The page leads with this
-// week's media and the weekly ladder; the tool catalogue is collapsed reference.
+// ── Creative Studio ───────────────────────────────────────────────────────────
+// The content factory floor: where videos, presentations, infographics, carousels
+// and posters get made, all in each brand's own colours and fonts. It leads with
+// what can be made and the brand sheets, then this week's media and the weekly
+// ladder; the tool catalogue is collapsed reference. (Formerly "Video Studio".)
 // Two modes:
 //   * Automatic: Cowork's weekly run and media desk follow a fixed, cheap ladder.
 //   * On request: Didi names a tool and it wins.
@@ -167,6 +168,62 @@ const BY_SITE: { site: string; url: string; note: string }[] = [
   { site: "Master Your Career Path", url: "masteryourcareerpath.com", note: "LinkedIn, Instagram, TikTok, Facebook. Tips, product promos (only if a campaign is confirmed), 9:16 talking-head." },
   { site: "Old Oak Town", url: "oldoaktown.co.uk", note: "Typographic cards or real photos only. No AI imagery, no stock footage, no invented events or statistics." },
   { site: "AI Viral Video Prompts", url: "aiviralvideoprompts.com", note: "TikTok, Instagram, Facebook, LinkedIn. The natural home for showcasing AI video tools." },
+];
+
+// What the studio makes, and the quickest good route to each. "ask" is a sentence
+// Didi can say to Claude or Cowork as it stands.
+const FORMATS: { name: string; what: string; route: string; size: string; ask: string }[] = [
+  {
+    name: "Video",
+    what: "Reels, shorts, explainers, promos and captioned clips.",
+    route: "HyperFrames for anything designed (free, exact brand look). An AI story video or your own filming for the rest.",
+    size: "1080 × 1920 vertical",
+    ask: "Make a 30-second vertical explainer about [topic] for [brand], using its brand sheet.",
+  },
+  {
+    name: "Presentation",
+    what: "Decks for a talk, training session, pitch or webinar. Also the base for a LinkedIn document post.",
+    route: "Claude Slides (in your plan). Downloads as PowerPoint or PDF.",
+    size: "1920 × 1080 slides",
+    ask: "Build a 10-slide deck on [topic] for [brand], using its brand sheet. One idea per slide.",
+  },
+  {
+    name: "Infographic",
+    what: "One tall image that explains a process, a comparison or a set of numbers.",
+    route: "Claude Design (in your plan) or HyperFrames as a still. Blotato Visuals if speed matters more than exact colours.",
+    size: "1080 × 1350, or taller for Pinterest",
+    ask: "Turn these five steps into an infographic for [brand], using its brand sheet: [steps].",
+  },
+  {
+    name: "Carousel and cards",
+    what: "Swipeable slides, quote cards and single text cards.",
+    route: "HyperFrames stills for the exact brand look. A Blotato free card when approximate colours will do.",
+    size: "1080 × 1350 carousel, 1080 × 1080 single",
+    ask: "Make a 6-slide carousel from this post for [brand], using its brand sheet: [post].",
+  },
+  {
+    name: "Poster and visual set",
+    what: "Event posters, launch graphics, a matching set of visuals for one campaign.",
+    route: "Claude Design (in your plan).",
+    size: "Any; say where it will be used",
+    ask: "Design a launch poster and three matching social graphics for [campaign] for [brand], using its brand sheet.",
+  },
+];
+
+// Skills are ready-made instructions Claude follows for one kind of job. These are
+// the ones that feed the factory; "have" means it is already on Didi's Claude account.
+const SKILLS: { name: string; does: string; state: "have" | "make" }[] = [
+  { name: "post-writer and post-grader", does: "Drafts posts in your voice, then marks them against what performs before you see them.", state: "have" },
+  { name: "brand-reject-lists", does: "The Brand gate: the words and claims each brand never uses.", state: "have" },
+  { name: "video-producer and video-batch-producer", does: "Plans and makes one video, or a week's worth in one go.", state: "have" },
+  { name: "canvas-design", does: "Posters, infographics and one-page visuals as finished image files.", state: "have" },
+  { name: "pptx", does: "Real PowerPoint files, for decks you will present or send.", state: "have" },
+  { name: "theme-factory and brand-guidelines", does: "Applies one consistent look (colours, fonts) to whatever is being made.", state: "have" },
+  { name: "Canva: resize for social, bulk create, brand check", does: "One design resized for every platform; many designs from a spreadsheet; a check against a brand kit.", state: "have" },
+  { name: "One brand skill per site", does: "Each brand sheet below turned into a skill, so the right colours and fonts are used without being asked.", state: "make" },
+  { name: "Carousel builder", does: "Takes one approved post and returns the finished slides in the brand look, ready for the Sunday review.", state: "make" },
+  { name: "Infographic builder", does: "Takes steps or numbers and returns a finished brand infographic.", state: "make" },
+  { name: "Hook and first-line tester", does: "Offers five opening lines for a post and says which is strongest and why.", state: "make" },
 ];
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -340,7 +397,7 @@ function Disclosure({ title, hint, children }: { title: string; hint?: string; c
   );
 }
 
-export default function VideoStudioPage() {
+export default function CreativeStudioPage() {
   const shortVideoUp = useLocalToolStatus();
 
   return (
@@ -350,10 +407,10 @@ export default function VideoStudioPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-fg">
-                Video Studio
+                Creative Studio
               </h1>
               <p className="mt-1 text-sm text-fg-2">
-                How video reaches a post · every tool · what each costs
+                Videos, presentations, infographics and carousels, in every brand&rsquo;s own look
               </p>
             </div>
             <Link
@@ -367,6 +424,34 @@ export default function VideoStudioPage() {
       </header>
 
       <main className="mx-auto max-w-4xl px-6 py-10 flex flex-col gap-10">
+
+        <Section title="What you can make">
+          <Prose>
+            Think of this page as the factory floor and each brand sheet as the mould: whatever is made here comes out in
+            that brand&rsquo;s colours and fonts. Say any of these sentences to Claude or Cowork, swapping in your topic and brand.
+          </Prose>
+          <ul className="m-0 grid list-none gap-3 p-0 sm:grid-cols-2">
+            {FORMATS.map(f => (
+              <li key={f.name} className="flex flex-col gap-2 rounded-xl border border-line bg-panel p-5">
+                <h3 className="text-sm font-bold text-fg">{f.name}</h3>
+                <p className="text-xs leading-relaxed text-fg-2">{f.what}</p>
+                <dl className="flex flex-col gap-1 text-xs leading-relaxed text-fg-2">
+                  <div><dt className="inline font-semibold text-fg">Made with: </dt><dd className="inline">{f.route}</dd></div>
+                  <div><dt className="inline font-semibold text-fg">Size: </dt><dd className="inline">{f.size}</dd></div>
+                </dl>
+                <p className="mt-auto rounded-lg bg-panel-2 px-3 py-2 text-xs italic text-fg">&ldquo;{f.ask}&rdquo;</p>
+              </li>
+            ))}
+          </ul>
+        </Section>
+
+        <Section title="Brand sheets">
+          <Prose>
+            One sheet per brand, read from each site&rsquo;s own code: colours and what each is for, fonts, a default card, voice
+            and the rules. Open one, press Copy, and paste it in with your request. Points marked &ldquo;to confirm&rdquo; are yours to settle.
+          </Prose>
+          <BrandSheets />
+        </Section>
 
         <Section title="This week's media">
           <ThisWeeksMedia />
@@ -393,15 +478,34 @@ export default function VideoStudioPage() {
           </Prose>
         </Section>
 
-        <Section title="Asking for a video yourself">
+        <Section title="Asking for something yourself">
           <Prose>
             Describe it to Claude or Cowork in plain words. If you name a tool, it uses that tool. If you leave it open, it
             follows the steps above, and the finished video is attached to a post and appears in the Sunday review before
-            anything is scheduled.
+            anything is scheduled. Presentations and infographics are made in Claude and kept there for you to edit, download
+            and share; attach one to a post the same way as any other image or file.
           </Prose>
         </Section>
 
         <Section title="Reference">
+          <Disclosure title="Skills that feed the factory" hint="What you have, and what to add next">
+            <Prose>
+              A skill is like a recipe card Claude keeps in a drawer: written once, followed the same way every time. The ones
+              marked &ldquo;To make&rdquo; do not exist yet and are the next steps towards a full content factory. &ldquo;You have this&rdquo;
+              means it was on your Claude account when this list was written (November 2026).
+            </Prose>
+            <ul className="m-0 flex list-none flex-col gap-2 p-0">
+              {SKILLS.map(k => (
+                <li key={k.name} className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm leading-relaxed text-fg-2">
+                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ${k.state === "have" ? "bg-ok/15 text-ok" : "bg-warn/15 text-warn"}`}>
+                    {k.state === "have" ? "You have this" : "To make"}
+                  </span>
+                  <span className="min-w-0"><span className="font-semibold text-fg">{k.name}. </span>{k.does}</span>
+                </li>
+              ))}
+            </ul>
+          </Disclosure>
+
           <Disclosure title="Every video tool" hint="Cost, where it runs, what it is for">
             <div className="grid gap-4 sm:grid-cols-2">
               {TOOLS.map(t => (

@@ -1,6 +1,6 @@
 # Social team design: one engine, three brands now, World of Contracts next
 
-Status: agreed model. The hub side is built (Sunday review, Brand gate and layer columns, old pipeline retired, Video Studio and guide updated). The Cowork side is written in `docs/cowork-operating-guide.md` and waits for Didi's approval to apply. Nothing here has been scheduled or published.
+Status: agreed model. The hub side is built (Sunday review, Brand gate and layer columns, old pipeline retired, Creative Studio (formerly Video Studio) and guide updated). The Cowork side is written in `docs/cowork-operating-guide.md` and waits for Didi's approval to apply. Nothing here has been scheduled or published.
 Updated 9 Nov 2026 after Didi's answers. Brands in scope: Old Oak Town (OOT), AI Viral Video Prompts (AIVVP), Master Your Career Path (MYCP). World of Contracts (WoC) joins later as a new brand file. The Concurrent Contractor (TCC) no longer exists and is out of scope.
 
 ## 1. The decisions
