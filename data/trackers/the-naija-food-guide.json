@@ -266,6 +266,138 @@
       "next": false,
       "when": "Before launch",
       "order": 250
+    },
+    {
+      "id": "seo-search-console",
+      "area": "SEO and blog",
+      "title": "Set up Google Search Console for thenaijafoodguide.co.uk and submit the sitemap",
+      "detail": "Starts collecting data now, so there is a baseline before the first article goes live. Full plan: seo-blog-article-plan in the project docs.",
+      "status": "todo",
+      "owner": "didi",
+      "next": true,
+      "when": "Before first article",
+      "order": 300
+    },
+    {
+      "id": "seo-technical-check",
+      "area": "SEO and blog",
+      "title": "Confirm area pages, schema markup and the sitemap are in place",
+      "detail": "City and borough landing pages are the main SEO engine; articles feed them. Also check Restaurant/LocalBusiness schema.",
+      "status": "todo",
+      "owner": "claude",
+      "next": false,
+      "when": "Before first article",
+      "order": 310
+    },
+    {
+      "id": "seo-blog-section",
+      "area": "SEO and blog",
+      "title": "Add a blog section to the site",
+      "detail": "Article index, article template with author box and FAQ block, and automatic links to listings.",
+      "status": "todo",
+      "owner": "claude",
+      "next": false,
+      "when": "Before first article",
+      "order": 320
+    },
+    {
+      "id": "seo-keyword-check",
+      "area": "SEO and blog",
+      "title": "Check search volumes for the 12 planned article topics",
+      "detail": "The plan's target searches are intent-based guesses. Confirm in Search Console or Keyword Planner and reorder.",
+      "status": "todo",
+      "owner": "both",
+      "next": false,
+      "when": "Before writing",
+      "order": 330
+    },
+    {
+      "id": "seo-article-caterers",
+      "area": "SEO and blog",
+      "title": "Write: Nigerian caterers for weddings, owambe and naming ceremonies",
+      "detail": "Priority 1. Commercial intent; supports Gold upgrades and the licensed-caterer promise.",
+      "status": "todo",
+      "owner": "claude",
+      "next": false,
+      "when": "Batch 1",
+      "order": 340
+    },
+    {
+      "id": "seo-article-jollof",
+      "area": "SEO and blog",
+      "title": "Write: Jollof rice, what makes it Nigerian and where to try it",
+      "detail": "Priority 1.",
+      "status": "todo",
+      "owner": "claude",
+      "next": false,
+      "when": "Batch 1",
+      "order": 350
+    },
+    {
+      "id": "seo-article-first-timer",
+      "area": "SEO and blog",
+      "title": "Write: A first-timer's guide to Nigerian food",
+      "detail": "Priority 1. Evergreen; captures newcomers.",
+      "status": "todo",
+      "owner": "claude",
+      "next": false,
+      "when": "Batch 1",
+      "order": 360
+    },
+    {
+      "id": "seo-article-spotlight",
+      "area": "SEO and blog",
+      "title": "Write: New-find spotlight template and first spotlight",
+      "detail": "Priority 1. Reusable format that keeps the site fresh.",
+      "status": "todo",
+      "owner": "claude",
+      "next": false,
+      "when": "Batch 1",
+      "order": 370
+    },
+    {
+      "id": "seo-review-batch-1",
+      "area": "SEO and blog",
+      "title": "Review and approve batch 1 drafts",
+      "detail": "Check facts, tone and photos before anything is published.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "when": "Batch 1",
+      "order": 380
+    },
+    {
+      "id": "seo-roundups",
+      "area": "SEO and blog",
+      "title": "Write the city and borough roundups (best Nigerian restaurants in London and other cities)",
+      "detail": "Priority 2. Parked until each area has at least 10 published listings; today only one listing is public.",
+      "status": "parked",
+      "owner": "claude",
+      "next": false,
+      "when": "After listings are live",
+      "order": 390
+    },
+    {
+      "id": "seo-authority-articles",
+      "area": "SEO and blog",
+      "title": "Write the authority articles: soups explained, small chops, how we verify, Christmas ordering guide",
+      "detail": "Priority 3.",
+      "status": "parked",
+      "owner": "claude",
+      "next": false,
+      "when": "After batch 1",
+      "order": 400
+    },
+    {
+      "id": "seo-review-results",
+      "area": "SEO and blog",
+      "title": "Review search results at 8 and 12 weeks and adjust the plan",
+      "detail": "Use Search Console impressions and clicks from articles into listings and claims.",
+      "status": "parked",
+      "owner": "both",
+      "next": false,
+      "when": "8 and 12 weeks after first article",
+      "order": 410
     }
   ]
 }
