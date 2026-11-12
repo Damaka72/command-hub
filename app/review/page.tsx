@@ -321,7 +321,7 @@ export default function ReviewPage() {
             <p className="text-[13px] text-fg-3">
               Cowork&apos;s media desk makes the first group every morning at 07:30, or straight away if you tell Cowork to
               run the media desk. Only you can film the second. How video gets made is on the{' '}
-              <Link href="/video-studio" className="text-accent-text underline">Video Studio</Link> page.
+              <Link href="/creative-studio" className="text-accent-text underline">Creative Studio</Link> page.
             </p>
             {byBucket.needs_media.length > 0 && (
               <div className="space-y-3">

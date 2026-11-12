@@ -88,7 +88,7 @@ const PAGES: React.ReactNode[][] = [
   ["/friday",       "Friday",         "Planned against published, revenue and subscribers."],
   ["/library",      "Library",        "Every post across weeks and months."],
   ["/social",       "Social",         "The connected accounts per brand."],
-  ["/video-studio", "Video Studio",   "How video reaches a post, and every video tool."],
+  ["/creative-studio", "Creative Studio", "Videos, presentations, infographics and carousels; the brand sheets; every tool."],
   ["/ops",          "Operations",     "Site health, deploys, revenue and trackers."],
 ];
 
@@ -179,7 +179,7 @@ export default function GuidePage() {
         <Section title="Media and video">
           <Prose>
             Cowork makes cards and story videos for free or very cheaply. Anything only you can film arrives as a
-            script and shot list. The whole flow is on the <Link href="/video-studio" className="text-accent-text underline">Video Studio</Link> page.
+            script and shot list. The whole flow is on the <Link href="/creative-studio" className="text-accent-text underline">Creative Studio</Link> page.
           </Prose>
         </Section>
 

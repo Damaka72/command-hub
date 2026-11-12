@@ -53,6 +53,16 @@
       "vercelProjectId": "prj_Qf2os2TZQSoDpCTFOwUHGbjGNGeH",
       "repo": "Damaka72/ai-viral-video-prompts",
       "adminPath": "/admin"
+    },
+    {
+      "id": "thenaijafoodguide",
+      "name": "The Naija Food Guide",
+      "short": "NFG",
+      "url": "https://www.thenaijafoodguide.co.uk",
+      "vercelProject": "thenaijafoodguide",
+      "repo": "Damaka72/thenaijafoodguide",
+      "adminPath": "/admin",
+      "tracker": "/trackers/the-naija-food-guide"
     }
   ]
 }

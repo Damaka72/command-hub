@@ -508,6 +508,76 @@
       "owner": "didi",
       "next": false,
       "order": 560
+    },
+    {
+      "id": "merge-pr-46",
+      "area": "On the website",
+      "title": "Merge pull request #46 (landing page with the four gold-bordered cards)",
+      "detail": "Open on roles-board since 8 Nov.",
+      "status": "todo",
+      "owner": "didi",
+      "next": true,
+      "order": 570
+    },
+    {
+      "id": "bot-prevention-choice",
+      "area": "On the website",
+      "title": "Choose between the two bot prevention and email validation options",
+      "detail": "The conversation from 8 Nov is paused on your choice.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 580
+    },
+    {
+      "id": "filters-branch-pr",
+      "area": "On the website",
+      "title": "Open a pull request for quick filters, freshness chips and saved searches",
+      "detail": "Pushed to the branch claude/gracious-archimedes-j2xe4h on 4 Nov; no pull request yet.",
+      "status": "todo",
+      "owner": "claude",
+      "next": false,
+      "order": 590
+    },
+    {
+      "id": "weekly-digest-how",
+      "area": "On the website",
+      "title": "Decide how the weekly digest runs: automatically on GitHub, or by hand",
+      "detail": "Asked on 28 Oct.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 600
+    },
+    {
+      "id": "adverts-checklist",
+      "area": "Paid adverts",
+      "title": "Work through the paid adverts launch checklist and Stripe test steps",
+      "detail": "Ten items given on 3 Nov. The pull request is being held until you are ready.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 610
+    },
+    {
+      "id": "podcast-concept",
+      "area": "LinkedIn",
+      "title": "Say whether you want the podcast concept",
+      "detail": "Asked on 5 Nov, after the LinkedIn company page work.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 620
+    },
+    {
+      "id": "brand-sheet-check",
+      "area": "Brand and content",
+      "title": "Check the brand sheet in Creative Studio",
+      "detail": "Navy, seal red, brass and vellum with Fraunces and Inter were read from the site's own brand file.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 630
     }
   ],
   "url": "https://www.worldofcontracts.co.uk"

@@ -23,7 +23,7 @@ const NAV = [
   { href: '/friday', label: 'Friday' },
   { href: '/library', label: 'Library' },
   { href: '/social', label: 'Social' },
-  { href: '/video-studio', label: 'Video Studio' },
+  { href: '/creative-studio', label: 'Creative Studio' },
   { href: '/ops', label: 'Operations' },
   { href: '/guide', label: 'Ops Guide' },
 ];

@@ -1,0 +1,180 @@
+{
+  "siteId": "masteryourcareerpath",
+  "name": "Master Your Career Path",
+  "description": "Career development, coaching and the PRIME and OPERATE frameworks",
+  "url": "https://masteryourcareerpath.com",
+  "repo": "Damaka72/Masteryourcareerpath",
+  "accent": "#F5A623",
+  "tasks": [
+    {
+      "id": "captcha-on",
+      "area": "Sign-ups and spam",
+      "title": "Confirm the sign-up CAPTCHA is switched on in Supabase",
+      "detail": "Supabase > Authentication > Attack Protection > CAPTCHA, using your Turnstile secret. From 5 Oct.",
+      "status": "todo",
+      "owner": "didi",
+      "next": true,
+      "order": 10
+    },
+    {
+      "id": "spam-accounts",
+      "area": "Sign-ups and spam",
+      "title": "Decide whether to delete the existing spam accounts",
+      "detail": "From 5 Oct.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 20
+    },
+    {
+      "id": "pr34-fullname",
+      "area": "Sign-ups and spam",
+      "title": "Check the sign-up full name line that was dropped when pull request #34 merged",
+      "detail": "Found on 5 Oct; confirm it was put back.",
+      "status": "todo",
+      "owner": "claude",
+      "next": false,
+      "order": 30
+    },
+    {
+      "id": "free-resource-security",
+      "area": "Sign-ups and spam",
+      "title": "Answer the waiting question on security for free resources",
+      "detail": "The conversation 'Security for free resource access' (5 Oct) is paused on a question for you.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 40
+    },
+    {
+      "id": "beehiiv-primary-goal",
+      "area": "Newsletter (Beehiiv)",
+      "title": "Create the Beehiiv custom field primary_goal (Text)",
+      "detail": "Needed by the sign-up form at /learn/signup. From 3 Oct.",
+      "status": "todo",
+      "owner": "didi",
+      "next": true,
+      "order": 50
+    },
+    {
+      "id": "beehiiv-welcome-links",
+      "area": "Newsletter (Beehiiv)",
+      "title": "Check the welcome email links use {{subscriber_email_hash_sha256}}",
+      "detail": "From 3 Oct.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 60
+    },
+    {
+      "id": "prime-review-leftovers",
+      "area": "Newsletter (Beehiiv)",
+      "title": "Finish the PRIME review leftovers: Beehiiv, Google Docs, Drive and newsletter tasks",
+      "detail": "Logos and slides from that work exist only on your computer. From 19 Oct.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 70
+    },
+    {
+      "id": "stripe-live",
+      "area": "Payments and pricing",
+      "title": "Decide: set up live Stripe next, or remove the leftover Skool and dollar wording first",
+      "detail": "From 30 Sep.",
+      "status": "todo",
+      "owner": "didi",
+      "next": true,
+      "order": 80
+    },
+    {
+      "id": "stripe-keys-check",
+      "area": "Payments and pricing",
+      "title": "Check the Stripe account keys in both dashboards and confirm the 30p test payment result",
+      "detail": "A two-minute checklist was given on 1 Oct.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 90
+    },
+    {
+      "id": "currency-check",
+      "area": "Payments and pricing",
+      "title": "Confirm prices show in the currency you want (pounds or dollars)",
+      "detail": "Two conversations went different ways (31 Aug pounds, 7 Sep dollars).",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 100
+    },
+    {
+      "id": "operate-cards",
+      "area": "Site content",
+      "title": "Look at the OPERATE cards on the live home page",
+      "detail": "They were published on 19 Oct but not checked on screen.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 110
+    },
+    {
+      "id": "welcome-module-login",
+      "area": "Site content",
+      "title": "Decide whether the free Welcome module needs a login",
+      "detail": "From 28 Sep.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 120
+    },
+    {
+      "id": "lead-magnet-folder",
+      "area": "Site content",
+      "title": "Give the Google Drive folder for lead magnets",
+      "detail": "From 28 Sep.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 130
+    },
+    {
+      "id": "brand-sheet-check",
+      "area": "Brand and content",
+      "title": "Check the MYCP brand sheet in Creative Studio",
+      "detail": "Colours and fonts were read from the live site. Confirm they are right for social posts.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 140
+    },
+    {
+      "id": "short-courses-pilot",
+      "area": "Older loose ends (check if still needed)",
+      "title": "Review the pilot lesson for the short courses",
+      "detail": "Eleven more lessons wait on your notes about tone, pacing and style. From 24 Aug.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 150
+    },
+    {
+      "id": "name-clients",
+      "area": "Older loose ends (check if still needed)",
+      "title": "Confirm you are clear to name Nissan, HP and Vodafone in the membership copy",
+      "detail": "From 26 Jul.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 160
+    },
+    {
+      "id": "beehiiv-template",
+      "area": "Older loose ends (check if still needed)",
+      "title": "Say how to continue the Beehiiv newsletter template",
+      "detail": "Paused on 23 Jul.",
+      "status": "todo",
+      "owner": "didi",
+      "next": false,
+      "order": 170
+    }
+  ]
+}

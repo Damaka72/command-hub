@@ -1,6 +1,7 @@
 export const SITE_SHORT: Record<string, string> = {
   oldoaktown:              'OOT',
   'world-of-contracts':    'WOC',
+  'the-naija-food-guide':  'NFG',
   masteryourcareerpath:    'MYCP',
   aiviralvideoprompts:     'AIVVP',
   didianolue:              'Didi',

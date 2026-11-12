@@ -375,7 +375,7 @@ on 9 Nov 2026 (version 0.9.26): `npx hyperframes doctor` passed (Node, FFmpeg, C
 10-second 1080 by 1920 H.264 render took about 5 seconds.
 
 **Where it can run**
-- **Didi's computer** (the Dev folder). The Video Studio page already lists it there.
+- **Didi's computer** (the Dev folder). The Creative Studio page (formerly Video Studio) already lists it there.
 - **A cloud session with FFmpeg and Chrome.** The Command Hub repo's session-start hook installs both for
   Claude Code sessions in this repo. The scheduled tasks list no repo folder, so that hook probably does not
   run for them (not confirmed). If scheduled tasks run in a cloud environment, give that environment a setup script that runs

@@ -26,10 +26,15 @@ export function shortDate(iso: string): string {
   return new Date(y, m - 1, d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
+/**
+ * The greeting for the time on Didi's device: morning until noon, afternoon
+ * until 5pm, then evening. The small hours (before 5am) still count as evening.
+ */
 export function greeting(d: Date): string {
   const h = d.getHours();
+  if (h < 5) return 'Good evening';
   if (h < 12) return 'Good morning';
-  if (h < 18) return 'Good afternoon';
+  if (h < 17) return 'Good afternoon';
   return 'Good evening';
 }
 

@@ -1,0 +1,85 @@
+{
+  "siteId": "didianolue",
+  "name": "Didi Anolue",
+  "url": "didianolue.co.uk",
+  "tagline": "Turn contracts into value",
+  "source": "Read from the live home page styles (index.html)",
+  "colours": [
+    {
+      "name": "Deep navy",
+      "hex": "#14213D",
+      "role": "Main brand colour: hero and dark sections"
+    },
+    {
+      "name": "Warm gold",
+      "hex": "#8A6D1F",
+      "role": "Accent: buttons, links, rules"
+    },
+    {
+      "name": "White",
+      "hex": "#FFFFFF",
+      "role": "Text on navy; clean backgrounds"
+    },
+    {
+      "name": "Mist",
+      "hex": "#F9FAFB",
+      "role": "Soft backgrounds"
+    },
+    {
+      "name": "Heading ink",
+      "hex": "#111827",
+      "role": "Headings on light"
+    },
+    {
+      "name": "Body ink",
+      "hex": "#374151",
+      "role": "Body text on light"
+    },
+    {
+      "name": "Rule",
+      "hex": "#E5E7EB",
+      "role": "Dividers and borders"
+    }
+  ],
+  "fonts": {
+    "display": {
+      "family": "Inter",
+      "weights": "700, 800, 900",
+      "use": "Headlines",
+      "source": "https://fonts.google.com/specimen/Inter"
+    },
+    "body": {
+      "family": "Inter",
+      "weights": "400, 500, 600",
+      "use": "Body copy, captions, labels",
+      "source": "https://fonts.google.com/specimen/Inter"
+    }
+  },
+  "card": {
+    "background": "#14213D",
+    "headline": "#FFFFFF",
+    "accent": "#D9B44A",
+    "body": "#F9FAFB",
+    "alt": {
+      "background": "#FFFFFF",
+      "headline": "#111827",
+      "accent": "#8A6D1F",
+      "body": "#374151"
+    }
+  },
+  "voice": "Senior, calm and specific. Authority from real programme experience, said plainly.",
+  "imagery": [
+    "Professional photographs of Didi; talking-head video.",
+    "When people appear, show a mix of nationalities and ethnicities; never one default face."
+  ],
+  "logo": "Headshot and heading images are in the site's code. Add the preferred headshot to Drive under 99 Brand Assets.",
+  "doNot": [
+    "Do not name clients without clearance.",
+    "Warm gold (#8A6D1F) is for light backgrounds; on navy use the lighter gold (#D9B44A) so it can be read."
+  ],
+  "toConfirm": [
+    "The lighter gold for navy backgrounds (#D9B44A) is a suggestion, not from the site. Approve or change it.",
+    "Does the /v2 site change this look?",
+    "The voice line is a first draft written for this sheet. Edit it to sound like you."
+  ]
+}

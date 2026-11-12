@@ -1,0 +1,85 @@
+{
+  "siteId": "aiviralvideoprompts",
+  "name": "AI Viral Video Prompts",
+  "url": "aiviralvideoprompts.com",
+  "tagline": "Prompts that make AI video perform",
+  "source": "Read from the live site's stylesheet (styles.css)",
+  "colours": [
+    {
+      "name": "Midnight",
+      "hex": "#1A1A2E",
+      "role": "Main background"
+    },
+    {
+      "name": "Coral",
+      "hex": "#FF6B6B",
+      "role": "Accent one: start of the gradient, key words"
+    },
+    {
+      "name": "Teal",
+      "hex": "#4ECDC4",
+      "role": "Accent two: end of the gradient, links, highlights"
+    },
+    {
+      "name": "Sky",
+      "hex": "#45B7D1",
+      "role": "Secondary teal for gradients"
+    },
+    {
+      "name": "Hot pink",
+      "hex": "#FF0844",
+      "role": "Sparing emphasis: badges, 'new'"
+    },
+    {
+      "name": "Gold",
+      "hex": "#FFD700",
+      "role": "Stars and ratings only"
+    },
+    {
+      "name": "White",
+      "hex": "#FFFFFF",
+      "role": "Headlines on midnight"
+    },
+    {
+      "name": "Soft grey",
+      "hex": "#E0E0E0",
+      "role": "Body text on midnight"
+    }
+  ],
+  "fonts": {
+    "display": {
+      "family": "Inter",
+      "weights": "800, 900",
+      "use": "Headlines, big and tight",
+      "source": "https://fonts.google.com/specimen/Inter"
+    },
+    "body": {
+      "family": "Inter",
+      "weights": "400, 600, 700",
+      "use": "Body copy, captions, labels",
+      "source": "https://fonts.google.com/specimen/Inter"
+    }
+  },
+  "card": {
+    "background": "#1A1A2E",
+    "headline": "#FFFFFF",
+    "accent": "#4ECDC4",
+    "body": "#E0E0E0",
+    "gradient": "linear-gradient(45deg, #FF6B6B, #4ECDC4)"
+  },
+  "voice": "Energetic, creative, results-focused. Show, don't tell: practical prompts and examples over theory.",
+  "imagery": [
+    "Stills and clips from real AI video output; this is the natural home for showing the tools off.",
+    "When people appear, show a mix of nationalities and ethnicities; never one default face.",
+    "Use the coral-to-teal gradient for one headline word or a border, not whole backgrounds."
+  ],
+  "logo": "No logo file was found in the site's code. Add one to Drive under 99 Brand Assets.",
+  "doNot": [
+    "Do not use coral or teal for body text on white: both are too faint.",
+    "Do not promise views or follower numbers."
+  ],
+  "toConfirm": [
+    "Is there a logo or wordmark?",
+    "A second, bolder headline font was tried on one page (Syne). Keep Inter only?"
+  ]
+}

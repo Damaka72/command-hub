@@ -1,0 +1,97 @@
+{
+  "siteId": "world-of-contracts",
+  "name": "World of Contracts",
+  "url": "www.worldofcontracts.co.uk",
+  "tagline": "UK jobs board for commercial, contracts and procurement roles",
+  "source": "Read from the site's own brand file (site/assets/woc.css) and its font folder",
+  "colours": [
+    {
+      "name": "Treaty navy",
+      "hex": "#1B1464",
+      "role": "Main brand colour: headings, links, primary buttons"
+    },
+    {
+      "name": "Treaty deep",
+      "hex": "#120D45",
+      "role": "Dark panels, header and footer"
+    },
+    {
+      "name": "Seal red",
+      "hex": "#B8322A",
+      "role": "Accent: the italic 'of', signature line, focus"
+    },
+    {
+      "name": "Coral",
+      "hex": "#F07A6E",
+      "role": "Seal's partner on navy backgrounds"
+    },
+    {
+      "name": "Brass",
+      "hex": "#E9C46A",
+      "role": "Highlight only: featured roles"
+    },
+    {
+      "name": "Vellum",
+      "hex": "#F7F4EC",
+      "role": "Page and card backgrounds"
+    },
+    {
+      "name": "Ink",
+      "hex": "#17152B",
+      "role": "Body text on vellum"
+    },
+    {
+      "name": "Muted ink",
+      "hex": "#5B5870",
+      "role": "Secondary text on vellum"
+    }
+  ],
+  "fonts": {
+    "display": {
+      "family": "Fraunces",
+      "weights": "600, 700; italic for the word 'of'",
+      "use": "Headlines and the wordmark",
+      "source": "https://fonts.google.com/specimen/Fraunces"
+    },
+    "body": {
+      "family": "Inter",
+      "weights": "400, 500, 600, 700",
+      "use": "Body copy, captions, labels",
+      "source": "https://fonts.google.com/specimen/Inter"
+    },
+    "mono": {
+      "family": "IBM Plex Mono",
+      "weights": "500",
+      "use": "Day rates, reference numbers, small labels",
+      "source": "https://fonts.google.com/specimen/IBM+Plex+Mono"
+    }
+  },
+  "card": {
+    "background": "#F7F4EC",
+    "headline": "#1B1464",
+    "accent": "#B8322A",
+    "body": "#17152B",
+    "alt": {
+      "background": "#120D45",
+      "headline": "#F7F4EC",
+      "accent": "#F07A6E",
+      "body": "#C9C5DA"
+    }
+  },
+  "voice": "Plain, exact and trustworthy, like a well-drafted contract. No hype. Day rates and facts first.",
+  "imagery": [
+    "Typographic cards with real role data work best.",
+    "When people appear, show a mix of nationalities and ethnicities; never one default face.",
+    "Brass is for featured roles only, so it keeps its meaning."
+  ],
+  "logo": "Wordmark files are in the site's code: site/brand/woc-wordmark.svg and woc-wordmark-on-dark.svg, with PNG versions for email.",
+  "doNot": [
+    "Do not use brass for ordinary highlights.",
+    "Do not put seal red on navy: use coral there.",
+    "No pay claims without a source."
+  ],
+  "toConfirm": [
+    "Install Fraunces and Inter on the computer you present from (already on the tracker).",
+    "The voice line is a first draft written for this sheet. Edit it to sound like you."
+  ]
+}

@@ -9,15 +9,29 @@ let current: number | null = null;
 const listeners = new Set<() => void>();
 let timer: ReturnType<typeof setInterval> | undefined;
 
+function tick() {
+  current = Date.now();
+  listeners.forEach(l => l());
+}
+
 function subscribe(cb: () => void) {
   listeners.add(cb);
   if (listeners.size === 1) {
     current = Date.now();
-    timer = setInterval(() => { current = Date.now(); listeners.forEach(l => l()); }, 60_000);
+    timer = setInterval(tick, 60_000);
+    // Browsers pause timers in a tab left in the background. Catch up the moment
+    // the Hub is looked at again, so the greeting and the date are never stale.
+    document.addEventListener('visibilitychange', tick);
+    window.addEventListener('focus', tick);
   }
   return () => {
     listeners.delete(cb);
-    if (listeners.size === 0 && timer) { clearInterval(timer); timer = undefined; }
+    if (listeners.size === 0 && timer) {
+      clearInterval(timer);
+      timer = undefined;
+      document.removeEventListener('visibilitychange', tick);
+      window.removeEventListener('focus', tick);
+    }
   };
 }
 

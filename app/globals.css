@@ -40,6 +40,7 @@
   --site-aiviralvideoprompts:  #a855f7;
   --site-world-of-contracts:   #e9c46a;
   --site-didianolue:           #ec4899;
+  --site-the-naija-food-guide: #14b8a6;
   --site-fallback:             #64748b;
 
   /* Shape and rhythm */
@@ -132,10 +133,15 @@ body {
 }
 
 /* Thin accent scrollbar */
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--accent) 25%, transparent); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--accent) 50%, transparent); }
+/* A scrollbar you can see and grab: wide enough to drag, clear against the page. */
+html { scrollbar-width: auto; scrollbar-color: color-mix(in srgb, var(--accent) 70%, transparent) color-mix(in srgb, var(--fg) 8%, transparent); }
+::-webkit-scrollbar { width: 12px; height: 12px; }
+::-webkit-scrollbar-track { background: color-mix(in srgb, var(--fg) 8%, transparent); }
+::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--accent) 70%, transparent); border-radius: 8px; border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); background-clip: padding-box; }
+
+/* Jump links and "Back to top" glide rather than snap, unless the device asks for less motion. */
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 
 /* Live pulse — for running agents, tinted to the "live" secondary blue
    (var(--hub-cyan)) rather than the primary accent, matching every element

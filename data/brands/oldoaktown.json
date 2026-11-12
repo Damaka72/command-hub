@@ -1,0 +1,81 @@
+{
+  "siteId": "oldoaktown",
+  "name": "Old Oak Town",
+  "url": "oldoaktown.co.uk",
+  "tagline": "Local news and community for Old Oak Common",
+  "source": "Colours from the live home page; fonts from the blog pages",
+  "colours": [
+    {
+      "name": "Oak green",
+      "hex": "#2D5016",
+      "role": "Main brand colour: backgrounds and headings"
+    },
+    {
+      "name": "Warm brown",
+      "hex": "#8B4513",
+      "role": "Accent: rules, labels, highlights"
+    },
+    {
+      "name": "Cream",
+      "hex": "#F5F5DC",
+      "role": "Page and card backgrounds"
+    },
+    {
+      "name": "Paper",
+      "hex": "#ECE8E0",
+      "role": "Softer background for long cards"
+    },
+    {
+      "name": "Charcoal",
+      "hex": "#333333",
+      "role": "Body text"
+    },
+    {
+      "name": "White",
+      "hex": "#FFFFFF",
+      "role": "Text on green"
+    }
+  ],
+  "fonts": {
+    "display": {
+      "family": "Instrument Serif",
+      "weights": "400; italic for emphasis",
+      "use": "Headlines",
+      "source": "https://fonts.google.com/specimen/Instrument+Serif"
+    },
+    "body": {
+      "family": "DM Sans",
+      "weights": "400, 500, 600",
+      "use": "Body copy, captions, labels",
+      "source": "https://fonts.google.com/specimen/DM+Sans"
+    }
+  },
+  "card": {
+    "background": "#F5F5DC",
+    "headline": "#2D5016",
+    "accent": "#8B4513",
+    "body": "#333333",
+    "alt": {
+      "background": "#2D5016",
+      "headline": "#FFFFFF",
+      "accent": "#F5F5DC",
+      "body": "#FFFFFF"
+    }
+  },
+  "voice": "Community-first, factual and local; never corporate. Grounded in what is actually happening in the area.",
+  "imagery": [
+    "Typographic cards or your own real local photos only.",
+    "Never AI-made imagery, never stock footage.",
+    "When people appear, show a mix of nationalities and ethnicities; never one default face."
+  ],
+  "logo": "No logo file was found in the site's code. Add one to Drive under 99 Brand Assets.",
+  "doNot": [
+    "No invented events, quotes or statistics.",
+    "No AI imagery or stock footage, ever.",
+    "Do not put brown text on green: it is too faint to read."
+  ],
+  "toConfirm": [
+    "Fonts: the home page uses plain system fonts, the blog uses Instrument Serif and DM Sans. This sheet assumes the blog pair.",
+    "Is there an Old Oak Town logo?"
+  ]
+}

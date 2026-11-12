@@ -112,6 +112,16 @@ const SITES: SiteConfig[] = [
     revenueConnected: false,
   },
   {
+    id: 'the-naija-food-guide',
+    url: 'https://www.thenaijafoodguide.co.uk',
+    vercelProjectId: null, // not recorded here yet; only the up/down check runs
+    revenueModel: 'directory',
+    newsletterProvider: null,
+    newsletterConnected: false,
+    revenueProvider: 'Stripe',
+    revenueConnected: false,
+  },
+  {
     id: 'world-of-contracts',
     url: 'https://www.worldofcontracts.co.uk',
     vercelProjectId: null, // not recorded here yet; only the up/down check runs
