@@ -9,6 +9,7 @@ import {
   OWNER_LABEL, STATUS_LABEL, siteLink, sumCounts,
   type TrackerSummary,
 } from '../lib/trackerLogic';
+import type { ChecklistSummary } from '../lib/checklistLogic';
 import NextStepsPanel from './tracker/NextStepsPanel';
 import SummaryBand from './tracker/SummaryBand';
 import ThinBar from './tracker/ThinBar';
@@ -25,6 +26,9 @@ interface CardSite {
   url?:    string;
   accent:  string;
   tracker: TrackerSummary | null;
+  checklist?: ChecklistSummary | null;
+  /** Per-site page with metrics, growth plan and quick links (only some sites have one). */
+  hasSitePage?: boolean;
 }
 
 function SiteSummaryCard({ site }: { site: CardSite }) {
@@ -71,6 +75,19 @@ function SiteSummaryCard({ site }: { site: CardSite }) {
             </p>
             <ThinBar done={t.counts.done} total={t.counts.total} label={t.name} />
           </div>
+          {site.checklist && (
+            <div className="flex flex-col gap-1 border-t pt-3" style={{ borderColor: 'var(--line-2)' }}>
+              <p className="mono-num text-sm" style={{ color: 'var(--fg)' }}>
+                Setup checklist: {site.checklist.complete} of {site.checklist.total} done
+                {site.checklist.blocked > 0 && <span style={{ color: 'var(--bad)' }}> · {site.checklist.blocked} blocked</span>}
+              </p>
+              {site.checklist.next && <p className="text-sm" style={{ color: 'var(--fg-2)' }}>Next action: {site.checklist.next.title}</p>}
+              <div className="flex flex-wrap gap-x-4">
+                <Link href={`/checklists/${encodeURIComponent(site.id)}`} className="inline-flex min-h-11 items-center text-sm font-semibold underline-offset-4 hover:underline" style={{ color: 'var(--accent-text)' }}>Open setup checklist →</Link>
+                {site.hasSitePage && <Link href={`/sites/${encodeURIComponent(site.id)}`} className="inline-flex min-h-11 items-center text-sm font-semibold underline-offset-4 hover:underline" style={{ color: 'var(--accent-text)' }}>Metrics and growth plan →</Link>}
+              </div>
+            </div>
+          )}
           <div className="mt-auto flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
             <span className="mono-num text-sm font-semibold" style={{ color: t.nextSteps > 0 ? 'var(--accent-text)' : 'var(--fg-2)' }}>
               {t.nextSteps} next {t.nextSteps === 1 ? 'step' : 'steps'}
@@ -113,6 +130,8 @@ export default function HomeTrackers() {
       url: byId.get(s.id)?.url ?? s.url,
       accent: siteColor(s.id).accent,
       tracker: byId.get(s.id) ?? null,
+      checklist: (data?.checklists ?? []).find(c => c.siteId === s.id) ?? null,
+      hasSitePage: s.id === 'the-naija-food-guide',
     }));
     const known = new Set(SITES.map(s => s.id));
     const extra = (data?.trackers ?? [])

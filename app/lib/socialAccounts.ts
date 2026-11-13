@@ -39,6 +39,19 @@ export const SITE_SOCIAL_ACCOUNTS: Record<string, SocialAccountEntry[]> = {
     { platform: 'YouTube',   handle: 'AI Viral Video Prompts', url: null, status: 'needs_link', note: "Blotato account id 36389 has no public channel handle on record — paste the real channel URL here." },
   ],
 
+  // Didi is creating these accounts herself (Nov 2026). The handles are placeholders: do not guess them.
+  // Replace each handle and url with the real ones and change the status to 'linked' (checklist item E4).
+  'the-naija-food-guide': [
+    { platform: 'TikTok',    handle: '(handle to be added)', url: null, status: 'not_connected', note: 'Active platform. Add the real handle and link once the account exists.' },
+    { platform: 'Instagram', handle: '(handle to be added)', url: null, status: 'not_connected', note: 'Active platform. Add the real handle and link once the account exists.' },
+    { platform: 'Facebook',  handle: '(handle to be added)', url: null, status: 'not_connected', note: 'Active platform. Add the real handle and link once the account exists.' },
+    { platform: 'YouTube',   handle: '(reserved)',           url: null, status: 'not_connected', note: 'Reserved under the same name, kept quiet for now.' },
+    { platform: 'X/Twitter', handle: '(reserved)',           url: null, status: 'not_connected', note: 'Reserved under the same name, kept quiet for now.' },
+    { platform: 'Pinterest', handle: '(reserved)',           url: null, status: 'not_connected', note: 'Reserved under the same name, kept quiet for now.' },
+    { platform: 'Threads',   handle: '(reserved)',           url: null, status: 'not_connected', note: 'Reserved under the same name, kept quiet for now.' },
+    { platform: 'WhatsApp Channel', handle: '(reserved)',    url: null, status: 'not_connected', note: 'Reserved under the same name, kept quiet for now.' },
+  ],
+
   didianolue: [
     { platform: 'Instagram', handle: '@damaka',      url: 'https://www.instagram.com/damaka/', status: 'linked' },
     { platform: 'X/Twitter', handle: '@DidiAnolue',  url: 'https://x.com/DidiAnolue', status: 'linked' },

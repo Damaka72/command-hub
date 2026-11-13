@@ -1,0 +1,565 @@
+{
+  "siteId": "the-naija-food-guide",
+  "name": "The Naija Food Guide",
+  "phases": [
+    {
+      "id": "A",
+      "title": "Accounts, hosting and project setup"
+    },
+    {
+      "id": "B",
+      "title": "Payments (Stripe, test mode first)"
+    },
+    {
+      "id": "C",
+      "title": "Email, forms and security"
+    },
+    {
+      "id": "D",
+      "title": "Legal and compliance"
+    },
+    {
+      "id": "E",
+      "title": "Social accounts and tracking"
+    },
+    {
+      "id": "F",
+      "title": "Content and outreach (no ad spend)"
+    },
+    {
+      "id": "G",
+      "title": "Go-live gate"
+    }
+  ],
+  "items": [
+    {
+      "id": "A1",
+      "phase": "A",
+      "title": "Create a new Supabase project for the directory",
+      "owner": "didi",
+      "status": "todo",
+      "instructions": "The free plan on your existing Supabase account is full, so the directory needs its own project. In Supabase choose New project, name it The Naija Food Guide, and keep the database password somewhere safe (do not paste it anywhere). Then add the project's details to Vercel in step C3.",
+      "depends_on": [],
+      "link": "https://supabase.com/dashboard"
+    },
+    {
+      "id": "A2",
+      "phase": "A",
+      "title": "Create the GitHub repo and Vercel project for the directory and connect them",
+      "owner": "either",
+      "status": "todo",
+      "instructions": "The GitHub repo (Damaka72/thenaijafoodguide) already exists. In Vercel choose Add New Project, import that repo and deploy. Each branch then gets its own preview address, which is what the testing in section G uses.",
+      "depends_on": [
+        "A1"
+      ],
+      "link": "https://vercel.com/dashboard"
+    },
+    {
+      "id": "A3",
+      "phase": "A",
+      "title": "Check Vercel's Hobby terms on commercial use, then decide Hobby or Pro",
+      "owner": "didi",
+      "status": "todo",
+      "instructions": "Vercel's Hobby plan is for personal, non-commercial use, so check its terms before taking payments. Pro removes the 12-function limit. Write the decision in the notes box (for example: Pro, from the first paid subscription).",
+      "depends_on": [],
+      "link": "https://vercel.com/legal/terms"
+    },
+    {
+      "id": "A4",
+      "phase": "A",
+      "title": "Count the Vercel functions and confirm the directory is within the plan limit",
+      "owner": "claude_code",
+      "status": "blocked",
+      "instructions": "Claude Code counts the functions in a local build and in the deployment. If the count is over the limit, routes are merged or removed.",
+      "depends_on": [
+        "A2"
+      ],
+      "notes": "Local build, 13 Nov 2026: 13 dynamic + 2 ISR routes. One new route added (/plan). Decide Hobby or Pro in A3 first.",
+      "blocked_reason": "Local count done: the build lists 13 dynamic routes plus 2 incremental (ISR) routes. Before the monetisation work it was 12 plus 2, so this work added one (/plan); everything else uses server actions. The count in the real deployment needs Vercel access, which the build session did not have, so it is not confirmed.",
+      "updated_at": "2026-11-13T15:00:00Z"
+    },
+    {
+      "id": "A5",
+      "phase": "A",
+      "title": "Confirm the schema, repo and Command Hub inspection is done and the existing photo form is untouched",
+      "owner": "claude_code",
+      "status": "done",
+      "instructions": "Claude Code inspected the Supabase migrations, the Next.js repo and the Command Hub repo before building.",
+      "depends_on": [],
+      "notes": "Done 13 Nov 2026. The earlier tier, claims and billing system was extended, not replaced (see docs/monetisation-build-notes.md in the directory repo). The photo form is unchanged except where section 4 of the spec requires it: the photo limit now comes from the listing's tier, on submit and on approval.",
+      "updated_at": "2026-11-13T15:00:00Z"
+    },
+    {
+      "id": "A6",
+      "phase": "A",
+      "title": "Apply the new database migration and deploy the two Supabase functions",
+      "owner": "either",
+      "status": "todo",
+      "instructions": "Run migration 0015_monetisation.sql in the directory's Supabase project (SQL editor: paste and run). Deploy the functions named lifecycle and hub-metrics from supabase/functions (Supabase CLI: supabase functions deploy). Then add two Vault secrets named nfg_project_url and nfg_cron_secret so the nightly job can call the function.",
+      "depends_on": [
+        "A1"
+      ],
+      "link": "https://supabase.com/dashboard",
+      "notes": "Added by Claude Code: not in the original list, but nothing in section C works until it is done."
+    },
+    {
+      "id": "B1",
+      "phase": "B",
+      "title": "Open the Stripe account for the business and stay in test mode",
+      "owner": "didi",
+      "status": "done",
+      "instructions": "The Stripe account exists and is in test mode. Keep the Test mode switch on (top right of the dashboard) until section G.",
+      "depends_on": [],
+      "link": "https://dashboard.stripe.com/test",
+      "notes": "Confirmed 13 Nov 2026: the Stripe account answers in test mode (livemode false).",
+      "updated_at": "2026-11-13T15:00:00Z"
+    },
+    {
+      "id": "B2",
+      "phase": "B",
+      "title": "Create the four prices in GBP and copy each price ID into Vercel",
+      "owner": "didi",
+      "status": "in_progress",
+      "instructions": "Claude Code has already created the four test prices in Stripe (Silver Annual 99, Silver Monthly 17, Gold Annual 199, Gold Monthly 33 pounds). In Stripe go to Product catalogue, open each product, and copy each price ID into Vercel as STRIPE_PRICE_SILVER_ANNUAL, STRIPE_PRICE_SILVER_MONTHLY, STRIPE_PRICE_GOLD_ANNUAL and STRIPE_PRICE_GOLD_MONTHLY. Never paste them into this Hub or into chat.",
+      "depends_on": [
+        "B1"
+      ],
+      "link": "https://dashboard.stripe.com/test/products",
+      "notes": "Test prices created by Claude Code with scripts/stripe-setup.mjs. Still to do: the Vercel variables (item C3). Live prices are made at G3.",
+      "updated_at": "2026-11-13T15:00:00Z"
+    },
+    {
+      "id": "B3",
+      "phase": "B",
+      "title": "Turn on cancellation and plan switching in Stripe's Customer Portal settings",
+      "owner": "didi",
+      "status": "in_progress",
+      "instructions": "Claude Code has set this up in test mode: cancellation takes effect at the end of the period, and customers can switch between Silver and Gold. Check it in Stripe under Settings, Billing, Customer portal, and set STRIPE_PORTAL_CONFIGURATION in Vercel to its ID. You must repeat this once in live mode (item G3).",
+      "depends_on": [
+        "B1"
+      ],
+      "link": "https://dashboard.stripe.com/test/settings/billing/portal",
+      "notes": "Test-mode portal configuration created by Claude Code via the API.",
+      "updated_at": "2026-11-13T15:00:00Z"
+    },
+    {
+      "id": "B4",
+      "phase": "B",
+      "title": "Add the webhook endpoint and signature verification",
+      "owner": "claude_code",
+      "status": "done",
+      "instructions": "Claude Code built the endpoint at /api/stripe/webhook. It rejects unsigned requests, ignores duplicate events and is the only thing that can change a paid tier. Didi registers it in Stripe and pastes the signing secret into Vercel (item B8).",
+      "depends_on": [],
+      "notes": "Built and unit-tested 13 Nov 2026: forged and unsigned requests are rejected, duplicates are ignored, a failed event is retried.",
+      "auto_check": "stripe_webhook_event",
+      "updated_at": "2026-11-13T15:00:00Z"
+    },
+    {
+      "id": "B5",
+      "phase": "B",
+      "title": "Test Silver and Gold checkout (monthly and annual), failed payment, cancellation and plan switching",
+      "owner": "claude_code",
+      "status": "in_progress",
+      "instructions": "Claude Code tests each case in Stripe test mode on a Vercel preview, with duplicate events ignored. It uses Stripe's test card numbers only, so no real money moves.",
+      "depends_on": [
+        "B8",
+        "A6",
+        "C3"
+      ],
+      "notes": "Covered so far by automated tests: signature checks, duplicate events, grace period, comps and cancellation in the tier engine. The full checkout run on a preview deployment is still to do.",
+      "updated_at": "2026-11-13T15:00:00Z"
+    },
+    {
+      "id": "B6",
+      "phase": "B",
+      "title": "Confirm the VAT position with the accountant",
+      "owner": "didi",
+      "status": "todo",
+      "instructions": "Ask your accountant whether VAT is due, then write the answer and whether Stripe Tax should be turned on in the notes box. Do not turn Stripe Tax on before adding the UK registration in Stripe.",
+      "depends_on": [],
+      "link": "https://dashboard.stripe.com/test/settings/tax"
+    },
+    {
+      "id": "B7",
+      "phase": "B",
+      "title": "Set the Terms of Service link in Stripe",
+      "owner": "didi",
+      "status": "todo",
+      "instructions": "Checkout asks buyers to agree to the Terms, and Stripe needs your Terms page address for that. In Stripe go to Settings, Public details, and add https://thenaijafoodguide.co.uk/terms as the Terms of service link. Without it, checkout shows an error.",
+      "depends_on": [
+        "B1"
+      ],
+      "link": "https://dashboard.stripe.com/test/settings/public",
+      "notes": "Added by Claude Code: Stripe requires this when checkout collects agreement to the Terms."
+    },
+    {
+      "id": "B8",
+      "phase": "B",
+      "title": "Register the webhook in Stripe and paste the signing secret into Vercel",
+      "owner": "didi",
+      "status": "todo",
+      "instructions": "In Stripe go to Developers, Webhooks, Add endpoint. Use the address of your site followed by /api/stripe/webhook, and choose the events checkout.session.completed, invoice.paid, invoice.payment_failed, customer.subscription.updated and customer.subscription.deleted. Copy the signing secret into Vercel as STRIPE_WEBHOOK_SECRET (never into chat).",
+      "depends_on": [
+        "B1",
+        "A2"
+      ],
+      "link": "https://dashboard.stripe.com/test/webhooks",
+      "notes": "Added by Claude Code: the other half of item B4.",
+      "secret_names": [
+        "STRIPE_WEBHOOK_SECRET"
+      ]
+    },
+    {
+      "id": "C1",
+      "phase": "C",
+      "title": "Verify the sending domain in Resend and create the API key",
+      "owner": "didi",
+      "status": "todo",
+      "instructions": "In Resend add the domain thenaijafoodguide.co.uk and add the DNS records it shows (SPF and DKIM) at your domain provider. When Resend says Verified, create an API key and put it in Vercel as RESEND_API_KEY. The sender is Obi@thenaijafoodguide.co.uk.",
+      "depends_on": [],
+      "link": "https://resend.com/domains",
+      "secret_names": [
+        "RESEND_API_KEY",
+        "EMAIL_FROM"
+      ]
+    },
+    {
+      "id": "C2",
+      "phase": "C",
+      "title": "Create Cloudflare Turnstile keys for the site",
+      "owner": "didi",
+      "status": "todo",
+      "instructions": "In Cloudflare open Turnstile and add a widget for thenaijafoodguide.co.uk (and the Vercel preview address if you want to test there). Copy the site key and secret key into Vercel as NEXT_PUBLIC_TURNSTILE_SITE_KEY and TURNSTILE_SECRET_KEY.",
+      "depends_on": [],
+      "link": "https://dash.cloudflare.com",
+      "secret_names": [
+        "NEXT_PUBLIC_TURNSTILE_SITE_KEY",
+        "TURNSTILE_SECRET_KEY"
+      ]
+    },
+    {
+      "id": "C3",
+      "phase": "C",
+      "title": "Set all environment variables in Vercel",
+      "owner": "either",
+      "status": "todo",
+      "instructions": "Add each variable listed here in Vercel under Project, Settings, Environment Variables. Then mark each one as set below. Only 'set' or 'not set' is recorded here, never the value.",
+      "depends_on": [
+        "A1",
+        "A2"
+      ],
+      "link": "https://vercel.com/dashboard",
+      "notes": "The Supabase functions also need their own secrets (supabase secrets set): CRON_FUNCTION_SECRET, RESEND_API_KEY, EMAIL_FROM, NEXT_PUBLIC_SITE_URL, ADMIN_EMAILS, HUB_METRICS_SECRET. REMINDERS_LIVE stays off until item G5.",
+      "secret_names": [
+        "NEXT_PUBLIC_SUPABASE_URL",
+        "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "STRIPE_SECRET_KEY",
+        "STRIPE_WEBHOOK_SECRET",
+        "STRIPE_PRICE_SILVER_ANNUAL",
+        "STRIPE_PRICE_SILVER_MONTHLY",
+        "STRIPE_PRICE_GOLD_ANNUAL",
+        "STRIPE_PRICE_GOLD_MONTHLY",
+        "STRIPE_PORTAL_CONFIGURATION",
+        "RESEND_API_KEY",
+        "EMAIL_FROM",
+        "NEXT_PUBLIC_TURNSTILE_SITE_KEY",
+        "TURNSTILE_SECRET_KEY",
+        "ADMIN_EMAILS",
+        "LINK_SECRET",
+        "CRON_FUNCTION_SECRET (Supabase)"
+      ]
+    },
+    {
+      "id": "C4",
+      "phase": "C",
+      "title": "Confirm Row Level Security on every new table and run the anonymous-access tests",
+      "owner": "claude_code",
+      "status": "in_progress",
+      "instructions": "Claude Code checks that every new table has row-level security on and that an anonymous visitor cannot read or write any of them.",
+      "depends_on": [
+        "A6"
+      ],
+      "notes": "Migration 0015 turns RLS on for every new table with no public policies, and the anonymous-access tests cover them. The tests need the migration applied to a real project before they can run (item A6).",
+      "updated_at": "2026-11-13T15:00:00Z"
+    },
+    {
+      "id": "C5",
+      "phase": "C",
+      "title": "Confirm the daily Silver job and the monthly summary job run on Supabase pg_cron, and that running twice sends no duplicate emails",
+      "owner": "claude_code",
+      "status": "in_progress",
+      "instructions": "Claude Code checks both jobs are scheduled in Supabase and runs each twice to prove no email goes out twice.",
+      "depends_on": [
+        "A6",
+        "C3"
+      ],
+      "notes": "Jobs and the database logic are written and tested on a local Postgres: reminders fire at 14 days, 3 days and expiry, once each, and a second run finds nothing due. Not yet deployed (item A6).",
+      "updated_at": "2026-11-13T15:00:00Z"
+    },
+    {
+      "id": "C6",
+      "phase": "C",
+      "title": "Confirm all transactional emails send from Obi@thenaijafoodguide.co.uk and pass SPF and DKIM checks",
+      "owner": "claude_code",
+      "status": "todo",
+      "instructions": "Claude Code sends one of each email to your own address from the preview and checks the headers pass SPF and DKIM.",
+      "depends_on": [
+        "C1",
+        "C3"
+      ]
+    },
+    {
+      "id": "C7",
+      "phase": "C",
+      "title": "Apply the Hub checklist table migration",
+      "owner": "either",
+      "status": "todo",
+      "instructions": "The Hub keeps tick-box changes in its own Supabase project. Run the file supabase/migrations/20261113120000_checklist_item_state.sql from the command-hub repo in that project's SQL editor. Until you do, changes made on screen are kept on this device only.",
+      "depends_on": [],
+      "link": "https://supabase.com/dashboard",
+      "notes": "Added by Claude Code."
+    },
+    {
+      "id": "C8",
+      "phase": "C",
+      "title": "Connect the Hub to the directory's metrics",
+      "owner": "either",
+      "status": "todo",
+      "instructions": "In the Hub's Vercel project add NFG_METRICS_URL (the address of the hub-metrics function) and NFG_METRICS_SECRET (the same secret you set on the function). Until then the metrics section shows 'not connected'.",
+      "depends_on": [
+        "A6"
+      ],
+      "link": "https://vercel.com/dashboard",
+      "notes": "Added by Claude Code.",
+      "secret_names": [
+        "NFG_METRICS_URL",
+        "NFG_METRICS_SECRET"
+      ]
+    },
+    {
+      "id": "D1",
+      "phase": "D",
+      "title": "Publish Terms covering price, billing period, how to cancel, and that photos are hidden if a subscription ends",
+      "owner": "didi",
+      "status": "todo",
+      "instructions": "Claude Code has rewritten the Terms page with these points. Read it at /terms, fix the bracketed details (refund policy, business name and address) and publish it.",
+      "depends_on": [],
+      "link": "https://thenaijafoodguide.co.uk/terms",
+      "notes": "Draft wording is in the site. Needs your review."
+    },
+    {
+      "id": "D2",
+      "phase": "D",
+      "title": "Update the Privacy Policy for claims, subscriptions, enquiries and analytics",
+      "owner": "didi",
+      "status": "todo",
+      "instructions": "The Privacy Policy must cover claims, subscriptions, enquiries and analytics. It should say enquiries are kept for 12 months, and that a business receiving an enquiry becomes responsible for the details it receives. Ask Claude Code to draft the wording, then check it.",
+      "depends_on": [],
+      "link": "https://thenaijafoodguide.co.uk/privacy"
+    },
+    {
+      "id": "D3",
+      "phase": "D",
+      "title": "Check the ICO registration covers the directory's data processing",
+      "owner": "didi",
+      "status": "todo",
+      "instructions": "Check on the ICO registration page that the description of your processing covers a business directory with claims, enquiries and subscriptions. Update it if not. Note the date you checked.",
+      "depends_on": [],
+      "link": "https://ico.org.uk/registration/"
+    },
+    {
+      "id": "D4",
+      "phase": "D",
+      "title": "Decide how newsletter sign-ups are handled before promising the newsletter mention",
+      "owner": "didi",
+      "status": "todo",
+      "instructions": "Decide the sign-up form, the sender name and the consent wording for the newsletter. Do this before telling Silver and Gold members they will be mentioned in it. Write the decision in the notes box.",
+      "depends_on": []
+    },
+    {
+      "id": "D5",
+      "phase": "D",
+      "title": "Agree the wording for the Featured and Sponsored labels",
+      "owner": "didi",
+      "status": "todo",
+      "instructions": "Featured (paid placement) and Sponsored or Gifted (articles and social posts) must be clear and honest. Agree the exact wording and write it in the notes box. The site currently uses Featured.",
+      "depends_on": []
+    },
+    {
+      "id": "E1",
+      "phase": "E",
+      "title": "Create TikTok, Instagram and Facebook business accounts with the same handle",
+      "owner": "didi",
+      "status": "todo",
+      "instructions": "Use @thenaijafoodguide, or one fallback handle used everywhere. Create each account with Obi@thenaijafoodguide.co.uk and turn on two-factor authentication. Do not write passwords or codes anywhere in this Hub.",
+      "depends_on": []
+    },
+    {
+      "id": "E2",
+      "phase": "E",
+      "title": "Reserve YouTube, X, Pinterest, Threads and a WhatsApp Channel under the same name, then leave them quiet",
+      "owner": "didi",
+      "status": "todo",
+      "instructions": "Create each account with the same name so nobody else takes it. Do not post on them yet.",
+      "depends_on": [
+        "E1"
+      ]
+    },
+    {
+      "id": "E3",
+      "phase": "E",
+      "title": "Set each bio: one line, the site link with a tracking tag per platform, and the logo in the Nigerian flag colours",
+      "owner": "didi",
+      "status": "todo",
+      "instructions": "Use one line and the site address with a tag for each platform, for example https://thenaijafoodguide.co.uk/?utm_source=tiktok (use utm_source=instagram and utm_source=facebook on the others). Add the logo in green and white.",
+      "depends_on": [
+        "E1"
+      ]
+    },
+    {
+      "id": "E4",
+      "phase": "E",
+      "title": "Add the real handles to the Hub's social accounts page for this site",
+      "owner": "didi",
+      "status": "todo",
+      "instructions": "Open app/lib/socialAccounts.ts in the command-hub repo (GitHub's web editor works on an iPad) and replace the placeholder handles and links for The Naija Food Guide with the real ones. Change each status from not_connected to linked.",
+      "depends_on": [
+        "E1"
+      ],
+      "link": "https://github.com/Damaka72/command-hub/edit/main/app/lib/socialAccounts.ts"
+    },
+    {
+      "id": "E5",
+      "phase": "E",
+      "title": "Confirm visits are recorded by source from the tracking tags and show in the Hub",
+      "owner": "claude_code",
+      "status": "todo",
+      "instructions": "Claude Code visits a listing with each tag and checks the visit is counted under the right platform and appears in the Hub's metrics.",
+      "depends_on": [
+        "A6",
+        "E3",
+        "C8"
+      ],
+      "notes": "Recording and the Hub display are built. Not yet confirmed end to end because the migration and functions are not deployed.",
+      "auto_check": "visits_by_source"
+    },
+    {
+      "id": "F1",
+      "phase": "F",
+      "title": "Collect or film 10 to 15 short faceless pieces",
+      "owner": "didi",
+      "status": "todo",
+      "instructions": "Dish close-ups, 'new on the guide' clips, comparisons and screen recordings of the site. Use only photos and video you have the right to post.",
+      "depends_on": []
+    },
+    {
+      "id": "F2",
+      "phase": "F",
+      "title": "Post the first set on TikTok and Instagram Reels from the same videos, plus Facebook",
+      "owner": "didi",
+      "status": "todo",
+      "instructions": "Post the same videos on TikTok and Instagram Reels, and a version on Facebook. Use each platform's link tag in the bio.",
+      "depends_on": [
+        "F1",
+        "E3"
+      ]
+    },
+    {
+      "id": "F3",
+      "phase": "F",
+      "title": "Build the first micro-influencer list and agree gifted or #ad wording",
+      "owner": "didi",
+      "status": "todo",
+      "instructions": "List food influencers whose audience fits. Agree clear 'gifted' or '#ad' wording for any free meal before you contact anyone.",
+      "depends_on": []
+    },
+    {
+      "id": "F4",
+      "phase": "F",
+      "title": "Start owner outreach from the 75 candidates, caterers first, and record each contact in the outreach pipeline",
+      "owner": "didi",
+      "status": "todo",
+      "instructions": "Open the Outreach tab in the directory's /admin/monetisation page. Work through caterers first, since the quote form gives them the clearest value, and record each contact there.",
+      "depends_on": [
+        "G5"
+      ],
+      "link": "https://thenaijafoodguide.co.uk/admin/monetisation"
+    },
+    {
+      "id": "F5",
+      "phase": "F",
+      "title": "Review after four weeks: which platform sent the most visits, which posts worked, what next",
+      "owner": "didi",
+      "status": "todo",
+      "instructions": "Check the visits-by-source numbers on the site page in this Hub, note which posts worked, and write what to do next in the notes box.",
+      "depends_on": [
+        "F2"
+      ]
+    },
+    {
+      "id": "G1",
+      "phase": "G",
+      "title": "Every acceptance criterion in section 19 passes on a Vercel preview, tested on a real phone",
+      "owner": "claude_code",
+      "status": "todo",
+      "instructions": "Claude Code runs through all 18 acceptance criteria on the preview, and Didi confirms the key flows on a real phone.",
+      "depends_on": [
+        "B5",
+        "C4",
+        "C5",
+        "C6",
+        "E5"
+      ]
+    },
+    {
+      "id": "G2",
+      "phase": "G",
+      "title": "Confirm final prices, VAT position and Terms are live",
+      "owner": "didi",
+      "status": "todo",
+      "instructions": "Check the prices on the site, the VAT answer from item B6 and the Terms page. Tell Claude Code when all three are right.",
+      "depends_on": [
+        "B6",
+        "D1",
+        "D2"
+      ]
+    },
+    {
+      "id": "G3",
+      "phase": "G",
+      "title": "Swap Stripe to live keys and live price IDs",
+      "owner": "didi",
+      "status": "todo",
+      "instructions": "In Stripe switch to live mode, create the four live prices and the live portal configuration (Claude Code can run the same script with your live key), register the live webhook, then change the Stripe values in Vercel. Claude Code checks the webhook is connected to the live endpoint.",
+      "depends_on": [
+        "G1",
+        "G2"
+      ],
+      "link": "https://dashboard.stripe.com/settings/billing/portal"
+    },
+    {
+      "id": "G4",
+      "phase": "G",
+      "title": "Make one real subscription with your own card, check the listing upgrades and the email arrives, then refund it",
+      "owner": "didi",
+      "status": "todo",
+      "instructions": "Subscribe to Silver for one of your own test listings with your own card. Check the listing upgrades and the email arrives, then refund it in Stripe.",
+      "depends_on": [
+        "G3"
+      ]
+    },
+    {
+      "id": "G5",
+      "phase": "G",
+      "title": "Switch on the Silver free-period reminders for real businesses only after G4 passes",
+      "owner": "didi",
+      "status": "todo",
+      "instructions": "In Supabase set the secret REMINDERS_LIVE to on for the lifecycle function. Until you do, reminders and monthly summaries are only logged and are sent to nobody but you.",
+      "depends_on": [
+        "G4"
+      ],
+      "link": "https://supabase.com/dashboard"
+    }
+  ]
+}

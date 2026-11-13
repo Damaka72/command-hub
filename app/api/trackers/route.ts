@@ -6,11 +6,15 @@
 import { NextResponse } from 'next/server';
 import { loadAllTrackers, type Persistence } from '@/app/lib/trackerStore';
 import { summarise, type TrackerSummary } from '@/app/lib/trackerLogic';
+import { loadAllChecklists } from '@/app/lib/checklistStore';
+import { summarise as summariseChecklist, type ChecklistSummary } from '@/app/lib/checklistLogic';
 
 export const dynamic = 'force-dynamic';
 
 export interface TrackersResponse {
   trackers:    TrackerSummary[];
+  /** Launch checklists, one per site that has a file in data/checklists/ (progress line on the site card). */
+  checklists?: ChecklistSummary[];
   persistence: Persistence;
   error?:      string;
 }
@@ -18,8 +22,9 @@ export interface TrackersResponse {
 export async function GET() {
   try {
     const { sites, persistence } = await loadAllTrackers();
+    const lists = await loadAllChecklists().catch(() => ({ files: [] }));
     return NextResponse.json(
-      { trackers: sites.map(summarise), persistence } satisfies TrackersResponse,
+      { trackers: sites.map(summarise), checklists: lists.files.map(summariseChecklist), persistence } satisfies TrackersResponse,
       { headers: { 'Cache-Control': 'no-store' } },
     );
   } catch (e) {
